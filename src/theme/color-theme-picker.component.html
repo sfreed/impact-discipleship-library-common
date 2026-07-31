@@ -1,0 +1,29 @@
+<mat-form-field appearance="outline" class="color-theme-field">
+  <mat-select
+    [value]="value()"
+    (selectionChange)="onSelectionChange($event)"
+    aria-label="Choose a color theme"
+    panelClass="color-theme-panel"
+  >
+    <mat-select-trigger>
+      <span class="theme-option">
+        <span class="theme-swatch" [class]="swatchClasses(value())">
+          <span class="theme-swatch-primary"></span>
+          <span class="theme-swatch-tertiary"></span>
+        </span>
+        {{ value() | titlecase }}
+      </span>
+    </mat-select-trigger>
+    @for (id of options(); track id) {
+      <mat-option [value]="id">
+        <span class="theme-option">
+          <span class="theme-swatch" [class]="swatchClasses(id)">
+            <span class="theme-swatch-primary"></span>
+            <span class="theme-swatch-tertiary"></span>
+          </span>
+          {{ id | titlecase }}
+        </span>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>

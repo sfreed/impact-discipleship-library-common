@@ -1,0 +1,15 @@
+.color-theme-field {
+  width: 160px;
+
+  // The swatch dots sit slightly off from a plain line of text - flex +
+  // align-items keeps them centered against the theme name next to them.
+  ::ng-deep .mat-mdc-select-value {
+    display: flex;
+  }
+}
+
+.theme-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

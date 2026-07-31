@@ -1,0 +1,86 @@
+// Shared Color Theme picker palette definitions - @use'd by both apps'
+// styles.scss (which each keep their own base `html { @include mat.theme(...) }`
+// light/dark block untouched; this only adds the *additional* selectable
+// theme-* options + the swatch preview classes). Ids here must match
+// BaseThemeService's LIGHT_COLOR_THEMES/DARK_COLOR_THEMES.
+//
+// Written as plain class selectors (not nested under `html`) so the exact
+// same class can be applied either to <html> itself (making it the active
+// app-wide theme, via BaseThemeService) or to a small isolated .theme-swatch
+// preview element in the dropdown (ColorThemePickerComponent), showing the
+// exact colors that option would apply with zero duplicate color bookkeeping.
+@use '@angular/material' as mat;
+
+.theme-ocean {
+  @include mat.theme((color: (theme-type: light, primary: mat.$blue-palette, tertiary: mat.$cyan-palette)));
+}
+.theme-forest {
+  @include mat.theme((color: (theme-type: light, primary: mat.$green-palette, tertiary: mat.$spring-green-palette)));
+}
+.theme-sunset {
+  @include mat.theme((color: (theme-type: light, primary: mat.$orange-palette, tertiary: mat.$rose-palette)));
+}
+.theme-berry {
+  @include mat.theme((color: (theme-type: light, primary: mat.$magenta-palette, tertiary: mat.$violet-palette)));
+}
+.theme-crimson {
+  @include mat.theme((color: (theme-type: light, primary: mat.$red-palette, tertiary: mat.$orange-palette)));
+}
+
+// The navy-ish accent the reader app originally shipped with (before the
+// Color Theme picker existed), kept as a selectable 7th option in both
+// catalogs rather than lost, paired with the same violet tertiary the
+// default theme already uses. Note: `mat.theme()` only accepts a built-in M3
+// palette here, not an arbitrary hex seed color (tried - Angular Material's
+// own _system.scss expects a palette map, not a raw color) - `blue` is the
+// closest built-in match to the original #1a3a5c/#7fb3e8 navy/steel-blue.
+.theme-navy {
+  @include mat.theme((color: (theme-type: light, primary: mat.$blue-palette, tertiary: mat.$violet-palette)));
+}
+
+// Dark-catalog options - each requires *both* classes present on the same
+// element (the app-wide <html> when active, or a preview swatch span), since
+// `theme-type: dark` needs to combine with (not replace) each app's own
+// `&.dark-theme` block's other dark-mode effects (color-scheme, corner size).
+.theme-midnight.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$cyan-palette, tertiary: mat.$blue-palette)));
+}
+.theme-emerald.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$spring-green-palette, tertiary: mat.$green-palette)));
+}
+.theme-amber.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$yellow-palette, tertiary: mat.$orange-palette)));
+}
+.theme-plum.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$violet-palette, tertiary: mat.$magenta-palette)));
+}
+.theme-ruby.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$rose-palette, tertiary: mat.$red-palette)));
+}
+.theme-navy.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$blue-palette, tertiary: mat.$violet-palette)));
+}
+
+// Preview swatch used in the Settings "Color Theme" dropdown
+// (ColorThemePickerComponent) - each mat-option wraps one of these, with the
+// option's actual theme-* (+ dark-theme, for dark-catalog options) class
+// applied directly to it, so the two dots always show the exact
+// primary/tertiary colors that option would apply - no separate hardcoded
+// swatch-color list to keep in sync.
+.theme-swatch {
+  display: inline-flex;
+  gap: 3px;
+
+  span {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 15%, transparent);
+  }
+}
+.theme-swatch-primary {
+  background: var(--mat-sys-primary);
+}
+.theme-swatch-tertiary {
+  background: var(--mat-sys-tertiary);
+}
