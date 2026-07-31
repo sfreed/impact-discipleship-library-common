@@ -74,7 +74,18 @@ export abstract class BaseThemeService {
         document.documentElement.classList.add(this.appliedThemeClass);
       }
     });
+  }
 
+  /**
+   * Wires up syncing from `loadProfile$()` into the signals above. Not run
+   * automatically from this base constructor: a subclass's own fields
+   * (e.g. an injected AuthService/UserService that `loadProfile$` reads)
+   * aren't initialized yet while `super()` is still running - per JS class
+   * semantics, derived-class field initializers run *after* `super()`
+   * returns. Each subclass must call this itself, once, at the end of its
+   * own constructor (after its fields are set).
+   */
+  protected initRemoteSync(): void {
     const profile = toSignal(this.loadProfile$(), { initialValue: undefined });
     effect(() => {
       const remoteDarkMode = profile()?.darkMode;
