@@ -134,6 +134,47 @@
 // applied directly to it, so the two dots always show the exact
 // primary/tertiary colors that option would apply - no separate hardcoded
 // swatch-color list to keep in sync.
+// Guest-facing pages (login, signup) are reachable before any signed-in
+// user exists to have a theme preference, yet BaseThemeService may have
+// left a *previous* user's (or a shared device's) full theme active on
+// <html> - including Matrix's black surfaces, green glow borders, and
+// monospace font. Resetting just the --mat-sys-* color tokens (as an
+// earlier version of this did, inline in each login component) stops the
+// *colors* from leaking through, but not Matrix's structural additions
+// above (border/box-shadow/text-shadow on .mat-mdc-card etc.), which are
+// plain selector matches against the page's own markup - they still fire,
+// just re-tinted in whatever light colors this mixin sets, leaving a
+// stray glow/border the guest pages were never meant to have. This mixin
+// is the single place both apps' login/signup pages pull a full reset
+// from, so the exclusion can't drift out of sync between them or between
+// color-token resets and structural ones.
+@mixin guest-page-theme-reset {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$violet-palette,
+      ),
+    )
+  );
+  color-scheme: light;
+  --mat-sys-corner-full: 0;
+  color: var(--mat-sys-on-surface);
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+
+  .mat-toolbar,
+  .mat-mdc-card,
+  .mat-mdc-dialog-container .mdc-dialog__surface,
+  .mat-drawer,
+  .mat-mdc-form-field,
+  [class*='-header'] {
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+
 .theme-swatch {
   display: inline-flex;
   gap: 3px;
