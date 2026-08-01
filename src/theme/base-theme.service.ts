@@ -20,7 +20,7 @@ const DARK_COLOR_THEME_KEY = 'darkColorTheme';
  *  raw ids. `'default'` is the app's original base theme and needs no extra
  *  class (see BaseThemeService's color-theme effect). */
 export const LIGHT_COLOR_THEMES: readonly string[] = ['default', 'ocean', 'forest', 'sunset', 'berry', 'crimson', 'navy'];
-export const DARK_COLOR_THEMES: readonly string[] = ['default', 'midnight', 'emerald', 'amber', 'plum', 'ruby', 'navy'];
+export const DARK_COLOR_THEMES: readonly string[] = ['default', 'midnight', 'emerald', 'amber', 'plum', 'ruby', 'navy', 'matrix'];
 export const DEFAULT_COLOR_THEME = 'default';
 
 export interface ThemePreferences {

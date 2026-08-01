@@ -61,6 +61,56 @@
   @include mat.theme((color: (theme-type: dark, primary: mat.$blue-palette, tertiary: mat.$violet-palette)));
 }
 
+// "Matrix" - deliberately a more elaborate reskin than every other theme-*
+// option above: not just a palette swap, but true-black surfaces, a
+// monospace font, and neon-glow borders/shadows on cards/buttons/toolbar,
+// for a "digital terminal" feel throughout the whole app (not just the
+// manager app's patron map, which has its own additional matrix-specific
+// treatment - see PatronMapComponent). Dark-only, no light-mode counterpart
+// - see BaseThemeService.DARK_COLOR_THEMES.
+.theme-matrix.dark-theme {
+  @include mat.theme((color: (theme-type: dark, primary: mat.$green-palette, tertiary: mat.$spring-green-palette)));
+
+  // M3's auto-generated dark surface tones from a green seed are a dark
+  // desaturated gray-green, not true black - overridden here for the
+  // "terminal on a black screen" look the recolor-only themes above don't
+  // attempt.
+  --mat-sys-surface: #000000;
+  --mat-sys-surface-container: #0a0f0a;
+  --mat-sys-surface-container-low: #060906;
+  --mat-sys-surface-container-high: #0f150f;
+  --mat-sys-surface-container-highest: #141c14;
+  --mat-sys-background: #000000;
+  --mat-sys-on-surface: #00ff41;
+  --mat-sys-on-surface-variant: #4dff85;
+  --mat-sys-outline: #00b82e;
+  --mat-sys-outline-variant: #0a5c1c;
+
+  font-family: 'Courier New', Courier, monospace;
+
+  .mat-toolbar,
+  .mat-mdc-card,
+  .mat-mdc-dialog-container .mdc-dialog__surface,
+  .mat-drawer,
+  .mat-mdc-form-field,
+  lib-color-theme-picker .mat-mdc-select-trigger {
+    text-shadow: 0 0 4px color-mix(in srgb, var(--mat-sys-on-surface) 60%, transparent);
+  }
+
+  .mat-toolbar,
+  .mat-mdc-card,
+  .mat-drawer {
+    border: 1px solid var(--mat-sys-primary);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+  }
+
+  .mat-mdc-raised-button:not(:disabled),
+  .mat-mdc-unelevated-button:not(:disabled),
+  .mat-mdc-fab:not(:disabled) {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
+  }
+}
+
 // Preview swatch used in the Settings "Color Theme" dropdown
 // (ColorThemePickerComponent) - each mat-option wraps one of these, with the
 // option's actual theme-* (+ dark-theme, for dark-catalog options) class
