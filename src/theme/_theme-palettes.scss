@@ -74,32 +74,49 @@
   // M3's auto-generated dark surface tones from a green seed are a dark
   // desaturated gray-green, not true black - overridden here for the
   // "terminal on a black screen" look the recolor-only themes above don't
-  // attempt.
+  // attempt. Primary/tertiary/on-surface are also hand-picked rather than
+  // left at mat.theme()'s auto-generated tones - M3 dark themes always pick
+  // a light/vibrant tone for `primary` (for contrast against dark surfaces),
+  // which read as too bright/neon here; these are deliberately a shade
+  // darker throughout.
+  --mat-sys-primary: #00b82e;
+  --mat-sys-on-primary: #eaffea;
+  --mat-sys-tertiary: #009e46;
+  --mat-sys-on-tertiary: #eaffea;
   --mat-sys-surface: #000000;
   --mat-sys-surface-container: #0a0f0a;
   --mat-sys-surface-container-low: #060906;
   --mat-sys-surface-container-high: #0f150f;
   --mat-sys-surface-container-highest: #141c14;
   --mat-sys-background: #000000;
-  --mat-sys-on-surface: #00ff41;
-  --mat-sys-on-surface-variant: #4dff85;
+  --mat-sys-on-surface: #33dd66;
+  --mat-sys-on-surface-variant: #3ecc70;
   --mat-sys-outline: #00b82e;
   --mat-sys-outline-variant: #0a5c1c;
 
   font-family: 'Courier New', Courier, monospace;
 
+  // Catches every routed page's own top-level sticky "-header" div (e.g.
+  // .settings-header, .purchases-header, .help-header - see each feature's
+  // own styleUrl) in addition to real Material components - without this,
+  // pages built from plain divs rather than mat-card (Purchases, Help, the
+  // header bar atop Settings, etc.) looked like Matrix had skipped them
+  // entirely, when really they just had no Material component for the
+  // component-scoped rules below to match.
   .mat-toolbar,
   .mat-mdc-card,
   .mat-mdc-dialog-container .mdc-dialog__surface,
   .mat-drawer,
   .mat-mdc-form-field,
+  [class*='-header'],
   lib-color-theme-picker .mat-mdc-select-trigger {
     text-shadow: 0 0 4px color-mix(in srgb, var(--mat-sys-on-surface) 60%, transparent);
   }
 
   .mat-toolbar,
   .mat-mdc-card,
-  .mat-drawer {
+  .mat-drawer,
+  [class*='-header'] {
     border: 1px solid var(--mat-sys-primary);
     box-shadow: 0 0 14px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
   }
