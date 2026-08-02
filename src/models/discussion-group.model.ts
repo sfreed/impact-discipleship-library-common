@@ -17,11 +17,19 @@ export interface DiscussionGroup {
    *  LibraryUser's doc comment for why. */
   creatorEmail: string;
   creatorDisplayName: string;
-  /** Set only if the group offers an in-person option - independent of
-   *  onlineInfo, since a group can offer either or both ("hybrid"). */
+  /** Legacy free-text in-person location, written by every group created
+   *  before the location wizard shipped - kept forever, never backfilled,
+   *  so old rows keep rendering exactly as authored. New groups never write
+   *  this; they write `location` instead. A group has at most one of
+   *  `inPersonLocation`/`location` populated, never both. */
   inPersonLocation?: string;
+  /** Structured in-person location, present only on groups created via the
+   *  location wizard with "Offer in-person" checked. Absent entirely for
+   *  online-only groups and for legacy in-person groups (which only have
+   *  `inPersonLocation`). */
+  location?: DiscussionGroupLocation;
   /** Set only if the group offers an online option - independent of
-   *  inPersonLocation. */
+   *  inPersonLocation/location. */
   onlineInfo?: string;
   /** Epoch ms - a *potential* start date, not a firm commitment. */
   startDate: number;
@@ -30,9 +38,48 @@ export interface DiscussionGroup {
    *  DiscussionGroupService.closeGroup. Staff removal (a later pass) is a
    *  real delete, distinct from a creator closing their own group. */
   status: 'open' | 'closed';
+  /** 'invite-only' groups are excluded from the open browse list and from
+   *  search results, but otherwise behave exactly like 'public' groups -
+   *  the document, members subcollection, chat, and join-approval flow are
+   *  all unaffected, same "hidden from browse, everything else intact"
+   *  relationship 'closed' has today. Optional so every group created
+   *  before this field existed keeps behaving as public with zero backfill
+   *  - always check `=== 'invite-only'` to exclude, never `!== 'public'`,
+   *  so an absent value is never mistaken for invite-only. The create
+   *  wizard always writes a concrete value for new groups; this is only
+   *  optional for backward compatibility with pre-existing documents. */
+  groupVisibility?: 'public' | 'invite-only';
   createdAt: number;
   updatedAt: number;
   closedAt?: number;
+}
+
+/** Structured location for an in-person (or hybrid) group, collected by the
+ *  create wizard's Location/Venue steps. `lat`/`lng` come from a best-effort
+ *  geocode of `address1` (if shown) or city/state/country, and are stored
+ *  regardless of `addressVisible` - distance search must work even for a
+ *  privacy-hidden address, so only *display* code (never distance math)
+ *  should ever check `addressVisible`. */
+export interface DiscussionGroupLocation {
+  /** ISO 3166-1 alpha-2 code (e.g. 'US', 'CA', 'GB'), not a display name. */
+  country: string;
+  /** USPS two-letter state code - present only when country === 'US'; the
+   *  wizard skips straight to city for every other country. */
+  state?: string;
+  city: string;
+  locationType: 'public' | 'private';
+  /** Always collected by the wizard whenever in-person is offered,
+   *  regardless of public/private - but only ever *rendered* to other
+   *  patrons when addressVisible is true. */
+  address1?: string;
+  /** Always true for a public location (no prompt needed - a public venue's
+   *  address is inherently fine to show). For a private location, this is
+   *  the creator's explicit answer to "OK to show this address to
+   *  everyone?", defaulting to false (hidden) until they opt in. A real
+   *  decided boolean, never omitted when `location` is present. */
+  addressVisible: boolean;
+  lat?: number;
+  lng?: number;
 }
 
 export type GroupMembershipStatus = 'pending' | 'approved' | 'rejected';
