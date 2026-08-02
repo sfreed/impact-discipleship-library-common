@@ -1,0 +1,317 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Manager-app CMS staff (any admin or editor - not just admins) always
+    // have full read access regardless of book license, same as they always
+    // could before licensing existed - they're not reader-app patrons and
+    // have no reason to hold a personal book license.
+    function isStaff() {
+      return signedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    // The reader app's access gate: does the
+    // signed-in patron's own libraryUsers record (keyed by their Auth email -
+    // see LibraryUserService) list this book as licensed? See
+    // LibraryUser.licensedBookIds's doc comment for why this is a flat array
+    // rather than checking into `bookLicenses`' array-of-objects shape
+    // (Firestore rules can't query into array-of-object fields).
+    function hasBookLicense(bookId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)) &&
+        bookId in get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.licensedBookIds;
+    }
+
+    function canReadBook(bookId) {
+      return isStaff() || hasBookLicense(bookId);
+    }
+
+    match /series/{seriesId} {
+      allow read, write: if signedIn();
+    }
+
+    // Read is intentionally NOT license-gated (unlike units/lessons below) -
+    // the Discussion Groups feature needs any signed-in patron to be able to
+    // see any book's title/description regardless of license, to browse and
+    // create groups around books they don't yet own. This only exposes
+    // metadata; actual lesson content stays fully gated below. Same openness
+    // `series` already has.
+    match /books/{bookId} {
+      allow read: if signedIn();
+      // Content authoring is manager-app staff only - a reader-app patron
+      // (any signedIn() account) has no legitimate reason to write here.
+      // Interim fix: any staff member (admin or editor), not per-node scoped -
+      // see PermissionService's own doc comment, that finer-grained model is
+      // deliberately client-only today and isn't mirrored here yet.
+      allow write: if isStaff();
+    }
+
+    match /units/{unitId} {
+      allow read: if canReadBook(resource.data.bookId);
+      // Same isStaff() interim fix as books above.
+      allow write: if isStaff();
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if canReadBook(get(/databases/$(database)/documents/units/$(resource.data.unitId)).data.bookId);
+      // Same isStaff() interim fix as books above.
+      allow write: if isStaff();
+
+      // Left signedIn()-only rather than license-gated too: a lesson's own
+      // rule above already keeps an unlicensed patron from ever discovering
+      // a lessonId to query translations for, so this is unreachable from
+      // the reader app's own UI for content the requester can't already see
+      // the parent lesson of. Known, accepted gap for a determined
+      // id-guessing attacker.
+      match /translations/{translationId} {
+        allow read, write: if signedIn();
+      }
+    }
+
+    // Collection-group read only (write still goes through the nested rule
+    // above) - lets the node-translation dialog build its list of "languages
+    // already used somewhere in this library" via a single collectionGroup
+    // query across every lesson's translations subcollection, instead of
+    // fetching every lesson individually.
+    match /{path=**}/translations/{translationId} {
+      allow read: if signedIn();
+    }
+
+    // Staff-authoring artifacts only - the reader app never reads these, so
+    // there's no reason to leave them open to any signed-in patron. Same
+    // isStaff() interim fix as books/units/lessons above.
+    match /subtemplates/{subtemplateId} {
+      allow read, write: if isStaff();
+    }
+
+    match /lessonTemplates/{lessonTemplateId} {
+      allow read, write: if isStaff();
+    }
+
+    match /titleTranslations/{titleTranslationId} {
+      allow read, write: if signedIn();
+    }
+
+    match /commonTranslations/{commonTranslationId} {
+      allow read, write: if signedIn();
+    }
+
+    // Content-addressed image blobs referenced from lesson/subtemplate HTML by
+    // id (`lessonimage:{id}`) instead of embedding base64 inline - keeps a
+    // single lesson/translation document well under Firestore's 1MB cap even
+    // when it has several images. See LessonImageService.
+    match /lessonImages/{imageId} {
+      allow read, write: if signedIn();
+    }
+
+    match /adminUsers/{uid} {
+      // A signed-in user may always read their OWN doc (staff or not - this is
+      // what StaffService.isStaff() relies on to tell the two apart, reading
+      // `adminUsers/{their-own-uid}` and checking whether it exists; a bare
+      // isStaff()-only rule would turn "doesn't exist" into a permission-denied
+      // error for every non-staff caller instead). Reading anyone else's doc
+      // requires being staff - otherwise this was the entire staff roster
+      // (emails/names/roles) readable by any patron.
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+      // Admins can update anything. A signed-in user may also update their OWN
+      // doc, but only to touch this exact allowlist of low-stakes self-service
+      // fields (personal theme preferences, last-login stamp) - role/permissions
+      // must stay admin-only so a non-admin can never self-promote or grant
+      // themself access by writing their own doc. lightColorTheme/darkColorTheme
+      // must stay in sync with whatever fields UserService.updateOwnPreferences
+      // actually writes (see its own doc comment) - adding a new self-service
+      // field there means updating this allowlist too, not just the client.
+      allow update: if isAdmin()
+        || (signedIn() && request.auth.uid == uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['darkMode', 'lightColorTheme', 'darkColorTheme', 'lastLogin', 'updatedAt', 'updatedBy']));
+      // Create/delete happen exclusively through the createUser/deleteUser/
+      // bootstrapFirstAdmin Cloud Functions, which use the Admin SDK and bypass
+      // these rules entirely - that's what keeps this collection in sync with the
+      // actual Firebase Auth accounts. Direct client writes are blocked so that
+      // sync can't be bypassed, and so a non-admin can't self-promote by writing
+      // their own role.
+      allow create, delete: if false;
+    }
+
+    // A signed-in user's saved answers for a lesson's Form.io form - see
+    // the reader app's SubmissionService (doc id is
+    // deterministic, `{lessonId}_{email}`, keyed by `userEmail` field).
+    // Scoped to the submission's own owner, plus admins for read (staff
+    // reviewing patron responses).
+    match /submissions/{submissionId} {
+      allow read: if signedIn() &&
+        (resource.data.userEmail == request.auth.token.email.lower() || isAdmin());
+      allow create, update: if signedIn() &&
+        request.resource.data.userEmail == request.auth.token.email.lower();
+      allow delete: if signedIn() && resource.data.userEmail == request.auth.token.email.lower();
+    }
+
+    // Order-history record for a Store purchase (see StoreComponent and
+    // PurchaseService) - digital book(s) bought, coupon used, amounts, and
+    // the PayPal receipt id. Read stays broad (any signed-in user - no admin
+    // UI exists yet to need narrower access, and nothing currently reads
+    // another user's purchases anyway); write is scoped to the requester's
+    // own email and made create-only, so a purchase record can't be forged
+    // for someone else or tampered with after the fact - a forgeable audit
+    // trail undercuts the whole point of keeping one. See the reader app's
+    // handoff.md for the still-missing admin-side items.
+    match /purchases/{purchaseId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.email == request.auth.token.email.lower();
+      allow update, delete: if false;
+    }
+
+    // A library patron's profile (name/email/phone/book licenses), imported
+    // from the legacy impactdisciples-a82a8 project - see the reader app's
+    // scripts/backfill-users.js and the LibraryUser model. Deliberately a
+    // separate collection from `users` above: that one is Cloud-Functions-
+    // provisioned CMS staff (admin/editor), keyed by Firebase Auth uid, with
+    // tightly restricted writes.
+    //
+    // Write is scoped to the requester's own email - every writer in this
+    // codebase (recordLogin, updateOwnPreferences, grantBookLicenses,
+    // SubmissionService's lessonStatus write, LessonHighlightService) already
+    // only ever targets its own signed-in user's doc, so this doesn't break
+    // any legitimate path; it closes an actual gap where any signed-in
+    // patron could otherwise write directly to another patron's
+    // licensedBookIds from devtools, self-granting a paid book for free with
+    // no PayPal/coupon involved at all. `.lower()` because the client always
+    // normalizes the doc id to lowercase (LibraryUserService.userRef) but
+    // Firebase Auth doesn't guarantee the token's email claim is lowercased.
+    // Read stays broad (signedIn()) - unlike write, an unscoped read isn't
+    // itself the risk here.
+    match /libraryUsers/{email} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.token.email.lower() == email;
+
+      // "Has this lesson been submitted, and when" markers - see
+      // LessonSubmissionStatus model and SubmissionService.saveSubmission.
+      // Rules don't apply recursively to subcollections, so this needs its
+      // own nested match even though it sits under a path already covered
+      // above - same own-email scoping as the parent, same reasoning.
+      match /lessonStatus/{lessonId} {
+        allow read: if signedIn();
+        allow write: if signedIn() && request.auth.token.email.lower() == email;
+      }
+
+      // A signed-in user's own highlighted lesson-content quotes - see
+      // the reader app's LessonHighlight model and
+      // LessonHighlightService. One doc per (user, lesson), array of
+      // highlight records - same "own nested match" requirement as
+      // lessonStatus above, same own-email scoping as the parent.
+      match /lessonHighlights/{lessonId} {
+        allow read: if signedIn();
+        allow write: if signedIn() && request.auth.token.email.lower() == email;
+      }
+    }
+
+    // Collection-group read only (write still goes through the nested rule
+    // above) - lets a staff diagnostic check "do any saved highlights still
+    // resolve after a content edit" run one query across every patron's
+    // lessonHighlights, instead of needing to already know every email.
+    match /{path=**}/lessonHighlights/{lessonId} {
+      allow read: if signedIn();
+    }
+
+    // A patron-organized book discussion group (in-person and/or online) -
+    // see the reader app's DiscussionGroup model and
+    // DiscussionGroupService. Any signed-in patron may create one (around
+    // any book, not just ones they're licensed for), but only the creator
+    // (or staff) may update (e.g. close it) or delete it.
+    match /discussionGroups/{groupId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.creatorEmail == request.auth.token.email.lower();
+      allow update, delete: if signedIn() &&
+        (resource.data.creatorEmail == request.auth.token.email.lower() || isStaff());
+
+      // One doc per patron who's requested (or been granted) membership,
+      // keyed by their own lowercased email - see GroupMembership. A patron
+      // may only ever create their OWN doc, and only as 'pending' (an
+      // approved/rejected doc can only come from the creator/staff updating
+      // an existing request afterward, never a self-written one) - EXCEPT
+      // the group's own creator, who writes their own doc straight to
+      // 'approved' at group-creation time (see
+      // DiscussionGroupService.createGroup) so "am I a member" never needs a
+      // special case for "or did I create it". Delete covers both "withdraw
+      // my own request/leave" and "the creator or staff removing a member".
+      match /members/{email} {
+        allow read: if signedIn();
+        allow create: if signedIn() && email == request.auth.token.email.lower() &&
+          (request.resource.data.status == 'pending' ||
+           (request.resource.data.status == 'approved' &&
+            get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == email));
+        allow update: if signedIn() &&
+          (get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
+           || isStaff());
+        allow delete: if signedIn() &&
+          (email == request.auth.token.email.lower()
+           || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
+           || isStaff());
+      }
+
+      // The group's shared chat - see GroupChatMessage. Only an approved
+      // member may post (checked by reading their own membership doc, same
+      // technique as hasBookLicense above); no client-side edit/delete of a
+      // sent message.
+      match /chatMessages/{messageId} {
+        allow read: if signedIn();
+        allow create: if signedIn() &&
+          request.resource.data.senderEmail == request.auth.token.email.lower() &&
+          get(/databases/$(database)/documents/discussionGroups/$(groupId)/members/$(request.auth.token.email.lower())).data.status == 'approved';
+        allow update, delete: if false;
+      }
+
+      // A 1:1 thread between the group's creator and exactly one other
+      // person (an approved member or a rejected/pending requester) - see
+      // GroupConversation. Doc id == the other person's lowercased email,
+      // so "am I a participant" is just "am I that email, or am I this
+      // group's creator" - no participant list to search.
+      match /conversations/{otherEmail} {
+        allow read, create, update: if signedIn() &&
+          (otherEmail == request.auth.token.email.lower()
+           || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower());
+
+        match /messages/{messageId} {
+          allow read: if signedIn() &&
+            (otherEmail == request.auth.token.email.lower()
+             || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower());
+          allow create: if signedIn() &&
+            request.resource.data.senderEmail == request.auth.token.email.lower() &&
+            (otherEmail == request.auth.token.email.lower()
+             || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower());
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    // Collection-group read only - lets "my groups" (see
+    // DiscussionGroupService.getMyMemberships) find every group a patron
+    // belongs to in one query, instead of needing to already know which
+    // groups to check.
+    match /{path=**}/members/{email} {
+      allow read: if signedIn();
+    }
+
+    match /activityLog/{entryId} {
+      // Account/access events plus library content add/edit/delete - see
+      // ActivityLogService/ActivityLogEntry. A signed-in user may only create
+      // an entry recording themself as the actor. There is no update path -
+      // entries are never edited, only (by an admin, from the Events screen)
+      // removed outright.
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+  }
+}
