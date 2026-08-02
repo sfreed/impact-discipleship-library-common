@@ -1,10 +1,11 @@
 // Plain-function Firestore reads shared between impact-discipleship-library-new
 // (where groups are created/browsed/joined) and impact-discipleship-library-manager-new
-// (staff view, added later) - see library-queries.ts for why these are plain
-// functions rather than an injectable service. Writes (createGroup, closeGroup,
-// requestToJoin, staff removal, etc.) are deliberately NOT here - they differ
-// enough between a patron's own actions and staff moderation that each app's
-// own DiscussionGroupService owns them directly instead.
+// (admin Impact Groups module - list/search/edit/delete any group) - see
+// library-queries.ts for why these are plain functions rather than an
+// injectable service. Writes (createGroup, closeGroup, requestToJoin, staff
+// edit/delete, etc.) are deliberately NOT here - they differ enough between
+// a patron's own actions and staff moderation that each app's own
+// DiscussionGroupService owns them directly instead.
 
 import {
   Firestore,
@@ -31,6 +32,30 @@ export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[
   return collectionData(query(ref, where('status', '==', 'open'), orderBy('startDate')), {
     idField: 'id',
   }) as Observable<DiscussionGroup[]>;
+}
+
+/** Every group regardless of status/visibility, newest first - the manager
+ *  app's admin table source list (unlike getOpenGroups, which is
+ *  patron-Browse-tab-scoped to open+non-excluded groups only). No `where`
+ *  filter needed - `firestore.rules`' discussionGroups read is unconditional
+ *  for any signed-in user, so this doesn't hit the "unconstrained list
+ *  query" restriction license-gated collections do. */
+export function getAllGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
+  const ref = collection(firestore, 'discussionGroups');
+  return collectionData(query(ref, orderBy('createdAt', 'desc')), { idField: 'id' }) as Observable<DiscussionGroup[]>;
+}
+
+/** Every group-membership doc across every group, unfiltered - lets the
+ *  manager app's admin table compute a per-group member count client-side
+ *  (group small enough in practice that this "fetch everything, group by
+ *  groupId" approach matches the rest of this feature's scale assumptions)
+ *  without a per-row subcollection query for every row in the table. Same
+ *  rule basis as getMyMemberships: `members/{email}`'s read rule is
+ *  unconditional for any signed-in user, so an unfiltered collectionGroup
+ *  query is just as permitted as email-filtered one. */
+export function getAllGroupMemberships(firestore: Firestore): Observable<GroupMembership[]> {
+  const ref = collectionGroup(firestore, 'members');
+  return collectionData(ref) as Observable<GroupMembership[]>;
 }
 
 export function getGroup(firestore: Firestore, groupId: string): Observable<DiscussionGroup | undefined> {

@@ -1,0 +1,75 @@
+.step-label {
+  margin: 8px 24px 0;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.wizard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 320px;
+  padding-top: 8px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.meeting-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.step-question {
+  margin: 4px 0 8px;
+  font-weight: 500;
+}
+
+mat-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.hint-text {
+  margin: 4px 0 8px;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.review-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  span:first-child {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.85rem;
+    flex: none;
+  }
+
+  span:last-child {
+    text-align: right;
+  }
+}
+
+.error-text {
+  color: var(--mat-sys-error);
+  font-size: 0.85rem;
+}
+
+.actions-spacer {
+  flex: 1 1 auto;
+}
