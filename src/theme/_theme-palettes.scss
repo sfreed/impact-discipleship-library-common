@@ -128,6 +128,45 @@
   }
 }
 
+// Neutralizes Matrix's structural additions (border/box-shadow/text-shadow
+// on cards/toolbars/drawers/form-fields/`*-header` divs) without touching
+// any color token - factored out of guest-page-theme-reset (which ALSO
+// resets the full color palette) so formio-theme-reset below can reuse the
+// exact same selector list without a second copy to keep in sync. Selectors
+// match here (not below) because [class*='-header'] is broad enough to also
+// catch Bootstrap's own `.card-header` (used by Form.io's Panel/DataGrid
+// component headers) - see formio-theme-reset's own doc comment.
+@mixin matrix-structural-reset {
+  .mat-toolbar,
+  .mat-mdc-card,
+  .mat-mdc-dialog-container .mdc-dialog__surface,
+  .mat-drawer,
+  .mat-mdc-form-field,
+  [class*='-header'] {
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+
+// Lesson content (Form.io/Bootstrap-rendered) is, like the guest pages,
+// deliberately never reskinned - each app's own Form.io container
+// (LessonViewComponent/LessonPreviewComponent/LessonEditorComponent's
+// .form-container/.builder-container) already pins its own color/background/
+// font back to a neutral light look. What that per-container fix doesn't
+// reach is Matrix's *separate* structural rules above: `[class*='-header']`
+// also matches Bootstrap's own `.card-header` class (rendered by Form.io's
+// Panel component titles and DataGrid/Table group headers), so a lesson
+// with a panel still picked up a stray neon-green border/glow/text-shadow
+// even with the container's own colors pinned back to normal - custom
+// properties like --mat-sys-primary inherit through the DOM regardless of
+// the container's own literal color override. `@include` this from
+// `:host-context(.theme-matrix.dark-theme) .form-container` (or
+// `.builder-container`) in each of those three components.
+@mixin formio-theme-reset {
+  @include matrix-structural-reset;
+}
+
 // Preview swatch used in the Settings "Color Theme" dropdown
 // (ColorThemePickerComponent) - each mat-option wraps one of these, with the
 // option's actual theme-* (+ dark-theme, for dark-catalog options) class
@@ -163,16 +202,7 @@
   color: var(--mat-sys-on-surface);
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 
-  .mat-toolbar,
-  .mat-mdc-card,
-  .mat-mdc-dialog-container .mdc-dialog__surface,
-  .mat-drawer,
-  .mat-mdc-form-field,
-  [class*='-header'] {
-    border: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
+  @include matrix-structural-reset;
 }
 
 .theme-swatch {
