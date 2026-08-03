@@ -12,9 +12,12 @@ export interface PurchaseCartItem {
   itemName: string;
   price: number;
   salePrice?: number;
-  /** Always 1 - a book license is bought once, not per-unit. Kept for shape
-   *  parity with the reference's CartItem. */
-  orderQuantity: 1;
+  /** 1 for a normal Store purchase (a book license bought once, not
+   *  per-unit) - kept for shape parity with the reference's CartItem. Can be
+   *  >1 for a group leader's bulk license purchase (`purchaseGroupLicenses`),
+   *  the one path that buys more than one license of the same book in a
+   *  single purchase. */
+  orderQuantity: number;
   discount?: number;
   /** Per-unit price after the coupon discount, i.e. (salePrice||price) - discount. */
   discountPrice?: number;
