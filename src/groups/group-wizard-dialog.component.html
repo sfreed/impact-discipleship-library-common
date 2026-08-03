@@ -34,11 +34,28 @@
         <textarea matInput rows="2" [ngModel]="formDescription()" (ngModelChange)="formDescription.set($event)"></textarea>
       </mat-form-field>
 
+      <div class="datetime-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Potential start date</mat-label>
+          <input matInput [matDatepicker]="startDatePicker" [ngModel]="formStartDate()" (ngModelChange)="formStartDate.set($event)" />
+          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Time</mat-label>
+          <input matInput type="time" [ngModel]="formStartTime()" (ngModelChange)="formStartTime.set($event)" />
+        </mat-form-field>
+      </div>
+
       <mat-form-field appearance="outline">
-        <mat-label>Potential start date</mat-label>
-        <input matInput [matDatepicker]="startDatePicker" [ngModel]="formStartDate()" (ngModelChange)="formStartDate.set($event)" />
-        <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #startDatePicker></mat-datepicker>
+        <mat-label>Time zone</mat-label>
+        <mat-select [ngModel]="formTimeZone()" (ngModelChange)="formTimeZone.set($event)">
+          @for (tz of timeZones; track tz.id) {
+            <mat-option [value]="tz.id">{{ tz.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Auto-detected from your device - change it if this group meets somewhere else.</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -145,7 +162,7 @@
         @if (formDescription()) {
           <div class="review-row"><span>Description</span><span>{{ formDescription() }}</span></div>
         }
-        <div class="review-row"><span>Start date</span><span>{{ formStartDate() | date: 'mediumDate' }}</span></div>
+        <div class="review-row"><span>Start date</span><span>{{ reviewStartDateTime() }}</span></div>
         @if (formMaxMembers()) {
           <div class="review-row"><span>Group size</span><span>{{ formMaxMembers() }} (plus you)</span></div>
         }

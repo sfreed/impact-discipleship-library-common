@@ -31,8 +31,15 @@ export interface DiscussionGroup {
   /** Set only if the group offers an online option - independent of
    *  inPersonLocation/location. */
   onlineInfo?: string;
-  /** Epoch ms - a *potential* start date, not a firm commitment. */
+  /** Epoch ms - a *potential* start date and time, not a firm commitment. */
   startDate: number;
+  /** IANA time zone id (e.g. "America/New_York") the creator intended
+   *  `startDate`'s time-of-day to be read in - see combineDateTimeInZone/
+   *  formatGroupDateTime in group-datetime.util.ts. Optional for backward
+   *  compatibility: groups created before this field existed have no saved
+   *  zone, so display code falls back to the viewer's own device zone for
+   *  those (the only information available). */
+  startTimeZone?: string;
   /** 'closed' groups are no longer shown in the open browse list, but the
    *  document (and its members subcollection) is kept, not deleted - see
    *  DiscussionGroupService.closeGroup. Staff removal (a later pass) is a

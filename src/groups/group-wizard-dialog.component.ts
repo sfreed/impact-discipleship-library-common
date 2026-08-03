@@ -1,5 +1,4 @@
 import { Component, Inject, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +16,8 @@ import { GeocodingService } from './geocoding.service';
 import { DiscussionGroup, DiscussionGroupLocation } from '../models/discussion-group.model';
 import { COUNTRIES } from './data/countries';
 import { US_STATES } from './data/us-states';
+import { TIME_ZONES } from './data/timezones';
+import { combineDateTimeInZone, extractTimeInZone, formatGroupDateTime } from './group-datetime.util';
 
 export interface GroupWizardBook {
   id: string;
@@ -58,6 +59,7 @@ export interface GroupWizardResult {
   location?: DiscussionGroupLocation;
   onlineInfo?: string;
   startDate: number;
+  startTimeZone: string;
   groupVisibility: 'public' | 'invite-only';
   maxMembers?: number;
 }
@@ -68,7 +70,6 @@ type StepId = 'basics' | 'format' | 'location' | 'venue' | 'visibility' | 'revie
   selector: 'common-group-wizard-dialog',
   standalone: true,
   imports: [
-    DatePipe,
     FormsModule,
     MatDialogModule,
     MatButtonModule,
@@ -92,6 +93,7 @@ export class GroupWizardDialogComponent {
 
   readonly countries = COUNTRIES;
   readonly usStates = US_STATES;
+  readonly timeZones = TIME_ZONES;
 
   readonly isEditMode: boolean;
   /** Prefilled-create ("clone") mode - see GroupWizardDialogData.cloneFrom. */
@@ -103,6 +105,11 @@ export class GroupWizardDialogComponent {
   readonly formTitle = signal('');
   readonly formDescription = signal('');
   readonly formStartDate = signal<Date | null>(null);
+  readonly formStartTime = signal('');
+  // Auto-detected default, always editable - see the Basics step's timezone
+  // select. A creator planning a group for a city other than their own can
+  // change it; most people never have to think about it.
+  readonly formTimeZone = signal(Intl.DateTimeFormat().resolvedOptions().timeZone);
   readonly formMaxMembers = signal<number | null>(null);
 
   readonly formOfferInPerson = signal(false);
@@ -130,6 +137,12 @@ export class GroupWizardDialogComponent {
       this.formTitle.set(existing.title);
       this.formDescription.set(existing.description ?? '');
       this.formStartDate.set(new Date(existing.startDate));
+      // Pre-existing groups saved before this field existed have no zone of
+      // their own - fall back to the editor's own device zone, the only
+      // information available for those.
+      const zone = existing.startTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+      this.formTimeZone.set(zone);
+      this.formStartTime.set(extractTimeInZone(existing.startDate, zone));
       this.formMaxMembers.set(existing.maxMembers ?? null);
       this.formOfferOnline.set(!!existing.onlineInfo);
       this.formOnlineInfo.set(existing.onlineInfo ?? '');
@@ -167,6 +180,18 @@ export class GroupWizardDialogComponent {
   readonly stepNumber = computed(() => this.currentStepIndex() + 1);
   readonly stepCount = computed(() => this.stepIds().length);
   readonly progressPercent = computed(() => (this.stepNumber() / this.stepCount()) * 100);
+
+  // Formatted for the Review step - combines the three separate date/time/
+  // zone form fields the same way submit() will, so what's shown here is
+  // exactly what gets saved.
+  readonly reviewStartDateTime = computed(() => {
+    const date = this.formStartDate();
+    const time = this.formStartTime();
+    if (!date || !time) {
+      return '';
+    }
+    return formatGroupDateTime(combineDateTimeInZone(date, time, this.formTimeZone()), this.formTimeZone());
+  });
 
   readonly reviewLocationSummary = computed(() => {
     const parts: string[] = [];
@@ -207,6 +232,8 @@ export class GroupWizardDialogComponent {
       !!this.formBookId() &&
       this.formTitle().trim().length > 0 &&
       this.formStartDate() !== null &&
+      this.formStartTime().trim().length > 0 &&
+      !!this.formTimeZone() &&
       !this.maxMembersError(),
   );
   readonly formatValid = computed(() => {
@@ -310,7 +337,8 @@ export class GroupWizardDialogComponent {
         ...(this.formDescription().trim() ? { description: this.formDescription().trim() } : {}),
         ...(location ? { location } : {}),
         ...(this.formOfferOnline() ? { onlineInfo: this.formOnlineInfo().trim() } : {}),
-        startDate: this.formStartDate()!.getTime(),
+        startDate: combineDateTimeInZone(this.formStartDate()!, this.formStartTime(), this.formTimeZone()),
+        startTimeZone: this.formTimeZone(),
         groupVisibility: this.formGroupVisibility(),
         ...(this.formMaxMembers() ? { maxMembers: this.formMaxMembers()! } : {}),
       };

@@ -347,7 +347,17 @@ service cloud.firestore {
       // doc comment); manager-app staff need admin/root - editors can't see
       // the admin Impact Groups screen (or its data directly).
       allow read: if signedIn() && canAccessStaffOnlyArea();
-      allow create: if signedIn() && request.resource.data.creatorEmail == request.auth.token.email.lower();
+      // A group can only be STARTED around a book the creator personally holds a
+      // license for (hasBookLicense, not canReadBook - deliberately no staff bypass
+      // here, unlike every other license check in this file; the manager app has no
+      // group-creation path at all, so this only ever gates reader-app patrons in
+      // practice). Editing/deleting an existing group is unaffected - see below.
+      allow create: if signedIn() && request.resource.data.creatorEmail == request.auth.token.email.lower() &&
+        hasBookLicense(request.resource.data.bookId);
+      // Deliberately NOT license-gated: updateGroup always writes the full wizard
+      // result (including bookId, whether or not it changed), and gating this would
+      // mean an admin fixing an unrelated typo on someone else's group would need to
+      // personally hold a license for that group's book.
       allow update, delete: if signedIn() &&
         (resource.data.creatorEmail == request.auth.token.email.lower() || isAdmin());
 
