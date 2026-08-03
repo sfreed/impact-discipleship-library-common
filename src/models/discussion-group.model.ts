@@ -115,6 +115,23 @@ export interface GroupChatMessage {
   sentAt: number;
 }
 
+/** A prayer a patron chose to share into a group, entered on a lesson's
+ *  prayer field (see `findPrayerFieldKeys` in the reader app) and shared at
+ *  submit time. Any approved member can read; only the author or the
+ *  group's creator (its de facto leader - see `DiscussionGroup.creatorEmail`,
+ *  there is no separate leader concept) can delete - no client-side edit.
+ *  Lives at `discussionGroups/{groupId}/prayerRequests/{requestId}`. */
+export interface GroupPrayerRequest {
+  id: string;
+  groupId: string;
+  authorEmail: string;
+  authorDisplayName: string;
+  text: string;
+  lessonId: string;
+  lessonTitle: string;
+  createdAt: number;
+}
+
 /** A 1:1 thread between a group's creator and exactly one other person -
  *  either an approved member or a rejected/pending requester (messaging a
  *  requester who was turned down is exactly this same mechanism). Lives at
