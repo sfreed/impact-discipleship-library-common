@@ -6,9 +6,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // 'root' is a superset-of-admin tier (currently identical rights to
+    // 'admin' - see AppUserRole/PermissionService.isAdmin/requireAdmin in
+    // the manager app for the client/Cloud-Functions mirrors of this same
+    // admin-or-root check, which must stay in sync with this one).
     function isAdmin() {
       return signedIn() &&
-        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'admin';
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role in ['admin', 'root'];
     }
 
     // Manager-app CMS staff (any admin or editor - not just admins) always
