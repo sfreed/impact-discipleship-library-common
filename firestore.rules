@@ -121,6 +121,32 @@ service cloud.firestore {
       allow read, write: if isStaff();
     }
 
+    // Staff-configured bulk-purchase discount tiers (Config screen, manager
+    // app) - any signed-in patron needs to read these to price a group
+    // leader's license purchase, but only admin/root can manage them. Doc id
+    // is String(numberOfBooks), enforcing "numberOfBooks must be unique" for
+    // free - no separate check needed here.
+    match /bulkDiscountTiers/{tierId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // A group leader's purchased-but-not-necessarily-assigned book licenses
+    // (see the reader app's group-license.model.ts doc comment for the full
+    // ownership model). Every mutation happens server-side, via the
+    // purchaseGroupLicenses/assignGroupLicense/revokeGroupLicense Cloud
+    // Functions (Admin SDK) - none of the authorization here (is this really
+    // the leader's own group, is the recipient an approved member, has the
+    // group since closed or changed book) can be expressed as a client-side
+    // write rule, so client writes are blocked outright.
+    match /groupLicenses/{licenseId} {
+      allow read: if signedIn() &&
+        (resource.data.leaderEmail == request.auth.token.email.lower()
+         || resource.data.assignedToEmail == request.auth.token.email.lower()
+         || isAdmin());
+      allow write: if false;
+    }
+
     match /titleTranslations/{titleTranslationId} {
       allow read, write: if signedIn();
     }
