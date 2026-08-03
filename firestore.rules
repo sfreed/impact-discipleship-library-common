@@ -147,6 +147,36 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // A leader's email invitation to a specific person for an invite-only
+    // discussion group - see the reader app's GroupInvite model. Create/
+    // cancel are safe as direct client writes (the leader only ever writes
+    // a doc about themselves that grants no privilege by itself - the
+    // get()-checked conditions below mirror the same idiom the members
+    // subcollection above already uses for its creator-approved case).
+    // Everything an anonymous, not-yet-signed-in invitee needs (previewing
+    // the invite, declining it) and every status transition with a real
+    // side effect (accepting - joins the group, maybe grants a license) go
+    // through the getInviteDetails/declineGroupInvite/acceptGroupInvite
+    // Cloud Functions instead, since an anonymous caller has no auth token
+    // for any rule here to check against.
+    match /groupInvites/{inviteId} {
+      allow read: if signedIn() &&
+        (resource.data.leaderEmail == request.auth.token.email.lower() || isAdmin());
+      allow create: if signedIn() &&
+        request.resource.data.leaderEmail == request.auth.token.email.lower() &&
+        request.resource.data.status == 'pending' &&
+        get(/databases/$(database)/documents/discussionGroups/$(request.resource.data.groupId)).data.creatorEmail == request.auth.token.email.lower() &&
+        get(/databases/$(database)/documents/discussionGroups/$(request.resource.data.groupId)).data.groupVisibility == 'invite-only';
+      // "Cancel" = delete-your-own-not-yet-answered invite - once accepted/
+      // declined it's kept as a historical record, same posture this file
+      // gives rejected join requests above.
+      allow delete: if signedIn() &&
+        resource.data.leaderEmail == request.auth.token.email.lower() && resource.data.status == 'pending';
+      // No client update path at all - status only ever moves via the
+      // Cloud Functions above.
+      allow update: if false;
+    }
+
     match /titleTranslations/{titleTranslationId} {
       allow read, write: if signedIn();
     }

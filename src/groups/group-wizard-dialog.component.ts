@@ -28,6 +28,15 @@ export interface GroupWizardDialogData {
   /** Present only when editing an existing group - every field is
    *  pre-filled from it. Absent means "create a new group". */
   existingGroup?: DiscussionGroup;
+  /** Present only when cloning a group for its next book - every field
+   *  except `bookId` is pre-filled from it, same as edit mode, but
+   *  submission is still a *create* (a brand-new group doc), never an
+   *  update to this group. Ignored if `existingGroup` is also set - edit
+   *  mode's behavior is more consequential to get right by accident, so it
+   *  wins. `bookId` is deliberately left blank in this mode so the creator
+   *  always picks the next book fresh from the same full list used for a
+   *  normal create. */
+  cloneFrom?: DiscussionGroup;
   /** Approved members (excluding the creator) this group currently has -
    *  supplied by the caller (which already has the membership data) rather
    *  than this wizard querying Firestore itself, keeping it independent of
@@ -85,6 +94,8 @@ export class GroupWizardDialogComponent {
   readonly usStates = US_STATES;
 
   readonly isEditMode: boolean;
+  /** Prefilled-create ("clone") mode - see GroupWizardDialogData.cloneFrom. */
+  readonly isCloneMode: boolean;
 
   // ---- Form state -----------------------------------------------------
 
@@ -110,9 +121,12 @@ export class GroupWizardDialogComponent {
 
   constructor(@Inject(MAT_DIALOG_DATA) readonly data: GroupWizardDialogData) {
     this.isEditMode = !!data.existingGroup;
-    const existing = data.existingGroup;
+    this.isCloneMode = !this.isEditMode && !!data.cloneFrom;
+    const existing = data.existingGroup ?? data.cloneFrom;
     if (existing) {
-      this.formBookId.set(existing.bookId);
+      if (!this.isCloneMode) {
+        this.formBookId.set(existing.bookId);
+      }
       this.formTitle.set(existing.title);
       this.formDescription.set(existing.description ?? '');
       this.formStartDate.set(new Date(existing.startDate));

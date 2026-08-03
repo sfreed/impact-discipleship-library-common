@@ -1,4 +1,6 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit Impact Group' : 'Start an Impact Group' }}</h2>
+<h2 mat-dialog-title>
+  {{ isEditMode ? 'Edit Impact Group' : (isCloneMode ? 'Start Impact Group for Next Book' : 'Start an Impact Group') }}
+</h2>
 
 <mat-progress-bar mode="determinate" [value]="progressPercent()"></mat-progress-bar>
 <p class="step-label">Step {{ stepNumber() }} of {{ stepCount() }}</p>
@@ -6,6 +8,13 @@
 <div mat-dialog-content class="wizard-content">
   @switch (currentStepId()) {
     @case ('basics') {
+      @if (isCloneMode) {
+        <p class="hint-text">
+          Pick the next book for this group to study. Group licenses are book-specific and
+          won't carry over - you'll need to buy or assign new licenses for this book once
+          members join.
+        </p>
+      }
       <mat-form-field appearance="outline">
         <mat-label>Book</mat-label>
         <mat-select [ngModel]="formBookId()" (ngModelChange)="formBookId.set($event)">
