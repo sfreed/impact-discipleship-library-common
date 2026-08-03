@@ -28,6 +28,12 @@ export interface GroupWizardDialogData {
   /** Present only when editing an existing group - every field is
    *  pre-filled from it. Absent means "create a new group". */
   existingGroup?: DiscussionGroup;
+  /** Approved members (excluding the creator) this group currently has -
+   *  supplied by the caller (which already has the membership data) rather
+   *  than this wizard querying Firestore itself, keeping it independent of
+   *  any app's own write service. Only meaningful in edit mode; used to
+   *  reject shrinking "Group size" below a count already reached. */
+  currentApprovedMemberCount?: number;
 }
 
 /** Everything the wizard collects, deliberately independent of any app's
@@ -44,6 +50,7 @@ export interface GroupWizardResult {
   onlineInfo?: string;
   startDate: number;
   groupVisibility: 'public' | 'invite-only';
+  maxMembers?: number;
 }
 
 type StepId = 'basics' | 'format' | 'location' | 'venue' | 'visibility' | 'review';
@@ -85,6 +92,7 @@ export class GroupWizardDialogComponent {
   readonly formTitle = signal('');
   readonly formDescription = signal('');
   readonly formStartDate = signal<Date | null>(null);
+  readonly formMaxMembers = signal<number | null>(null);
 
   readonly formOfferInPerson = signal(false);
   readonly formOfferOnline = signal(false);
@@ -108,6 +116,7 @@ export class GroupWizardDialogComponent {
       this.formTitle.set(existing.title);
       this.formDescription.set(existing.description ?? '');
       this.formStartDate.set(new Date(existing.startDate));
+      this.formMaxMembers.set(existing.maxMembers ?? null);
       this.formOfferOnline.set(!!existing.onlineInfo);
       this.formOnlineInfo.set(existing.onlineInfo ?? '');
       this.formGroupVisibility.set(existing.groupVisibility ?? 'public');
@@ -166,8 +175,25 @@ export class GroupWizardDialogComponent {
 
   // ---- Per-step validity ------------------------------------------------
 
+  // Only meaningful when editing (see GroupWizardDialogData.currentApprovedMemberCount's
+  // doc comment) - a new group has no members yet, so there's nothing to shrink below.
+  readonly maxMembersError = computed(() => {
+    const max = this.formMaxMembers();
+    const current = this.data.currentApprovedMemberCount;
+    if (max === null || current === undefined) {
+      return undefined;
+    }
+    return max < current
+      ? `This group already has ${current} approved member${current === 1 ? '' : 's'} - group size can't be set below that.`
+      : undefined;
+  });
+
   readonly basicsValid = computed(
-    () => !!this.formBookId() && this.formTitle().trim().length > 0 && this.formStartDate() !== null,
+    () =>
+      !!this.formBookId() &&
+      this.formTitle().trim().length > 0 &&
+      this.formStartDate() !== null &&
+      !this.maxMembersError(),
   );
   readonly formatValid = computed(() => {
     if (!this.formOfferInPerson() && !this.formOfferOnline()) {
@@ -272,6 +298,7 @@ export class GroupWizardDialogComponent {
         ...(this.formOfferOnline() ? { onlineInfo: this.formOnlineInfo().trim() } : {}),
         startDate: this.formStartDate()!.getTime(),
         groupVisibility: this.formGroupVisibility(),
+        ...(this.formMaxMembers() ? { maxMembers: this.formMaxMembers()! } : {}),
       };
       this.dialogRef.close(result);
     } catch {

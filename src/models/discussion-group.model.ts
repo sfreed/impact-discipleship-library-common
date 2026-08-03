@@ -49,6 +49,12 @@ export interface DiscussionGroup {
    *  wizard always writes a concrete value for new groups; this is only
    *  optional for backward compatibility with pre-existing documents. */
   groupVisibility?: 'public' | 'invite-only';
+  /** Optional cap on approved members, not counting the creator - once
+   *  approving a join request would bring the approved-member count (again,
+   *  excluding the creator) to this number, DiscussionGroupService.
+   *  approveMembership closes the group automatically. Absent means
+   *  unlimited, same backward-compatible posture as groupVisibility. */
+  maxMembers?: number;
   createdAt: number;
   updatedAt: number;
   closedAt?: number;

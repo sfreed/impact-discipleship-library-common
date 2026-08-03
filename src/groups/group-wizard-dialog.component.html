@@ -31,6 +31,22 @@
         <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #startDatePicker></mat-datepicker>
       </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Group size (optional)</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          [ngModel]="formMaxMembers()"
+          (ngModelChange)="formMaxMembers.set($event)"
+          placeholder="Leave blank for unlimited"
+        />
+        <mat-hint>Not counting yourself - the group closes automatically once this many people are approved.</mat-hint>
+        @if (maxMembersError(); as error) {
+          <mat-error>{{ error }}</mat-error>
+        }
+      </mat-form-field>
     }
 
     @case ('format') {
@@ -121,6 +137,9 @@
           <div class="review-row"><span>Description</span><span>{{ formDescription() }}</span></div>
         }
         <div class="review-row"><span>Start date</span><span>{{ formStartDate() | date: 'mediumDate' }}</span></div>
+        @if (formMaxMembers()) {
+          <div class="review-row"><span>Group size</span><span>{{ formMaxMembers() }} (plus you)</span></div>
+        }
         @if (formOfferInPerson()) {
           <div class="review-row"><span>In-person</span><span>{{ reviewLocationSummary() }}</span></div>
         }
