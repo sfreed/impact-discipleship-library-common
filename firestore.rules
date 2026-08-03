@@ -23,6 +23,26 @@ service cloud.firestore {
       return signedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
     }
 
+    // True only for a caller whose own adminUsers doc has role 'root' -
+    // stricter than isAdmin(), which also accepts plain 'admin'. Used to gate
+    // the one action reserved for root specifically: assigning the root role
+    // to someone (see the adminUsers update rule below and the client/Cloud-
+    // Functions mirrors of this same check).
+    function isRoot() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'root';
+    }
+
+    // Gates the manager-app-only staff screens (Purchases, Users, Impact
+    // Groups, Events) to admin/root, while leaving reader-app patrons
+    // (who have no adminUsers doc at all, so isStaff() is false for them)
+    // completely unaffected - collections like discussionGroups are read by
+    // both apps, so the gate can't just be isAdmin() outright without also
+    // locking out every reader-app patron.
+    function canAccessStaffOnlyArea() {
+      return !isStaff() || isAdmin();
+    }
+
     // The reader app's access gate: does the
     // signed-in patron's own libraryUsers record (keyed by their Auth email -
     // see LibraryUserService) list this book as licensed? See
@@ -125,16 +145,26 @@ service cloud.firestore {
       // error for every non-staff caller instead). Reading anyone else's doc
       // requires being staff - otherwise this was the entire staff roster
       // (emails/names/roles) readable by any patron.
-      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
-      // Admins can update anything. A signed-in user may also update their OWN
-      // doc, but only to touch this exact allowlist of low-stakes self-service
-      // fields (personal theme preferences, last-login stamp) - role/permissions
-      // must stay admin-only so a non-admin can never self-promote or grant
-      // themself access by writing their own doc. lightColorTheme/darkColorTheme
-      // must stay in sync with whatever fields UserService.updateOwnPreferences
+      // Reading the FULL roster (the Users screen) is admin/root only -
+      // editors never see who else has access. A signed-in user may still
+      // always read their OWN doc regardless of role (Settings page,
+      // StaffService.isStaff()'s existence check, etc.).
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // Admins/root can update anything, EXCEPT assigning the 'root' role
+      // itself - only an existing root user may promote someone to root
+      // (the `resource.data.role == 'root'` clause lets a non-root admin
+      // still edit an already-root user's other fields, e.g. displayName,
+      // as long as they aren't the one newly setting role to 'root'). A
+      // signed-in user may also update their OWN doc, but only to touch this
+      // exact allowlist of low-stakes self-service fields (personal theme
+      // preferences, last-login stamp) - role/permissions must stay
+      // admin-only so a non-admin can never self-promote or grant themself
+      // access by writing their own doc. lightColorTheme/darkColorTheme must
+      // stay in sync with whatever fields UserService.updateOwnPreferences
       // actually writes (see its own doc comment) - adding a new self-service
       // field there means updating this allowlist too, not just the client.
-      allow update: if isAdmin()
+      allow update: if (isAdmin() &&
+                         (request.resource.data.role != 'root' || resource.data.role == 'root' || isRoot()))
         || (signedIn() && request.auth.uid == uid
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['darkMode', 'lightColorTheme', 'darkColorTheme', 'lastLogin', 'updatedAt', 'updatedBy']));
@@ -179,7 +209,11 @@ service cloud.firestore {
     // trail undercuts the whole point of keeping one. See the reader app's
     // handoff.md for the still-missing admin-side items.
     match /purchases/{purchaseId} {
-      allow read: if signedIn();
+      // Read is manager-app-admin-only (the Purchases screen) - the reader
+      // app only ever creates these (audit trail) and never reads them back
+      // (see PurchaseService), so there's no patron-read need to preserve
+      // here the way discussionGroups has.
+      allow read: if isAdmin();
       allow create: if signedIn() && request.resource.data.email == request.auth.token.email.lower();
       allow update, delete: if false;
     }
@@ -242,10 +276,13 @@ service cloud.firestore {
     // any book, not just ones they're licensed for), but only the creator
     // (or staff) may update (e.g. close it) or delete it.
     match /discussionGroups/{groupId} {
-      allow read: if signedIn();
+      // Reader-app patrons keep unrestricted read (see canAccessStaffOnlyArea's
+      // doc comment); manager-app staff need admin/root - editors can't see
+      // the admin Impact Groups screen (or its data directly).
+      allow read: if signedIn() && canAccessStaffOnlyArea();
       allow create: if signedIn() && request.resource.data.creatorEmail == request.auth.token.email.lower();
       allow update, delete: if signedIn() &&
-        (resource.data.creatorEmail == request.auth.token.email.lower() || isStaff());
+        (resource.data.creatorEmail == request.auth.token.email.lower() || isAdmin());
 
       // One doc per patron who's requested (or been granted) membership,
       // keyed by their own lowercased email - see GroupMembership. A patron
@@ -258,18 +295,18 @@ service cloud.firestore {
       // special case for "or did I create it". Delete covers both "withdraw
       // my own request/leave" and "the creator or staff removing a member".
       match /members/{email} {
-        allow read: if signedIn();
+        allow read: if signedIn() && canAccessStaffOnlyArea();
         allow create: if signedIn() && email == request.auth.token.email.lower() &&
           (request.resource.data.status == 'pending' ||
            (request.resource.data.status == 'approved' &&
             get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == email));
         allow update: if signedIn() &&
           (get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
-           || isStaff());
+           || isAdmin());
         allow delete: if signedIn() &&
           (email == request.auth.token.email.lower()
            || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
-           || isStaff());
+           || isAdmin());
       }
 
       // The group's shared chat - see GroupChatMessage. Only an approved
@@ -310,18 +347,24 @@ service cloud.firestore {
     // Collection-group read only - lets "my groups" (see
     // DiscussionGroupService.getMyMemberships) find every group a patron
     // belongs to in one query, instead of needing to already know which
-    // groups to check.
+    // groups to check. Also backs the manager app's admin table's unfiltered
+    // getAllGroupMemberships (member-count column) - same admin/root-only
+    // restriction as the nested members rule above, same patron carve-out.
     match /{path=**}/members/{email} {
-      allow read: if signedIn();
+      allow read: if signedIn() && canAccessStaffOnlyArea();
     }
 
     match /activityLog/{entryId} {
       // Account/access events plus library content add/edit/delete - see
-      // ActivityLogService/ActivityLogEntry. A signed-in user may only create
-      // an entry recording themself as the actor. There is no update path -
-      // entries are never edited, only (by an admin, from the Events screen)
-      // removed outright.
-      allow read: if signedIn();
+      // ActivityLogService/ActivityLogEntry. Reading the log (the Events
+      // screen, and the per-user activity column on the Users detail page)
+      // is admin/root only - editors can't see anyone's activity, including
+      // their own, through this collection. Writing stays open to any
+      // signed-in staff member recording their OWN actions (an editor's
+      // edits still need to show up in the log for an admin to audit) -
+      // there is no update path, entries are never edited, only (by an
+      // admin, from the Events screen) removed outright.
+      allow read: if isAdmin();
       allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid;
       allow update: if false;
       allow delete: if isAdmin();
