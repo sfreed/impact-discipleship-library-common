@@ -378,12 +378,13 @@ service cloud.firestore {
       // Two create paths:
       //  1. A signed-in user (either app, any role) logging their OWN error,
       //     self-attributed the same way activityLog is.
-      //  2. A FAILED LOGIN OR SIGNUP ATTEMPT - the one deliberate exception
-      //     to "must be signed in to write" anywhere in this whole rules
-      //     file. Tightly scoped: uid must be null, location must be exactly
-      //     'login' or 'signup', app must be one of the two real client
-      //     apps. This can't be used to write anything else - every other
-      //     field combination still requires signedIn(). See
+      //  2. A FAILED LOGIN, SIGNUP, OR FORGOT-PASSWORD ATTEMPT - the one
+      //     deliberate exception to "must be signed in to write" anywhere in
+      //     this whole rules file. Tightly scoped: uid must be null,
+      //     location must be exactly 'login', 'signup', or
+      //     'forgotPassword', app must be one of the two real client apps.
+      //     This can't be used to write anything else - every other field
+      //     combination still requires signedIn(). See
       //     BaseErrorLogHandler.logPreAuthFailure, the only code path that
       //     produces this shape.
       //
@@ -396,7 +397,7 @@ service cloud.firestore {
         (signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.app in ['reader', 'manager'])
         || (!signedIn() && request.resource.data.uid == null
             && request.resource.data.app in ['reader', 'manager']
-            && request.resource.data.location in ['login', 'signup']);
+            && request.resource.data.location in ['login', 'signup', 'forgotPassword']);
       allow update: if false;
     }
   }

@@ -44,12 +44,21 @@ export abstract class BaseErrorLogHandler implements ErrorHandler {
     return this.record(location, error, detail, correlationId ?? readCorrelationId(error));
   }
 
-  /** The one path allowed to write with uid: null - a failed login/signup
-   *  attempt, before any signed-in identity exists (see firestore.rules'
-   *  narrow unauthenticated-write exception for this exact shape).
-   *  Unconditional - no expected-vs-abnormal filtering - since the whole
-   *  point is visibility into every login struggle, not just "real bugs." */
-  async logPreAuthFailure(location: 'login' | 'signup', attemptedEmail: string, error: unknown): Promise<void> {
+  /** The one path allowed to write with uid: null - a failed login/signup/
+   *  forgot-password attempt, before any signed-in identity exists (see
+   *  firestore.rules' narrow unauthenticated-write exception for this exact
+   *  shape). Unconditional for login/signup - no expected-vs-abnormal
+   *  filtering, since the whole point is visibility into every login
+   *  struggle, not just "real bugs." Callers logging a forgotPassword
+   *  failure are expected to filter out the anticipated `user-not-found`
+   *  case themselves before calling this (see LoginComponent.sendResetEmail)
+   *  - that one *is* an expected/anticipated condition, unlike a real login
+   *  failure. */
+  async logPreAuthFailure(
+    location: 'login' | 'signup' | 'forgotPassword',
+    attemptedEmail: string,
+    error: unknown,
+  ): Promise<void> {
     try {
       await this.writeEntry({
         timestamp: Date.now(),
