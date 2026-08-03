@@ -270,6 +270,17 @@ service cloud.firestore {
       allow read: if signedIn();
     }
 
+    // True only if the caller has an 'approved' membership doc for this
+    // specific group - a fixed, non-variable get() lookup, so (unlike
+    // checking the QUERIED documents' own fields) this is safe to use for
+    // list-query rules too, same idiom as hasBookLicense above. The
+    // group's own creator always has one (see DiscussionGroupService.
+    // createGroup), so this covers "am I the creator" for free.
+    function isApprovedGroupMember(groupId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/discussionGroups/$(groupId)/members/$(request.auth.token.email.lower())).data.status == 'approved';
+    }
+
     // A patron-organized book discussion group (in-person and/or online) -
     // see the reader app's DiscussionGroup model and
     // DiscussionGroupService. Any signed-in patron may create one (around
@@ -295,7 +306,12 @@ service cloud.firestore {
       // special case for "or did I create it". Delete covers both "withdraw
       // my own request/leave" and "the creator or staff removing a member".
       match /members/{email} {
-        allow read: if signedIn() && canAccessStaffOnlyArea();
+        // Tightened from "any signed-in patron" (which let anyone enumerate
+        // any group's member roster - emails included - just by knowing or
+        // guessing a groupId, even for 'invite-only' groups) to: staff
+        // admin, or an approved member of THIS group reading via their own
+        // membership doc.
+        allow read: if signedIn() && (isAdmin() || isApprovedGroupMember(groupId));
         allow create: if signedIn() && email == request.auth.token.email.lower() &&
           (request.resource.data.status == 'pending' ||
            (request.resource.data.status == 'approved' &&
@@ -312,26 +328,32 @@ service cloud.firestore {
       // The group's shared chat - see GroupChatMessage. Only an approved
       // member may post (checked by reading their own membership doc, same
       // technique as hasBookLicense above); no client-side edit/delete of a
-      // sent message.
+      // sent message. Read tightened the same way as members above - chat
+      // content is more sensitive than a roster, so "any signed-in user"
+      // (reader OR manager, editor included) was a real exposure, not just
+      // an accepted client-side-only gate.
       match /chatMessages/{messageId} {
-        allow read: if signedIn();
+        allow read: if signedIn() && (isAdmin() || isApprovedGroupMember(groupId));
         allow create: if signedIn() &&
           request.resource.data.senderEmail == request.auth.token.email.lower() &&
-          get(/databases/$(database)/documents/discussionGroups/$(groupId)/members/$(request.auth.token.email.lower())).data.status == 'approved';
+          request.resource.data.text is string && request.resource.data.text.size() < 4000 &&
+          isApprovedGroupMember(groupId);
         allow update, delete: if false;
       }
 
       // A prayer shared into this group from a lesson's prayer field - see
-      // GroupPrayerRequest. Read unrestricted to any signed-in user (same
-      // as chatMessages) - GroupPrayerRequestsComponent restricts rendering
-      // to approved members client-side. Unlike chatMessages, delete is
-      // allowed for the author or the group's creator (its leader) or
-      // staff - no client-side edit either way.
+      // GroupPrayerRequest. Read tightened the same way as members/
+      // chatMessages above - shared prayer content is at least as sensitive
+      // as chat, so it gets the same isAdmin()-or-approved-member gate
+      // rather than "any signed-in user". Delete allowed for the author or
+      // the group's creator (its leader) or staff - no client-side edit
+      // either way.
       match /prayerRequests/{requestId} {
-        allow read: if signedIn();
+        allow read: if signedIn() && (isAdmin() || isApprovedGroupMember(groupId));
         allow create: if signedIn() &&
           request.resource.data.authorEmail == request.auth.token.email.lower() &&
-          get(/databases/$(database)/documents/discussionGroups/$(groupId)/members/$(request.auth.token.email.lower())).data.status == 'approved';
+          request.resource.data.text is string && request.resource.data.text.size() < 4000 &&
+          isApprovedGroupMember(groupId);
         allow delete: if signedIn() &&
           (resource.data.authorEmail == request.auth.token.email.lower()
            || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
@@ -366,10 +388,14 @@ service cloud.firestore {
     // DiscussionGroupService.getMyMemberships) find every group a patron
     // belongs to in one query, instead of needing to already know which
     // groups to check. Also backs the manager app's admin table's unfiltered
-    // getAllGroupMemberships (member-count column) - same admin/root-only
-    // restriction as the nested members rule above, same patron carve-out.
+    // getAllGroupMemberships (member-count column). Tightened the same way
+    // as the nested members rule above: isAdmin() (satisfies the manager
+    // app's unfiltered query unconditionally) OR the document is literally
+    // the caller's own membership doc - getMyMemberships already filters
+    // `where('email', '==', callerEmail)`, so Firestore can prove this rule
+    // holds for every possible result of that exact query shape.
     match /{path=**}/members/{email} {
-      allow read: if signedIn() && canAccessStaffOnlyArea();
+      allow read: if signedIn() && (isAdmin() || resource.data.email == request.auth.token.email.lower());
     }
 
     match /activityLog/{entryId} {
@@ -386,6 +412,23 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid;
       allow update: if false;
       allow delete: if isAdmin();
+    }
+
+    // Basic type/size bounds on a logged error entry - the pre-auth create
+    // path below needs no signed-in identity at all, so without this an
+    // anonymous caller could write arbitrarily many docs with unbounded
+    // message/stack strings (storage-cost flooding) or a fabricated
+    // userEmail attributing a fake "failed login" to any real patron
+    // (log-poisoning of what root sees on the Error Logs screen). Bounds
+    // are generous, not exact - this is abuse prevention, not strict schema
+    // validation.
+    function isValidErrorLogEntry() {
+      return request.resource.data.message is string && request.resource.data.message.size() < 2000
+        && request.resource.data.location is string && request.resource.data.location.size() < 200
+        && (!('detail' in request.resource.data) || (request.resource.data.detail is string && request.resource.data.detail.size() < 2000))
+        && (!('stack' in request.resource.data) || (request.resource.data.stack is string && request.resource.data.stack.size() < 8000))
+        && (!('userEmail' in request.resource.data) || request.resource.data.userEmail == null
+            || (request.resource.data.userEmail is string && request.resource.data.userEmail.size() < 320));
     }
 
     match /errorLogs/{entryId} {
@@ -411,11 +454,11 @@ service cloud.firestore {
       // Functions' Admin SDK write, which bypasses these rules entirely, so
       // a client could otherwise spoof one.
       allow read, delete: if isRoot();
-      allow create: if
-        (signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.app in ['reader', 'manager'])
-        || (!signedIn() && request.resource.data.uid == null
-            && request.resource.data.app in ['reader', 'manager']
-            && request.resource.data.location in ['login', 'signup', 'forgotPassword']);
+      allow create: if isValidErrorLogEntry() &&
+        ((signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.app in ['reader', 'manager'])
+         || (!signedIn() && request.resource.data.uid == null
+             && request.resource.data.app in ['reader', 'manager']
+             && request.resource.data.location in ['login', 'signup', 'forgotPassword']));
       allow update: if false;
     }
   }
