@@ -369,5 +369,35 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isAdmin();
     }
+
+    match /errorLogs/{entryId} {
+      // Every logged client/Cloud-Function error - see ErrorLogEntry and
+      // BaseErrorLogHandler. Read/delete is root-only - stricter than
+      // activityLog (isAdmin()): even a plain admin doesn't see this.
+      //
+      // Two create paths:
+      //  1. A signed-in user (either app, any role) logging their OWN error,
+      //     self-attributed the same way activityLog is.
+      //  2. A FAILED LOGIN OR SIGNUP ATTEMPT - the one deliberate exception
+      //     to "must be signed in to write" anywhere in this whole rules
+      //     file. Tightly scoped: uid must be null, location must be exactly
+      //     'login' or 'signup', app must be one of the two real client
+      //     apps. This can't be used to write anything else - every other
+      //     field combination still requires signedIn(). See
+      //     BaseErrorLogHandler.logPreAuthFailure, the only code path that
+      //     produces this shape.
+      //
+      // `app` is constrained to the two CLIENT-writable values in both
+      // paths - a 'functions'-sourced entry can only come from the Cloud
+      // Functions' Admin SDK write, which bypasses these rules entirely, so
+      // a client could otherwise spoof one.
+      allow read, delete: if isRoot();
+      allow create: if
+        (signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.app in ['reader', 'manager'])
+        || (!signedIn() && request.resource.data.uid == null
+            && request.resource.data.app in ['reader', 'manager']
+            && request.resource.data.location in ['login', 'signup']);
+      allow update: if false;
+    }
   }
 }

@@ -90,4 +90,11 @@ export interface Purchase {
    *  revoke of the same purchase doesn't repeat it. Never set by anything
    *  else. */
   paypalCaptureId?: string;
+  /** Generated once by the reader app's StoreComponent when a PayPal
+   *  checkout begins (see completePurchase), stored here so the manager
+   *  app's revokePurchase can read it back and reuse it for its own
+   *  PayPal-related error logging on a later refund - one id ties together
+   *  a purchase's whole PayPal lifecycle, initial charge through any
+   *  refund. See @impact-common/errors/correlation-id. */
+  correlationId?: string;
 }
