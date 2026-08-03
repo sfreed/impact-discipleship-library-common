@@ -321,6 +321,24 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // A prayer shared into this group from a lesson's prayer field - see
+      // GroupPrayerRequest. Read unrestricted to any signed-in user (same
+      // as chatMessages) - GroupPrayerRequestsComponent restricts rendering
+      // to approved members client-side. Unlike chatMessages, delete is
+      // allowed for the author or the group's creator (its leader) or
+      // staff - no client-side edit either way.
+      match /prayerRequests/{requestId} {
+        allow read: if signedIn();
+        allow create: if signedIn() &&
+          request.resource.data.authorEmail == request.auth.token.email.lower() &&
+          get(/databases/$(database)/documents/discussionGroups/$(groupId)/members/$(request.auth.token.email.lower())).data.status == 'approved';
+        allow delete: if signedIn() &&
+          (resource.data.authorEmail == request.auth.token.email.lower()
+           || get(/databases/$(database)/documents/discussionGroups/$(groupId)).data.creatorEmail == request.auth.token.email.lower()
+           || isAdmin());
+        allow update: if false;
+      }
+
       // A 1:1 thread between the group's creator and exactly one other
       // person (an approved member or a rejected/pending requester) - see
       // GroupConversation. Doc id == the other person's lowercased email,

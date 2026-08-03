@@ -25,6 +25,7 @@ import {
   GroupChatMessage,
   GroupConversation,
   GroupMembership,
+  GroupPrayerRequest,
 } from '../models/discussion-group.model';
 
 export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
@@ -95,6 +96,15 @@ export function getMyCreatedGroups(firestore: Firestore, email: string): Observa
 export function getGroupChatMessages(firestore: Firestore, groupId: string): Observable<GroupChatMessage[]> {
   const ref = collection(firestore, 'discussionGroups', groupId, 'chatMessages');
   return collectionData(query(ref, orderBy('sentAt')), { idField: 'id' }) as Observable<GroupChatMessage[]>;
+}
+
+/** Every prayer shared into this group, newest first (browsed as a list,
+ *  unlike chat's chronological read). See GroupPrayerRequest. */
+export function getGroupPrayerRequests(firestore: Firestore, groupId: string): Observable<GroupPrayerRequest[]> {
+  const ref = collection(firestore, 'discussionGroups', groupId, 'prayerRequests');
+  return collectionData(query(ref, orderBy('createdAt', 'desc')), { idField: 'id' }) as Observable<
+    GroupPrayerRequest[]
+  >;
 }
 
 export function getConversation(
