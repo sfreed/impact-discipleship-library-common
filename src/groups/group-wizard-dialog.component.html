@@ -1,22 +1,24 @@
 <h2 mat-dialog-title>
-  {{ isEditMode ? 'Edit Impact Group' : (isCloneMode ? 'Start Impact Group for Next Book' : 'Start an Impact Group') }}
+  {{ isEditMode ? chrome.t('Edit Impact Group') : (isCloneMode ? chrome.t('Start Impact Group for Next Book') : chrome.t('Start an Impact Group')) }}
 </h2>
 
 <mat-progress-bar mode="determinate" [value]="progressPercent()"></mat-progress-bar>
-<p class="step-label">Step {{ stepNumber() }} of {{ stepCount() }}</p>
+<p class="step-label">{{ chrome.t('Step {n} of {count}', { n: stepNumber(), count: stepCount() }) }}</p>
 
 <div mat-dialog-content class="wizard-content">
   @switch (currentStepId()) {
     @case ('basics') {
       @if (isCloneMode) {
         <p class="hint-text">
-          Pick the next book for this group to study. Group licenses are book-specific and
-          won't carry over - you'll need to buy or assign new licenses for this book once
-          members join.
+          {{
+            chrome.t(
+              "Pick the next book for this group to study. Group licenses are book-specific and won't carry over - you'll need to buy or assign new licenses for this book once members join."
+            )
+          }}
         </p>
       }
       <mat-form-field appearance="outline">
-        <mat-label>Book</mat-label>
+        <mat-label>{{ chrome.t('Book') }}</mat-label>
         <mat-select [ngModel]="formBookId()" (ngModelChange)="formBookId.set($event)">
           @for (book of data.books; track book.id) {
             <mat-option [value]="book.id">{{ book.title }}</mat-option>
@@ -25,50 +27,50 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Impact Group title</mat-label>
-        <input matInput [ngModel]="formTitle()" (ngModelChange)="formTitle.set($event)" placeholder="e.g. Tuesday Night Discussion" />
+        <mat-label>{{ chrome.t('Impact Group title') }}</mat-label>
+        <input matInput [ngModel]="formTitle()" (ngModelChange)="formTitle.set($event)" [placeholder]="chrome.t('e.g. Tuesday Night Discussion')" />
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Description (optional)</mat-label>
+        <mat-label>{{ chrome.t('Description (optional)') }}</mat-label>
         <textarea matInput rows="2" [ngModel]="formDescription()" (ngModelChange)="formDescription.set($event)"></textarea>
       </mat-form-field>
 
       <div class="datetime-row">
         <mat-form-field appearance="outline">
-          <mat-label>Potential start date</mat-label>
+          <mat-label>{{ chrome.t('Potential start date') }}</mat-label>
           <input matInput [matDatepicker]="startDatePicker" [ngModel]="formStartDate()" (ngModelChange)="formStartDate.set($event)" />
           <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #startDatePicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Time</mat-label>
+          <mat-label>{{ chrome.t('Time') }}</mat-label>
           <input matInput type="time" [ngModel]="formStartTime()" (ngModelChange)="formStartTime.set($event)" />
         </mat-form-field>
       </div>
 
       <mat-form-field appearance="outline">
-        <mat-label>Time zone</mat-label>
+        <mat-label>{{ chrome.t('Time zone') }}</mat-label>
         <mat-select [ngModel]="formTimeZone()" (ngModelChange)="formTimeZone.set($event)">
           @for (tz of timeZones; track tz.id) {
             <mat-option [value]="tz.id">{{ tz.label }}</mat-option>
           }
         </mat-select>
-        <mat-hint>Auto-detected from your device - change it if this group meets somewhere else.</mat-hint>
+        <mat-hint>{{ chrome.t('Auto-detected from your device - change it if this group meets somewhere else.') }}</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Group size (optional)</mat-label>
+        <mat-label>{{ chrome.t('Group size (optional)') }}</mat-label>
         <input
           matInput
           type="number"
           min="1"
           [ngModel]="formMaxMembers()"
           (ngModelChange)="formMaxMembers.set($event)"
-          placeholder="Leave blank for unlimited"
+          [placeholder]="chrome.t('Leave blank for unlimited')"
         />
-        <mat-hint>Not counting yourself - the group closes automatically once this many people are approved.</mat-hint>
+        <mat-hint>{{ chrome.t('Not counting yourself - the group closes automatically once this many people are approved.') }}</mat-hint>
         @if (maxMembersError(); as error) {
           <mat-error>{{ error }}</mat-error>
         }
@@ -78,18 +80,18 @@
     @case ('format') {
       <div class="meeting-option">
         <mat-checkbox [checked]="formOfferInPerson()" (change)="formOfferInPerson.set($event.checked)">
-          Offer in-person
+          {{ chrome.t('Offer in-person') }}
         </mat-checkbox>
       </div>
 
       <div class="meeting-option">
         <mat-checkbox [checked]="formOfferOnline()" (change)="formOfferOnline.set($event.checked)">
-          Offer online
+          {{ chrome.t('Offer online') }}
         </mat-checkbox>
         @if (formOfferOnline()) {
           <mat-form-field appearance="outline">
-            <mat-label>Online details</mat-label>
-            <input matInput [ngModel]="formOnlineInfo()" (ngModelChange)="formOnlineInfo.set($event)" placeholder="e.g. Zoom link shared after signup" />
+            <mat-label>{{ chrome.t('Online details') }}</mat-label>
+            <input matInput [ngModel]="formOnlineInfo()" (ngModelChange)="formOnlineInfo.set($event)" [placeholder]="chrome.t('e.g. Zoom link shared after signup')" />
           </mat-form-field>
         }
       </div>
@@ -97,7 +99,7 @@
 
     @case ('location') {
       <mat-form-field appearance="outline">
-        <mat-label>Country</mat-label>
+        <mat-label>{{ chrome.t('Country') }}</mat-label>
         <mat-select [ngModel]="formCountry()" (ngModelChange)="formCountry.set($event)">
           @for (country of countries; track country.code) {
             <mat-option [value]="country.code">{{ country.name }}</mat-option>
@@ -107,7 +109,7 @@
 
       @if (formCountry() === 'US') {
         <mat-form-field appearance="outline">
-          <mat-label>State</mat-label>
+          <mat-label>{{ chrome.t('State') }}</mat-label>
           <mat-select [ngModel]="formState()" (ngModelChange)="formState.set($event)">
             @for (state of usStates; track state.code) {
               <mat-option [value]="state.code">{{ state.name }}</mat-option>
@@ -117,64 +119,64 @@
       }
 
       <mat-form-field appearance="outline">
-        <mat-label>City</mat-label>
+        <mat-label>{{ chrome.t('City') }}</mat-label>
         <input matInput [ngModel]="formCity()" (ngModelChange)="formCity.set($event)" />
       </mat-form-field>
     }
 
     @case ('venue') {
-      <p class="step-question">Will this group meet at a public or private location (church, home, etc.)?</p>
+      <p class="step-question">{{ chrome.t('Will this group meet at a public or private location (church, home, etc.)?') }}</p>
       <mat-radio-group [ngModel]="formLocationType()" (ngModelChange)="formLocationType.set($event)">
-        <mat-radio-button value="public">Public location (e.g. a church)</mat-radio-button>
-        <mat-radio-button value="private">Private location (e.g. a home)</mat-radio-button>
+        <mat-radio-button value="public">{{ chrome.t('Public location (e.g. a church)') }}</mat-radio-button>
+        <mat-radio-button value="private">{{ chrome.t('Private location (e.g. a home)') }}</mat-radio-button>
       </mat-radio-group>
 
       <mat-form-field appearance="outline">
-        <mat-label>Address</mat-label>
-        <input matInput [ngModel]="formAddress1()" (ngModelChange)="formAddress1.set($event)" placeholder="Street address" />
+        <mat-label>{{ chrome.t('Address') }}</mat-label>
+        <input matInput [ngModel]="formAddress1()" (ngModelChange)="formAddress1.set($event)" [placeholder]="chrome.t('Street address')" />
       </mat-form-field>
 
       @if (formLocationType() === 'private') {
         <mat-slide-toggle [checked]="formAddressVisible()" (change)="formAddressVisible.set($event.checked)">
-          OK to show this address to everyone?
+          {{ chrome.t('OK to show this address to everyone?') }}
         </mat-slide-toggle>
         <p class="hint-text">
           @if (formAddressVisible()) {
-            The full address will be shown to patrons browsing Impact Groups.
+            {{ chrome.t('The full address will be shown to patrons browsing Impact Groups.') }}
           } @else {
-            The address stays private - only city/state will be shown to patrons. It's still used to help nearby patrons find this group.
+            {{ chrome.t("The address stays private - only city/state will be shown to patrons. It's still used to help nearby patrons find this group.") }}
           }
         </p>
       }
     }
 
     @case ('visibility') {
-      <p class="step-question">Is this Impact Group open to the public, or by invite only?</p>
+      <p class="step-question">{{ chrome.t('Is this Impact Group open to the public, or by invite only?') }}</p>
       <mat-radio-group [ngModel]="formGroupVisibility()" (ngModelChange)="formGroupVisibility.set($event)">
-        <mat-radio-button value="public">Open to the public - anyone can find and request to join</mat-radio-button>
-        <mat-radio-button value="invite-only">By invite only - hidden from browsing and search</mat-radio-button>
+        <mat-radio-button value="public">{{ chrome.t('Open to the public - anyone can find and request to join') }}</mat-radio-button>
+        <mat-radio-button value="invite-only">{{ chrome.t('By invite only - hidden from browsing and search') }}</mat-radio-button>
       </mat-radio-group>
     }
 
     @case ('review') {
       <div class="review-summary">
-        <div class="review-row"><span>Title</span><span>{{ formTitle() }}</span></div>
+        <div class="review-row"><span>{{ chrome.t('Title') }}</span><span>{{ formTitle() }}</span></div>
         @if (formDescription()) {
-          <div class="review-row"><span>Description</span><span>{{ formDescription() }}</span></div>
+          <div class="review-row"><span>{{ chrome.t('Description') }}</span><span>{{ formDescription() }}</span></div>
         }
-        <div class="review-row"><span>Start date</span><span>{{ reviewStartDateTime() }}</span></div>
+        <div class="review-row"><span>{{ chrome.t('Start date') }}</span><span>{{ reviewStartDateTime() }}</span></div>
         @if (formMaxMembers()) {
-          <div class="review-row"><span>Group size</span><span>{{ formMaxMembers() }} (plus you)</span></div>
+          <div class="review-row"><span>{{ chrome.t('Group size') }}</span><span>{{ chrome.t('{n} (plus you)', { n: formMaxMembers()! }) }}</span></div>
         }
         @if (formOfferInPerson()) {
-          <div class="review-row"><span>In-person</span><span>{{ reviewLocationSummary() }}</span></div>
+          <div class="review-row"><span>{{ chrome.t('In-person') }}</span><span>{{ reviewLocationSummary() }}</span></div>
         }
         @if (formOfferOnline()) {
-          <div class="review-row"><span>Online</span><span>{{ formOnlineInfo() }}</span></div>
+          <div class="review-row"><span>{{ chrome.t('Online') }}</span><span>{{ formOnlineInfo() }}</span></div>
         }
         <div class="review-row">
-          <span>Visibility</span>
-          <span>{{ formGroupVisibility() === 'public' ? 'Open to the public' : 'By invite only' }}</span>
+          <span>{{ chrome.t('Visibility') }}</span>
+          <span>{{ formGroupVisibility() === 'public' ? chrome.t('Open to the public') : chrome.t('By invite only') }}</span>
         </div>
       </div>
 
@@ -186,19 +188,19 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button [disabled]="submitting()" (click)="cancel()">Cancel</button>
+  <button mat-button [disabled]="submitting()" (click)="cancel()">{{ chrome.t('Cancel') }}</button>
   <span class="actions-spacer"></span>
   @if (!isFirstStep()) {
-    <button mat-button [disabled]="submitting()" (click)="back()">Back</button>
+    <button mat-button [disabled]="submitting()" (click)="back()">{{ chrome.t('Back') }}</button>
   }
   @if (!isReviewStep()) {
-    <button mat-flat-button color="primary" [disabled]="!currentStepValid()" (click)="next()">Next</button>
+    <button mat-flat-button color="primary" [disabled]="!currentStepValid()" (click)="next()">{{ chrome.t('Next') }}</button>
   } @else {
     <button mat-flat-button color="primary" [disabled]="submitting()" (click)="submit()">
       @if (submitting()) {
         <mat-spinner diameter="20"></mat-spinner>
       } @else {
-        {{ isEditMode ? 'Save Changes' : 'Create Impact Group' }}
+        {{ isEditMode ? chrome.t('Save Changes') : chrome.t('Create Impact Group') }}
       }
     </button>
   }

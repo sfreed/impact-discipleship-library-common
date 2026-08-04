@@ -18,6 +18,7 @@ import { COUNTRIES } from './data/countries';
 import { US_STATES } from './data/us-states';
 import { TIME_ZONES } from './data/timezones';
 import { combineDateTimeInZone, extractTimeInZone, formatGroupDateTime } from './group-datetime.util';
+import { CHROME_TEXT_SERVICE } from '../chrome-text/chrome-text.token';
 
 export interface GroupWizardBook {
   id: string;
@@ -98,6 +99,7 @@ type StepId = 'basics' | 'format' | 'location' | 'venue' | 'visibility' | 'revie
 export class GroupWizardDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<GroupWizardDialogComponent, GroupWizardResult>);
   private readonly geocodingService = inject(GeocodingService);
+  readonly chrome = inject(CHROME_TEXT_SERVICE);
 
   readonly countries = COUNTRIES;
   readonly usStates = US_STATES;
@@ -233,7 +235,9 @@ export class GroupWizardDialogComponent {
       return undefined;
     }
     return max < current
-      ? `This group already has ${current} approved member${current === 1 ? '' : 's'} - group size can't be set below that.`
+      ? current === 1
+        ? this.chrome.t("This group already has {n} approved member - group size can't be set below that.", { n: current })
+        : this.chrome.t("This group already has {n} approved members - group size can't be set below that.", { n: current })
       : undefined;
   });
 
@@ -354,7 +358,7 @@ export class GroupWizardDialogComponent {
       };
       this.dialogRef.close(result);
     } catch {
-      this.formError.set('Something went wrong. Please try again.');
+      this.formError.set(this.chrome.t('Something went wrong. Please try again.'));
       this.submitting.set(false);
     }
   }
