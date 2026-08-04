@@ -206,12 +206,17 @@ service cloud.firestore {
       // always read their OWN doc regardless of role (Settings page,
       // StaffService.isStaff()'s existence check, etc.).
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      // Admins/root can update anything, EXCEPT assigning the 'root' role
-      // itself - only an existing root user may promote someone to root
-      // (the `resource.data.role == 'root'` clause lets a non-root admin
-      // still edit an already-root user's other fields, e.g. displayName,
-      // as long as they aren't the one newly setting role to 'root'). A
-      // signed-in user may also update their OWN doc, but only to touch this
+      // Admins/root can update anything, EXCEPT changing role TO OR AWAY FROM
+      // 'root' - only an existing root user may promote someone to root, or
+      // demote/edit an already-root user's role. A plain admin can still
+      // freely edit a root user's other fields (displayName, etc.) as long as
+      // the role itself isn't part of the change, and can freely toggle
+      // between 'admin'/'editor' for anyone who isn't currently root. Without
+      // the resource.data.role != 'root' guard on the "no role change" and
+      // "admin<->editor" branches below, a plain admin could demote an
+      // existing root user to 'editor' in one write (root-assignment was
+      // guarded, but root-*removal* wasn't - see fix commit for the finding).
+      // A signed-in user may also update their OWN doc, but only to touch this
       // exact allowlist of low-stakes self-service fields (personal theme
       // preferences, last-login stamp) - role/permissions must stay
       // admin-only so a non-admin can never self-promote or grant themself
@@ -220,7 +225,9 @@ service cloud.firestore {
       // actually writes (see its own doc comment) - adding a new self-service
       // field there means updating this allowlist too, not just the client.
       allow update: if (isAdmin() &&
-                         (request.resource.data.role != 'root' || resource.data.role == 'root' || isRoot()))
+                         (request.resource.data.role == resource.data.role
+                          || (request.resource.data.role != 'root' && resource.data.role != 'root')
+                          || isRoot()))
         || (signedIn() && request.auth.uid == uid
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['darkMode', 'lightColorTheme', 'darkColorTheme', 'lastLogin', 'updatedAt', 'updatedBy']));
