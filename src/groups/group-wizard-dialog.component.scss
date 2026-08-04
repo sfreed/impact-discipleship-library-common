@@ -1,3 +1,12 @@
+// Manuscript touch (reader app's Impact Groups redesign): a serif dialog
+// title and a double-ruled review divider, shape/type only - every color
+// reference here still goes through --mat-sys-*, so this stays theme-neutral
+// for both apps rather than a reader-app-only look leaking into the manager
+// app's own admin group editor, which reuses this same component.
+h2[mat-dialog-title] {
+  font-family: Palatino, 'Palatino Linotype', Georgia, serif;
+}
+
 .step-label {
   margin: 8px 24px 0;
   font-size: 0.8rem;
@@ -62,7 +71,7 @@ mat-radio-group {
   justify-content: space-between;
   gap: 16px;
   padding: 6px 0;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-bottom: 2px double var(--mat-sys-outline-variant);
 
   span:first-child {
     color: var(--mat-sys-on-surface-variant);

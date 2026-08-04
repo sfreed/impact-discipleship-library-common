@@ -38,6 +38,14 @@ export interface GroupWizardDialogData {
    *  always picks the next book fresh from the same full list used for a
    *  normal create. */
   cloneFrom?: DiscussionGroup;
+  /** Only meaningful alongside `cloneFrom`: pre-selects this book instead of
+   *  leaving the Basics step's book picker blank - the reader app's
+   *  "Promote to Next Book" flow (which already knows the next book by
+   *  series order) uses this so the creator isn't asked to re-pick a book
+   *  the app already figured out, while "Clone for a different book" (which
+   *  omits this) still starts blank. Still a normal, editable mat-select -
+   *  the creator can change it before submitting either way. */
+  preselectedBookId?: string;
   /** Approved members (excluding the creator) this group currently has -
    *  supplied by the caller (which already has the membership data) rather
    *  than this wizard querying Firestore itself, keeping it independent of
@@ -133,6 +141,8 @@ export class GroupWizardDialogComponent {
     if (existing) {
       if (!this.isCloneMode) {
         this.formBookId.set(existing.bookId);
+      } else if (data.preselectedBookId) {
+        this.formBookId.set(data.preselectedBookId);
       }
       this.formTitle.set(existing.title);
       this.formDescription.set(existing.description ?? '');

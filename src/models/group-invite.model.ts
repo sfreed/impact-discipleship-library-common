@@ -32,4 +32,11 @@ export interface GroupInvite {
    *  moment - absent means either no license was intended, or one was
    *  intended but none was left. */
   grantedLicenseId?: string;
+  /** Optional note the invitee left when declining, entered on the public
+   *  invite-landing page and persisted here so the leader can review it
+   *  later (in addition to the one-time decline-notification email) -
+   *  only the leader/admin can ever read this doc, so it's fine to store
+   *  in plain text alongside the invite itself. Never present on a
+   *  pending/accepted invite. */
+  declineReason?: string;
 }
