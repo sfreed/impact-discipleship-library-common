@@ -60,7 +60,12 @@ service cloud.firestore {
     }
 
     match /series/{seriesId} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      // Content authoring is manager-app staff only - same isStaff()
+      // interim fix as books/units/lessons below. No reader-app code path
+      // writes here (read-only), so this is a no-op for legitimate use and
+      // closes a patron-write loophole that existed only by omission.
+      allow write: if isStaff();
     }
 
     // Read is intentionally NOT license-gated (unlike units/lessons below) -
@@ -177,12 +182,20 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Content authoring (title/common translations, lesson images) is
+    // manager-app staff only - same isStaff() interim fix as books/units/
+    // lessons/series above. The reader app only ever reads these (see
+    // TitleTranslationService/CommonTranslationService/lesson-image-queries),
+    // so this closes a patron-write loophole with no functional change for
+    // legitimate use.
     match /titleTranslations/{titleTranslationId} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isStaff();
     }
 
     match /commonTranslations/{commonTranslationId} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isStaff();
     }
 
     // Content-addressed image blobs referenced from lesson/subtemplate HTML by
@@ -190,7 +203,8 @@ service cloud.firestore {
     // single lesson/translation document well under Firestore's 1MB cap even
     // when it has several images. See LessonImageService.
     match /lessonImages/{imageId} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isStaff();
     }
 
     match /adminUsers/{uid} {
@@ -264,13 +278,32 @@ service cloud.firestore {
     // for someone else or tampered with after the fact - a forgeable audit
     // trail undercuts the whole point of keeping one. See the reader app's
     // handoff.md for the still-missing admin-side items.
+    // Shape-only guard on a purchase create, same idiom as
+    // isValidErrorLogEntry() below - this is audit-trail INTEGRITY (a
+    // malformed/absurd record can't be written), not proof-of-payment.
+    // Nothing here verifies the reported amounts against what PayPal
+    // actually charged (a deliberate, accepted gap shared with the Cloud
+    // Functions' own purchaseGroupLicenses - see that function's doc
+    // comment in the manager app's functions/src/index.ts).
+    function isValidPurchaseEntry() {
+      return request.resource.data.userId == request.auth.uid
+        && request.resource.data.cartItems is list
+        && request.resource.data.cartItems.size() > 0 && request.resource.data.cartItems.size() <= 50
+        && request.resource.data.subtotal is number && request.resource.data.subtotal >= 0
+        && request.resource.data.discount is number && request.resource.data.discount >= 0
+        && request.resource.data.total is number && request.resource.data.total >= 0
+        && request.resource.data.receipt is string
+        && !('revocations' in request.resource.data);
+    }
+
     match /purchases/{purchaseId} {
       // Read is manager-app-admin-only (the Purchases screen) - the reader
       // app only ever creates these (audit trail) and never reads them back
       // (see PurchaseService), so there's no patron-read need to preserve
       // here the way discussionGroups has.
       allow read: if isAdmin();
-      allow create: if signedIn() && request.resource.data.email == request.auth.token.email.lower();
+      allow create: if signedIn() && request.resource.data.email == request.auth.token.email.lower()
+        && isValidPurchaseEntry();
       allow update, delete: if false;
     }
 
