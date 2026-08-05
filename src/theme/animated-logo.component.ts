@@ -74,7 +74,7 @@ import { Component } from '@angular/core';
       font-weight: 500;
       font-size: 240px;
       letter-spacing: -11px;
-      fill: #1c5cab;
+      fill: #4b92fe;
     }
   `,
 })
