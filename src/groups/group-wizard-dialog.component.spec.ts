@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GroupWizardDialogComponent, GroupWizardDialogData } from './group-wizard-dialog.component';
 import { DiscussionGroup } from '../models/discussion-group.model';
+import { CHROME_TEXT_SERVICE, NOOP_CHROME_TEXT_SERVICE } from '../chrome-text/chrome-text.token';
 
 const sourceGroup: DiscussionGroup = {
   id: 'group-1',
@@ -21,6 +22,9 @@ function createComponent(data: GroupWizardDialogData): GroupWizardDialogComponen
     providers: [
       { provide: MatDialogRef, useValue: { close: () => {} } },
       { provide: MAT_DIALOG_DATA, useValue: data },
+      // The wizard translates its own chrome text - the passthrough is
+      // exactly what a unit test wants (assertions read the English text).
+      { provide: CHROME_TEXT_SERVICE, useValue: NOOP_CHROME_TEXT_SERVICE },
     ],
   });
   return TestBed.createComponent(GroupWizardDialogComponent).componentInstance;
