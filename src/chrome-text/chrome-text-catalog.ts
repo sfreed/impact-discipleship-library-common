@@ -147,6 +147,16 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
     kind: 'label',
     area: 'Messages',
   },
+  { text: 'New', kind: 'label', area: 'Messages' },
+  { text: 'Delete message', kind: 'label', area: 'Messages' },
+  { text: 'Delete this message?', kind: 'label', area: 'Messages' },
+  {
+    text: "It will be removed from your inbox and can't be brought back.",
+    kind: 'label',
+    area: 'Messages',
+  },
+  { text: 'Delete', kind: 'label', area: 'Messages' },
+  { text: 'Could not delete the message. Please try again.', kind: 'label', area: 'Messages' },
 
   // --- Books list / Book detail (title text itself is covered separately via TitleTranslationService) ---
   { text: 'Books', kind: 'label', area: 'Books' },

@@ -414,15 +414,20 @@ service cloud.firestore {
       // manager repo's sendLibraryUserMessage Cloud Function (Admin SDK, the
       // only writer - doc id is the shared adminMessages summary id). READ is
       // owner-only like fcmTokens (a private inbox, not part of the broadly
-      // readable parent profile), and the owner's only permitted mutation is
-      // flipping `read` to true - never editing content, un-reading, or
-      // deleting the record.
+      // readable parent profile). The owner's permitted mutations: flipping
+      // `read` to true (never editing content or un-reading), and deleting a
+      // message they have already read - unread ones can't be dismissed
+      // unseen, and the adminMessages summary keeps the sent record either
+      // way. A deleted message stays gone (create is Function-only) unless
+      // the admin re-sends, which recreates the same doc id.
       match /messages/{messageId} {
         allow read: if signedIn() && request.auth.token.email.lower() == email;
         allow update: if signedIn() && request.auth.token.email.lower() == email
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
           && request.resource.data.read == true;
-        allow create, delete: if false;
+        allow delete: if signedIn() && request.auth.token.email.lower() == email
+          && resource.data.read == true;
+        allow create: if false;
       }
     }
 

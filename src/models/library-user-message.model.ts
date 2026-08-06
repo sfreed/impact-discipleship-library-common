@@ -4,10 +4,10 @@
 // libraryUsers/{email}/messages/{messageId} subcollection (its doc id ==
 // adminMessageId, so a retried send overwrites rather than duplicates) and
 // writes one AdminMessage summary doc to adminMessages/{messageId}. The
-// reader app's inbox screen reads the per-recipient docs (owner-only, and the
-// owner's only permitted write is flipping `read` to true); the manager app's
-// sent-messages history screen reads the summaries (admin-only). See
-// firestore.rules for both gates.
+// reader app's inbox screen reads the per-recipient docs (owner-only; the
+// owner may flip `read` to true and delete already-read messages); the
+// manager app's sent-messages history screen reads the summaries
+// (admin-only). See firestore.rules for both gates.
 
 /** One recipient's copy of an announcement, in their own inbox subcollection. */
 export interface LibraryUserMessage {
@@ -20,8 +20,9 @@ export interface LibraryUserMessage {
   sentBy: string;
   /** Sending admin's display name, snapshotted at send time. */
   sentByName: string;
-  /** Flipped to true by the recipient's own client when the inbox renders
-   *  the message - the only owner-writable field (see firestore.rules). */
+  /** Flipped to true by the recipient's own client when they open the
+   *  message - the only owner-writable field, and the precondition for the
+   *  owner deleting the doc (see firestore.rules). */
   read: boolean;
   /** The adminMessages summary doc this copy was fanned out from (== id). */
   adminMessageId: string;
