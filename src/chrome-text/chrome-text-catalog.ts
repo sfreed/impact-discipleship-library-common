@@ -122,6 +122,12 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
     kind: 'label',
     area: 'Settings',
   },
+  { text: 'Sign-in Location', kind: 'label', area: 'Settings' },
+  {
+    text: 'Approximate location detected from your most recent sign-in.',
+    kind: 'label',
+    area: 'Settings',
+  },
   { text: 'Notifications', kind: 'label', area: 'Settings' },
   { text: 'Push notifications', kind: 'label', area: 'Settings' },
   { text: 'Toggle push notifications', kind: 'label', area: 'Settings' },

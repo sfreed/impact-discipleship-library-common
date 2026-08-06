@@ -55,8 +55,29 @@ service cloud.firestore {
         bookId in get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.licensedBookIds;
     }
 
+    // An overseas patron - their own libraryUsers doc carries the sticky
+    // `internationalUser: true` marker, stamped by the reader app's
+    // LibraryUserService.recordLogin the first time an IP geolocation lookup
+    // at session entry resolves outside the US (never unset by a later US
+    // login; only staff editing the doc can clear it). International patrons
+    // read every book free of charge - the reader app also hides its Store
+    // and group-license purchasing UI for them, so they're never asked to
+    // pay. Trust model is deliberately client-side (the reader app both
+    // detects the location and writes the flag to the caller's own doc,
+    // which the libraryUsers rule already permits) - accepted the same way
+    // the purchases rule accepts client-reported amounts: this gates
+    // honest-path UX, not a determined spoofer. Like hasBookLicense, this
+    // only reads the CALLER's own doc (no resource fields), so it's safe in
+    // list-query rules - an unconstrained units/lessons query from an
+    // international patron is provably allowed.
+    function isInternationalPatron() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.get('internationalUser', false) == true;
+    }
+
     function canReadBook(bookId) {
-      return isStaff() || hasBookLicense(bookId);
+      return isStaff() || isInternationalPatron() || hasBookLicense(bookId);
     }
 
     match /series/{seriesId} {
@@ -402,9 +423,12 @@ service cloud.firestore {
       // license for (hasBookLicense, not canReadBook - deliberately no staff bypass
       // here, unlike every other license check in this file; the manager app has no
       // group-creation path at all, so this only ever gates reader-app patrons in
-      // practice). Editing/deleting an existing group is unaffected - see below.
+      // practice). International patrons (isInternationalPatron - free all-book
+      // access, never asked to pay) count as licensed for every book here too,
+      // matching the reader app's create-group book picker offering them
+      // everything. Editing/deleting an existing group is unaffected - see below.
       allow create: if signedIn() && request.resource.data.creatorEmail == request.auth.token.email.lower() &&
-        hasBookLicense(request.resource.data.bookId);
+        (hasBookLicense(request.resource.data.bookId) || isInternationalPatron());
       // Deliberately NOT license-gated: updateGroup always writes the full wizard
       // result (including bookId, whether or not it changed), and gating this would
       // mean an admin fixing an unrelated typo on someone else's group would need to
