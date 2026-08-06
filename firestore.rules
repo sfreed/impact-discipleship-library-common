@@ -52,6 +52,7 @@ service cloud.firestore {
     function hasBookLicense(bookId) {
       return signedIn() &&
         exists(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.get('revoked', false) != true &&
         bookId in get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.licensedBookIds;
     }
 
@@ -70,9 +71,18 @@ service cloud.firestore {
     // only reads the CALLER's own doc (no resource fields), so it's safe in
     // list-query rules - an unconstrained units/lessons query from an
     // international patron is provably allowed.
+    // Both this and hasBookLicense above also require the caller's doc not to
+    // carry the admin-set `revoked` flag (see the libraryUsers rule below) -
+    // the flag's primary enforcement is the Auth account being disabled
+    // (setLibraryUserRevoked Cloud Function), but a revoked user's existing
+    // ID token stays valid for up to an hour; this check closes book-content
+    // access inside that window. Free for evaluation cost: both functions
+    // already get() this same doc, and rules cache identical document
+    // accesses within a single request.
     function isInternationalPatron() {
       return signedIn() &&
         exists(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.get('revoked', false) != true &&
         get(/databases/$(database)/documents/libraryUsers/$(request.auth.token.email)).data.get('internationalUser', false) == true;
     }
 
@@ -354,9 +364,20 @@ service cloud.firestore {
     // Firebase Auth doesn't guarantee the token's email claim is lowercased.
     // Read stays broad (signedIn()) - unlike write, an unscoped read isn't
     // itself the risk here.
+    // The owner's write is additionally barred from touching the admin-set
+    // revoke fields (`revoked`/`revokedAt`/`revokedBy`, stamped only by the
+    // setLibraryUserRevoked Cloud Function via the Admin SDK) - without that
+    // carve-out, a revoked user whose ID token hadn't expired yet could
+    // simply write `revoked: false` back onto their own doc from devtools.
+    // No legitimate reader-app writer touches those keys, so this breaks no
+    // existing path.
     match /libraryUsers/{email} {
       allow read: if signedIn();
-      allow write: if signedIn() && request.auth.token.email.lower() == email;
+      allow create: if signedIn() && request.auth.token.email.lower() == email
+        && !request.resource.data.keys().hasAny(['revoked', 'revokedAt', 'revokedBy']);
+      allow update: if signedIn() && request.auth.token.email.lower() == email
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['revoked', 'revokedAt', 'revokedBy']);
+      allow delete: if signedIn() && request.auth.token.email.lower() == email;
 
       // "Has this lesson been submitted, and when" markers - see
       // LessonSubmissionStatus model and SubmissionService.saveSubmission.
@@ -388,6 +409,21 @@ service cloud.firestore {
       match /fcmTokens/{tokenId} {
         allow read, write: if signedIn() && request.auth.token.email.lower() == email;
       }
+
+      // Admin-sent announcements, fanned out one doc per recipient by the
+      // manager repo's sendLibraryUserMessage Cloud Function (Admin SDK, the
+      // only writer - doc id is the shared adminMessages summary id). READ is
+      // owner-only like fcmTokens (a private inbox, not part of the broadly
+      // readable parent profile), and the owner's only permitted mutation is
+      // flipping `read` to true - never editing content, un-reading, or
+      // deleting the record.
+      match /messages/{messageId} {
+        allow read: if signedIn() && request.auth.token.email.lower() == email;
+        allow update: if signedIn() && request.auth.token.email.lower() == email
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && request.resource.data.read == true;
+        allow create, delete: if false;
+      }
     }
 
     // Collection-group read only (write still goes through the nested rule
@@ -396,6 +432,16 @@ service cloud.firestore {
     // lessonHighlights, instead of needing to already know every email.
     match /{path=**}/lessonHighlights/{lessonId} {
       allow read: if signedIn();
+    }
+
+    // One summary doc per admin broadcast (title/body/recipients/counts),
+    // written only by the manager repo's sendLibraryUserMessage Cloud
+    // Function (Admin SDK) alongside the per-recipient inbox fan-out above -
+    // backs the manager app's sent-messages history screen. Admin-only read;
+    // never client-writable.
+    match /adminMessages/{messageId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // True only if the caller has an 'approved' membership doc for this
