@@ -122,6 +122,14 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
     kind: 'label',
     area: 'Settings',
   },
+  { text: 'Notifications', kind: 'label', area: 'Settings' },
+  { text: 'Push notifications', kind: 'label', area: 'Settings' },
+  { text: 'Toggle push notifications', kind: 'label', area: 'Settings' },
+  {
+    text: 'Get notified about group chat, direct messages, join requests, and shared prayer requests.',
+    kind: 'label',
+    area: 'Settings',
+  },
 
   // --- Books list / Book detail (title text itself is covered separately via TitleTranslationService) ---
   { text: 'Books', kind: 'label', area: 'Books' },

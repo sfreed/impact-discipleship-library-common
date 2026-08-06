@@ -356,6 +356,17 @@ service cloud.firestore {
         allow read: if signedIn();
         allow write: if signedIn() && request.auth.token.email.lower() == email;
       }
+
+      // Per-device FCM registration tokens - written by the reader app's
+      // PushNotificationService, read by the manager repo's push-notification
+      // Cloud Function triggers (Admin SDK, bypasses these rules). Unlike the
+      // sibling subcollections above, READ is owner-only too: a push token is
+      // a capability handle (anyone holding it can address that device via
+      // any FCM-enabled server key), so the parent doc's broad signedIn()
+      // read must not extend to it.
+      match /fcmTokens/{tokenId} {
+        allow read, write: if signedIn() && request.auth.token.email.lower() == email;
+      }
     }
 
     // Collection-group read only (write still goes through the nested rule
