@@ -132,9 +132,20 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Push notifications', kind: 'label', area: 'Settings' },
   { text: 'Toggle push notifications', kind: 'label', area: 'Settings' },
   {
-    text: 'Get notified about group chat, direct messages, join requests, and shared prayer requests.',
+    text: 'Get notified about group chat, direct messages, join requests, shared prayer requests, and announcements from the library team.',
     kind: 'label',
     area: 'Settings',
+  },
+  { text: 'Enable browser notifications', kind: 'label', area: 'Settings' },
+
+  // --- Messages (admin-announcement inbox) ---
+  { text: 'Messages', kind: 'label', area: 'Shell > Toolbar & Menu' },
+  { text: 'Messages', kind: 'label', area: 'Messages' },
+  { text: 'No messages yet.', kind: 'label', area: 'Messages' },
+  {
+    text: 'Turn on notifications to hear about new messages right away.',
+    kind: 'label',
+    area: 'Messages',
   },
 
   // --- Books list / Book detail (title text itself is covered separately via TitleTranslationService) ---
@@ -575,7 +586,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Reached from the hamburger menu (top right) - that same menu also shows your name and email at the top, above Store/Impact Groups/Settings/Help and Sign out. Every change on this page applies and saves immediately - there\'s no Save button, and your choices sync to your account, so they follow you to any device you sign in on.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: '<strong>Dark Mode</strong> and <strong>Color Theme</strong> - light mode and dark mode each remember their own separate color theme, so switching one doesn\'t lose the other\'s choice.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: '<strong>Preferred lesson language</strong> - a lesson renders in this language when a translation exists for it, and in its original language otherwise. Choose &quot;English&quot; to always see lessons exactly as authored.', kind: 'html', area: 'Help > Settings & Appearance' },
-  { text: '<strong>Push notifications</strong> - on the Android app, your device gets a notification for Impact Group activity: chat messages, direct messages to you, join requests (and their approval), and shared prayer requests. Android asks for notification permission the first time you sign in; this switch silences them for your whole account without touching that permission. Notifications aren\'t available in the web version yet.', kind: 'html', area: 'Help > Settings & Appearance' },
+  { text: '<strong>Push notifications</strong> - your device gets a notification for Impact Group activity (chat messages, direct messages to you, join requests and their approval, shared prayer requests) and for announcements from the library team. On the Android app, Android asks for notification permission the first time you sign in; in a web browser, use the Enable browser notifications button. This switch silences notifications for your whole account without touching either permission.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: 'Settings screen', kind: 'label', area: 'Help > Settings & Appearance' },
   { text: 'Settings: account email and sign-in location, appearance, preferred lesson language, and push notifications.', kind: 'label', area: 'Help > Settings & Appearance' },
   { text: 'Staying signed in', kind: 'label', area: 'Help > Settings & Appearance' },
