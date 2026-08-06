@@ -41,6 +41,59 @@ export async function hydrateFormioSchema(firestore: Firestore, schema: FormioSc
     return clone;
   }
 
+  const dataUriById = await fetchImageDataUris(firestore, ids);
+
+  for (const component of htmlComponents) {
+    const html = component['html'];
+    if (typeof html !== 'string') {
+      continue;
+    }
+    component['html'] = html.replace(LESSON_IMAGE_PLACEHOLDER_RE, (tag, id) => {
+      const dataUri = dataUriById.get(id);
+      return dataUri ? tag.replace(`lessonimage:${id}`, dataUri) : tag;
+    });
+  }
+  return clone;
+}
+
+/**
+ * Replaces every `lessonimage:{id}` placeholder in each of `resource`'s values
+ * with its real data URI - for i18n resource maps built from a translation's
+ * saved fields. Translated text is saved against the *stored* (dehydrated)
+ * schema, so an image-only content field's translation carries the
+ * `lessonimage:{id}` placeholder; the schema handed to Formio.createForm is
+ * hydrated, and without this pass the translated render would swap the
+ * hydrated original for the raw placeholder and the image would vanish.
+ * Same per-image fault tolerance as hydrateFormioSchema: an unresolvable id
+ * is left as-is rather than throwing.
+ */
+export async function hydrateTranslationResource(
+  firestore: Firestore,
+  resource: Record<string, string>,
+): Promise<Record<string, string>> {
+  const ids = new Set<string>();
+  for (const value of Object.values(resource)) {
+    for (const match of value.matchAll(LESSON_IMAGE_PLACEHOLDER_RE)) {
+      ids.add(match[1]);
+    }
+  }
+  if (ids.size === 0) {
+    return resource;
+  }
+
+  const dataUriById = await fetchImageDataUris(firestore, ids);
+
+  const hydrated: Record<string, string> = {};
+  for (const [key, value] of Object.entries(resource)) {
+    hydrated[key] = value.replace(LESSON_IMAGE_PLACEHOLDER_RE, (tag, id) => {
+      const dataUri = dataUriById.get(id);
+      return dataUri ? tag.replace(`lessonimage:${id}`, dataUri) : tag;
+    });
+  }
+  return hydrated;
+}
+
+async function fetchImageDataUris(firestore: Firestore, ids: Set<string>): Promise<Map<string, string>> {
   const dataUriById = new Map<string, string>();
   await Promise.all(
     [...ids].map(async (id) => {
@@ -59,18 +112,7 @@ export async function hydrateFormioSchema(firestore: Firestore, schema: FormioSc
       }
     }),
   );
-
-  for (const component of htmlComponents) {
-    const html = component['html'];
-    if (typeof html !== 'string') {
-      continue;
-    }
-    component['html'] = html.replace(LESSON_IMAGE_PLACEHOLDER_RE, (tag, id) => {
-      const dataUri = dataUriById.get(id);
-      return dataUri ? tag.replace(`lessonimage:${id}`, dataUri) : tag;
-    });
-  }
-  return clone;
+  return dataUriById;
 }
 
 function deepClone<T>(value: T): T {
