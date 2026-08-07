@@ -571,6 +571,8 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Reopening a lesson always reloads your last saved answers, so you can come back and pick up where you left off, or revise something you answered before - editing and re-submitting simply overwrites your previous answers for that lesson.', kind: 'label', area: 'Help > Reading & Lessons' },
   { text: 'Highlighting text', kind: 'label', area: 'Help > Reading & Lessons' },
   { text: 'Select any text in a lesson (outside of the answer fields themselves) and a small <strong>Highlight</strong> button appears right above your selection - tap it to mark that passage. To remove a highlight, tap directly on the highlighted text again; it comes right off, no confirmation needed. There\'s only one highlight style - no color choices.', kind: 'html', area: 'Help > Reading & Lessons' },
+  { text: 'Animated demo of selecting text in a lesson and highlighting it', kind: 'label', area: 'Help > Reading & Lessons' },
+  { text: 'Drag across a passage, tap Highlight when the button appears, and it stays marked.', kind: 'label', area: 'Help > Reading & Lessons' },
   {
     text: "Your highlights are private to you - other patrons, including anyone in an Impact Group you share with, never see them. They're tied to the lesson's current language, so a highlight made while reading in English won't appear if you later switch your preferred lesson language to a translation (see",
     kind: 'label',
@@ -717,6 +719,8 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Home Dashboard', kind: 'label', area: 'Help > Topics' },
   { text: 'Your landing screen - study stats, continue reading, and what needs your attention.', kind: 'label', area: 'Help > Topics' },
   { text: 'The <strong>Home</strong> screen is the first thing you see after signing in. It gathers your study progress, a verse worth revisiting, and anything waiting on you - and every card and row on it is a shortcut into the right screen. You can always come back to it from <strong>Home</strong> in the menu.', kind: 'html', area: 'Help > Home Dashboard' },
+  { text: 'Home Dashboard screen', kind: 'label', area: 'Help > Home Dashboard' },
+  { text: 'The Home Dashboard: progress stats, a verse to revisit, continue reading, and your books and groups.', kind: 'label', area: 'Help > Home Dashboard' },
   { text: 'Your progress at a glance', kind: 'label', area: 'Help > Home Dashboard' },
   { text: "<strong>Lessons this week</strong> counts the lessons you've submitted in the last 7 days.", kind: 'html', area: 'Help > Home Dashboard' },
   { text: "<strong>Day streak</strong> is how many days in a row you've submitted at least one lesson. It counts through yesterday, so it isn't broken before you've had a chance to study today.", kind: 'html', area: 'Help > Home Dashboard' },
