@@ -1,14 +1,32 @@
-// Shared Book -> Unit -> Lesson domain shapes, identical in both
+// Shared Series -> Book -> Unit -> Lesson domain shapes, identical in both
 // impact-discipleship-library-new and impact-discipleship-library-manager-new
 // as of the extraction into this common library - both apps read/write the
 // same Firestore documents, so these must stay in sync. Each app's own
 // core/models/library.models.ts re-exports these plus its own app-specific
-// additions (BookSeries, AppUser, etc. for the manager app).
+// additions (AppUser, etc. for the manager app).
 
 export interface BookLanguage {
   id: string;
   language: string;
   abbreviation: string;
+}
+
+/** A top-level grouping of books (e.g. "Impact Discipleship"), stored in its
+ *  own `series` collection - `Book.seriesId` points back to one of these.
+ *  Originally manager-only (series authoring is manager-app-only), moved
+ *  here once the reader app also needed series titles/order to group books
+ *  by series on the Store and My Books pages. */
+export interface BookSeries {
+  id: string;
+  title: string;
+  description?: string;
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+  /** uid of the user who created this record. */
+  createdBy: string;
+  /** uid of the user who last updated this record. */
+  updatedBy: string;
 }
 
 export interface Book {

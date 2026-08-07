@@ -213,6 +213,10 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
     area: 'Store',
   },
   { text: 'There was a problem processing your PayPal payment. Please try again.', kind: 'label', area: 'Store' },
+  // Fallback series-group heading (Store's collapsible product groups, and
+  // My Books' grouped list) for a book/product whose seriesId doesn't
+  // resolve to a known series - shared between both screens, one entry.
+  { text: 'Other Books', kind: 'label', area: 'Store / My Books' },
 
   // --- Shared confirm dialog fallback defaults (callers supply title/message/confirmLabel themselves) ---
   { text: 'Cancel', kind: 'label', area: 'Shared > Confirm Dialog' },
@@ -561,6 +565,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
 
   // --- Help: Reading & Lessons ---
   { text: 'From <strong>My Books</strong> (in the menu, or the book list on your Home screen), tap a <strong>Book</strong>, then a <strong>Unit</strong>, to see its lessons. Tap a lesson to open it - each one is a mix of reading content and questions to answer.', kind: 'html', area: 'Help > Reading & Lessons' },
+  { text: 'On <strong>My Books</strong>, your books are grouped under their series name - handy once your library grows past a book or two.', kind: 'html', area: 'Help > Reading & Lessons' },
   { text: 'Answering and saving a lesson', kind: 'label', area: 'Help > Reading & Lessons' },
   { text: 'Fill in a lesson\'s fields, then press its <strong>Submit</strong> button (the exact label can vary lesson to lesson) to save your answers. If you\'re offline when you save, you\'ll see <em>&quot;You\'re offline - your answers are saved on this device and will sync automatically once you\'re back online.&quot;</em> - that\'s a confirmation, not an error: nothing is lost, and there\'s nothing to redo. If a save fails for any other reason, you\'ll see <em>&quot;Something went wrong saving your answers. Please try again.&quot;</em> right on the page.', kind: 'html', area: 'Help > Reading & Lessons' },
   { text: 'Reopening a lesson always reloads your last saved answers, so you can come back and pick up where you left off, or revise something you answered before - editing and re-submitting simply overwrites your previous answers for that lesson.', kind: 'label', area: 'Help > Reading & Lessons' },
@@ -576,6 +581,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
 
   // --- Help: Store ---
   { text: 'Buy additional book licenses individually from the <strong>Store</strong>, linked from the hamburger menu. Every book you don\'t already own is listed with a <strong>Select to purchase</strong> checkbox; a sticky header keeps a running total as you check books on and off. A book you already own shows a &quot;You already own this book&quot; badge instead of a checkbox.', kind: 'html', area: 'Help > Store' },
+  { text: 'Purchasable books are grouped into collapsible sections by series - tap a series heading to expand or collapse it. Every series starts expanded; a book that doesn\'t belong to any series lists under an &quot;Other Books&quot; heading at the end.', kind: 'html', area: 'Help > Store' },
   { text: 'Store screen', kind: 'label', area: 'Help > Store' },
   { text: 'The Store: price, running total, and ownership status per book.', kind: 'label', area: 'Help > Store' },
   { text: 'Enter a <strong>Coupon code</strong> (appears once you\'ve selected at least one book) and click <strong>Apply</strong> for a percent-off discount - if you then uncheck the one book it applied to, the coupon is automatically removed rather than left dangling.', kind: 'html', area: 'Help > Store' },
