@@ -20,6 +20,14 @@ export interface Book {
   author?: string;
   /** Languages this book's lessons are available in. */
   languages?: BookLanguage[];
+  /** Whether this book is visible in the reader app. Missing/undefined is
+   *  treated as published (true) so every book that existed before this field
+   *  was introduced keeps showing exactly as it did before - only an explicit
+   *  `false` hides a book. Toggled from the manager app's library tree ("..."
+   *  menu on a book row); enforced client-side only in the reader app (see
+   *  LibraryService.getBooksForUser there), not in firestore.rules - a direct
+   *  link to an unpublished book's content is not blocked. */
+  published?: boolean;
   order: number;
   createdAt: number;
   updatedAt: number;

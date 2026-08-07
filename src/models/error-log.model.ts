@@ -34,6 +34,15 @@ export interface ErrorLogEntry {
    *  errors/correlation-id.ts. Populated for manager-app Cloud Function
    *  calls and for the reader app's PayPal checkout flow; absent otherwise. */
   correlationId?: string;
+  /** Repeat suppression (see BaseErrorLogHandler/ErrorRepeatTracker):
+   *  when the same location+message recurs rapidly, no new entries are
+   *  written - this first entry is updated instead. Total occurrences
+   *  including the first; present only once a repeat happened (>= 2). The
+   *  episode "started at" is this entry's own `timestamp`. */
+  repeatCount?: number;
+  /** epoch ms of the episode's most recent occurrence - the "ended at"
+   *  side of the recurrence note. Present only alongside repeatCount. */
+  lastOccurredAt?: number;
 }
 
 export type NewErrorLogEntry = Omit<ErrorLogEntry, 'id'>;

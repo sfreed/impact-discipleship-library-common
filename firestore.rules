@@ -651,7 +651,21 @@ service cloud.firestore {
          || (!signedIn() && request.resource.data.uid == null
              && request.resource.data.app in ['reader', 'manager']
              && request.resource.data.location in ['login', 'signup', 'forgotPassword']));
-      allow update: if false;
+      // Repeat suppression (see BaseErrorLogHandler): a rapidly-recurring
+      // error updates its episode's FIRST entry instead of creating one doc
+      // per occurrence. The only mutation ever allowed, and only on the
+      // author's own entries: exactly repeatCount + lastOccurredAt, count
+      // monotonically increasing, last-seen never before the entry's own
+      // start. Everything else (message, stack, attribution) stays
+      // immutable, preserving the log's audit integrity. Pre-auth (uid ==
+      // null) entries have no update path at all.
+      allow update: if signedIn() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['repeatCount', 'lastOccurredAt'])
+        && request.resource.data.repeatCount is int
+        && request.resource.data.repeatCount >= 2
+        && (!('repeatCount' in resource.data) || request.resource.data.repeatCount >= resource.data.repeatCount)
+        && request.resource.data.lastOccurredAt is int
+        && request.resource.data.lastOccurredAt >= resource.data.timestamp;
     }
   }
 }

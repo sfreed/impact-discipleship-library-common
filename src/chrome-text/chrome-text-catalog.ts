@@ -726,4 +726,17 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: "<strong>My Groups</strong> lists the Impact Groups you belong to with each group's next meeting date, plus a <strong>Prayers</strong> row totaling the prayer requests shared across your groups.", kind: 'html', area: 'Help > Home Dashboard' },
   { text: "An <strong>Explore the store</strong> row appears at the bottom when there are titles you don't own yet.", kind: 'html', area: 'Help > Home Dashboard' },
   { text: "Everything above the groups section works offline from your saved content. The groups and store rows need a connection, so they simply hide while you're offline - they come back on their own when connectivity returns.", kind: 'label', area: 'Help > Home Dashboard' },
+
+  // --- Store: Free eBooks section + in-app PDF viewer ---
+  { text: 'Free eBooks', kind: 'label', area: 'Store > Free eBooks' },
+  { text: 'Free PDF resources you can read right now - no purchase needed.', kind: 'label', area: 'Store > Free eBooks' },
+  { text: 'Read', kind: 'label', area: 'Store > Free eBooks' },
+  { text: 'Open in new tab', kind: 'label', area: 'Store > Free eBooks' },
+  { text: 'Included with your free access', kind: 'label', area: 'Store > Free eBooks' },
+  { text: 'Back to store', kind: 'label', area: 'Store > eBook Viewer' },
+  { text: "Couldn't load this eBook. It may have been removed.", kind: 'label', area: 'Store > eBook Viewer' },
+  { text: 'If the PDF doesn\'t display above, use "Open in new tab".', kind: 'label', area: 'Store > eBook Viewer' },
+  { text: 'Free eBooks and resources', kind: 'label', area: 'Dashboard > Store Teaser' },
+  { text: "Below the books for purchase, the Store also lists <strong>Free eBooks</strong> - PDF resources you can read without buying anything. Each one shows its cover and description with two buttons: <strong>Read</strong> opens the PDF right in the app (on the Android app it opens in your device's browser instead), and <strong>Open in new tab</strong> hands it to your browser - handy for downloading or printing.", kind: 'html', area: 'Help > Store' },
+  { text: 'The list starts collapsed - tap the Free eBooks heading to open or close it.', kind: 'label', area: 'Help > Store' },
 ];
