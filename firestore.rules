@@ -122,7 +122,15 @@ service cloud.firestore {
     }
 
     match /lessons/{lessonId} {
-      allow read: if canReadBook(get(/databases/$(database)/documents/units/$(resource.data.unitId)).data.bookId);
+      // bookId is denormalized directly onto the lesson doc (see
+      // LibraryService.createLesson/ImportBookService) instead of being
+      // looked up via the parent unit - same cheap pattern `units` above
+      // already uses one level up, avoiding an extra get() on every single
+      // lesson read (the highest-traffic read path in the whole system).
+      // Every lesson has bookId as of the 2026-08-15
+      // scripts/backfill-lesson-bookid.js run - do not revert this to the
+      // get()-based check without re-running that backfill first.
+      allow read: if canReadBook(resource.data.bookId);
       // Same isStaff() interim fix as books above.
       allow write: if isStaff();
 

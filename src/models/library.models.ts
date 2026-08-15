@@ -69,6 +69,15 @@ export type LessonStatus = 'draft' | 'published';
 export interface Lesson {
   id: string;
   unitId: string;
+  /** Denormalized from the parent unit at creation time (see
+   *  LibraryService.createLesson) so firestore.rules' lesson read check can
+   *  be a plain field check instead of an extra get() on the parent unit on
+   *  every lesson read. Optional on the TYPE only for backward compatibility
+   *  with pre-existing lesson docs written before this field existed (see
+   *  scripts/backfill-lesson-bookid.js) - every lesson created going forward
+   *  always has it, and the rules change that relies on it should only ship
+   *  after that backfill has run. */
+  bookId?: string;
   title: string;
   order: number;
   status: LessonStatus;
