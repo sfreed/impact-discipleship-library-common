@@ -14,11 +14,12 @@ import {
   doc,
   docData,
   collectionData,
+  limit,
   orderBy,
   query,
   where,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import {
   ConversationMessage,
   DiscussionGroup,
@@ -27,6 +28,18 @@ import {
   GroupMembership,
   GroupPrayerRequest,
 } from '../models/discussion-group.model';
+
+/** Cap on how much message/prayer-request history a live listener pulls per
+ *  thread (group chat, a 1:1 conversation, or a group's prayer requests) - a
+ *  hard cap on RECENCY, not true "load more" pagination (neither app has a
+ *  "load older" UI for these yet). Bounds read/render/memory cost for an
+ *  unusually long-lived thread instead of the previous fully-unbounded
+ *  read; the tradeoff is that history older than this many entries isn't
+ *  reachable from these screens - nothing is deleted, it's just not
+ *  fetched by default. Generous relative to this feature's actual scale
+ *  (small patron-organized groups, not high-volume chat) so it should
+ *  rarely bind in practice; revisit with real pagination if that changes. */
+const RECENT_ENTRY_LIMIT = 200;
 
 export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
   const ref = collection(firestore, 'discussionGroups');
@@ -95,16 +108,24 @@ export function getMyCreatedGroups(firestore: Firestore, email: string): Observa
 
 export function getGroupChatMessages(firestore: Firestore, groupId: string): Observable<GroupChatMessage[]> {
   const ref = collection(firestore, 'discussionGroups', groupId, 'chatMessages');
-  return collectionData(query(ref, orderBy('sentAt')), { idField: 'id' }) as Observable<GroupChatMessage[]>;
+  // Query the RECENT_ENTRY_LIMIT most recent messages (descending), then
+  // reverse back to the chronological (ascending) order the chat UI renders
+  // in - orderBy('sentAt') ascending with a limit() would instead return the
+  // OLDEST messages, the opposite of what "recent" means here.
+  return (
+    collectionData(query(ref, orderBy('sentAt', 'desc'), limit(RECENT_ENTRY_LIMIT)), {
+      idField: 'id',
+    }) as Observable<GroupChatMessage[]>
+  ).pipe(map((messages) => [...messages].reverse()));
 }
 
 /** Every prayer shared into this group, newest first (browsed as a list,
  *  unlike chat's chronological read). See GroupPrayerRequest. */
 export function getGroupPrayerRequests(firestore: Firestore, groupId: string): Observable<GroupPrayerRequest[]> {
   const ref = collection(firestore, 'discussionGroups', groupId, 'prayerRequests');
-  return collectionData(query(ref, orderBy('createdAt', 'desc')), { idField: 'id' }) as Observable<
-    GroupPrayerRequest[]
-  >;
+  return collectionData(query(ref, orderBy('createdAt', 'desc'), limit(RECENT_ENTRY_LIMIT)), {
+    idField: 'id',
+  }) as Observable<GroupPrayerRequest[]>;
 }
 
 export function getConversation(
@@ -129,7 +150,13 @@ export function getConversationMessages(
     otherEmail.trim().toLowerCase(),
     'messages',
   );
-  return collectionData(query(ref, orderBy('sentAt')), { idField: 'id' }) as Observable<ConversationMessage[]>;
+  // See getGroupChatMessages' identical comment - same recent-window +
+  // reverse-to-chronological approach.
+  return (
+    collectionData(query(ref, orderBy('sentAt', 'desc'), limit(RECENT_ENTRY_LIMIT)), {
+      idField: 'id',
+    }) as Observable<ConversationMessage[]>
+  ).pipe(map((messages) => [...messages].reverse()));
 }
 
 /** Every open conversation thread for a group, for the creator's Manage tab
