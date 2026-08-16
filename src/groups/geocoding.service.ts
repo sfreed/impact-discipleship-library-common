@@ -23,6 +23,19 @@ export interface GeocodeResult {
  * defensive (never throws, resolves to undefined on any failure/timeout).
  * Used by GroupWizardDialogComponent so in-person groups can participate in
  * distance search even when the address itself is never displayed.
+ *
+ * PII note (reviewed in the 2026-08 security sweep, accepted as-is): when a
+ * group leader enters a street address (including for a group flagged
+ * private/address-hidden - "never displayed" above means never displayed to
+ * *other members*, not withheld from this lookup), that address is sent to
+ * Nominatim, a third party. This is inherent to using a free geocoding
+ * service for group meeting locations, not a coding bug - Nominatim's usage
+ * policy prohibits systematic/bulk querying but doesn't retain a lookup
+ * history tied back to this app. If this needs tightening further, the fix
+ * is either a paid geocoder with a stricter data-processing agreement, or
+ * dropping street-level precision for private groups (city/state only) - not
+ * attempted here since it's a product tradeoff (search precision vs. this
+ * exposure), not something to change unilaterally in code.
  */
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {

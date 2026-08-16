@@ -73,8 +73,15 @@ export interface Purchase {
    *  `revocations` - see revokePurchase. A partial revoke leaves this 'NEW'
    *  with a non-empty `revocations`; flatten `revocations[].bookIds` and
    *  compare its length against `cartItems`' to distinguish "not refunded"
-   *  from "partially refunded" in the UI. */
-  processedStatus: 'NEW' | 'REFUNDED';
+   *  from "partially refunded" in the UI.
+   *
+   *  'PENDING_MANUAL_REVIEW': a $0/coupon claim
+   *  verifyAndGrantReaderStorePurchase could NOT independently verify
+   *  (coupon validity lives in a project this app's Cloud Functions have no
+   *  cross-project access to yet) - no license was granted automatically;
+   *  an admin follows up via grantLibraryUserLicenses after checking the
+   *  errorLogs entry the function also writes. */
+  processedStatus: 'NEW' | 'REFUNDED' | 'PENDING_MANUAL_REVIEW';
   dateProcessed: number;
   createdAt: number;
   /** Append-only history of revoke actions against this purchase - see

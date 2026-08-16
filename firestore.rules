@@ -310,7 +310,18 @@ service cloud.firestore {
       // EXISTING submissions stays owner/admin-only.
       allow read: if signedIn() &&
         (resource == null || resource.data.userEmail == request.auth.token.email.lower() || isAdmin());
-      allow create, update: if signedIn() &&
+      // `create` has no existing doc to check ownership against (resource is
+      // null), so it only constrains the new data's userEmail. `update` MUST
+      // also check resource.data.userEmail (the doc's existing owner) -
+      // without it, anyone who knows a target's email + a lessonId they've
+      // likely answered could update() the deterministic {lessonId}_{email}
+      // doc with their OWN userEmail and hijack/overwrite the victim's saved
+      // answers. Found in a live security sweep - delete (below) already had
+      // this right.
+      allow create: if signedIn() &&
+        request.resource.data.userEmail == request.auth.token.email.lower();
+      allow update: if signedIn() &&
+        resource.data.userEmail == request.auth.token.email.lower() &&
         request.resource.data.userEmail == request.auth.token.email.lower();
       allow delete: if signedIn() && resource.data.userEmail == request.auth.token.email.lower();
     }
@@ -379,12 +390,30 @@ service cloud.firestore {
     // simply write `revoked: false` back onto their own doc from devtools.
     // No legitimate reader-app writer touches those keys, so this breaks no
     // existing path.
+    //
+    // Also barred (CRITICAL, added after a live audit found this open):
+    // `licensedBookIds`/`bookLicenses` - every real license grant now goes
+    // through a Cloud Function using the Admin SDK (grantLibraryUserLicenses,
+    // grantStorePurchaseLicenses, applyLicenseGrant for group licenses,
+    // verifyAndGrantReaderStorePurchase for the reader's own Store), none of
+    // which write through these client rules at all. Before this, a
+    // signed-in patron could write these two fields directly on their own
+    // doc from devtools and self-grant any paid book for free - the exact
+    // same write LibraryUserService.grantBookLicenses() used to perform
+    // legitimately after a real purchase, just with no purchase required.
+    // `create` still allows seeding them to an empty array (every
+    // create-profile path does this for a brand-new doc; nothing ever
+    // creates a doc with real license content) - `update` blocks them
+    // outright, since no legitimate update path touches them post-creation.
     match /libraryUsers/{email} {
       allow read: if signedIn();
       allow create: if signedIn() && request.auth.token.email.lower() == email
-        && !request.resource.data.keys().hasAny(['revoked', 'revokedAt', 'revokedBy']);
+        && !request.resource.data.keys().hasAny(['revoked', 'revokedAt', 'revokedBy'])
+        && (!('licensedBookIds' in request.resource.data) || request.resource.data.licensedBookIds == [])
+        && (!('bookLicenses' in request.resource.data) || request.resource.data.bookLicenses == []);
       allow update: if signedIn() && request.auth.token.email.lower() == email
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['revoked', 'revokedAt', 'revokedBy']);
+        && !request.resource.data.diff(resource.data).affectedKeys()
+             .hasAny(['revoked', 'revokedAt', 'revokedBy', 'licensedBookIds', 'bookLicenses']);
       allow delete: if signedIn() && request.auth.token.email.lower() == email;
 
       // "Has this lesson been submitted, and when" markers - see
@@ -609,7 +638,14 @@ service cloud.firestore {
       // there is no update path, entries are never edited, only (by an
       // admin, from the Events screen) removed outright.
       allow read: if isAdmin();
-      allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid;
+      // isStaff(), not signedIn() - the doc comment above already promises
+      // "any signed-in staff member," but the rule was open to any signed-in
+      // reader-app patron too (who has no adminUsers doc at all). action/
+      // detail/targetUid/targetName are otherwise unconstrained, so this let
+      // a patron inject fabricated entries (a fake action/detail, or a
+      // targetUid/targetName pointing at a real admin) into the audit trail
+      // admins rely on. Found in a live security sweep.
+      allow create: if isStaff() && request.resource.data.actorUid == request.auth.uid;
       allow update: if false;
       allow delete: if isAdmin();
     }

@@ -54,9 +54,19 @@ export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[
  *  filter needed - `firestore.rules`' discussionGroups read is unconditional
  *  for any signed-in user, so this doesn't hit the "unconstrained list
  *  query" restriction license-gated collections do. */
+// Generous safety-net cap, not real pagination - the admin Groups table
+// needs to see every group for moderation, so this intentionally sits far
+// above today's real scale rather than silently hiding older groups; it only
+// exists to bound truly unbounded growth. Revisit with real pagination if
+// this collection ever approaches it.
+const ALL_GROUPS_SAFETY_LIMIT = 1000;
+
 export function getAllGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
   const ref = collection(firestore, 'discussionGroups');
-  return collectionData(query(ref, orderBy('createdAt', 'desc')), { idField: 'id' }) as Observable<DiscussionGroup[]>;
+  return collectionData(
+    query(ref, orderBy('createdAt', 'desc'), limit(ALL_GROUPS_SAFETY_LIMIT)),
+    { idField: 'id' },
+  ) as Observable<DiscussionGroup[]>;
 }
 
 /** Every group-membership doc across every group, unfiltered - lets the
@@ -164,5 +174,11 @@ export function getConversationMessages(
  *  scoped to one group). */
 export function getGroupConversations(firestore: Firestore, groupId: string): Observable<GroupConversation[]> {
   const ref = collection(firestore, 'discussionGroups', groupId, 'conversations');
-  return collectionData(ref, { idField: 'id' }) as Observable<GroupConversation[]>;
+  // Naturally bounded by this one group's membership size already (unlike
+  // the whole-collection listeners elsewhere in this file), but capped for
+  // consistency with its sibling per-group listeners rather than left with
+  // no limit() at all.
+  return collectionData(query(ref, limit(RECENT_ENTRY_LIMIT)), { idField: 'id' }) as Observable<
+    GroupConversation[]
+  >;
 }
