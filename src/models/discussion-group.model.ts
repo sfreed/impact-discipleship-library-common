@@ -65,6 +65,17 @@ export interface DiscussionGroup {
   createdAt: number;
   updatedAt: number;
   closedAt?: number;
+  /** Denormalized counts of this group's own `members` subcollection,
+   *  maintained by the manager app's onGroupMembershipCountChanged Cloud
+   *  Function trigger (FieldValue.increment() on every members/{email}
+   *  write) - see that function's doc comment. Lets the manager app's admin
+   *  Groups table read a per-row count directly instead of computing it
+   *  from an unfiltered collectionGroup('members') query across every group
+   *  in the system. Optional for backward compatibility: a group created
+   *  before this field existed has neither until
+   *  scripts/backfill-group-member-counts.js seeds it. */
+  memberCount?: number;
+  pendingCount?: number;
 }
 
 /** Structured location for an in-person (or hybrid) group, collected by the
