@@ -90,58 +90,69 @@ service cloud.firestore {
       return isStaff() || isInternationalPatron() || hasBookLicense(bookId);
     }
 
-    match /series/{seriesId} {
+    // Phase 3 migration: series/books/units/lessons moved from flat
+    // top-level collections (with denormalized bookId/unitId reference
+    // fields) into a nested schema - librarySeries/{seriesId}/books/
+    // {bookId}/units/{unitId}/lessons/{lessonId}/translations/
+    // {translationId} - see the consolidation plan's Phase 3. Renamed to
+    // `librarySeries`, not `series` - impactdisciples-admin's own project
+    // already has an unrelated top-level `series` collection (Store
+    // Manager's Product Series). The migration script deliberately no
+    // longer stores seriesId/bookId/unitId as fields on these docs (that
+    // used to matter here specifically so `canReadBook` could cheaply
+    // read `resource.data.bookId` without a get() - see the removed
+    // backfill-lesson-bookid.js note below), because the nested path
+    // itself now IS that reference: {bookId} below is a rules path
+    // capture variable, always present and always correct, so canReadBook
+    // no longer needs a stored field OR a get() traversal at all - an
+    // improvement over the old flat scheme's denormalization, not just a
+    // reshuffle.
+    match /librarySeries/{seriesId} {
       allow read: if signedIn();
       // Content authoring is manager-app staff only - same isStaff()
       // interim fix as books/units/lessons below. No reader-app code path
       // writes here (read-only), so this is a no-op for legitimate use and
       // closes a patron-write loophole that existed only by omission.
       allow write: if isStaff();
-    }
 
-    // Read is intentionally NOT license-gated (unlike units/lessons below) -
-    // the Discussion Groups feature needs any signed-in patron to be able to
-    // see any book's title/description regardless of license, to browse and
-    // create groups around books they don't yet own. This only exposes
-    // metadata; actual lesson content stays fully gated below. Same openness
-    // `series` already has.
-    match /books/{bookId} {
-      allow read: if signedIn();
-      // Content authoring is manager-app staff only - a reader-app patron
-      // (any signedIn() account) has no legitimate reason to write here.
-      // Interim fix: any staff member (admin or editor), not per-node scoped -
-      // see PermissionService's own doc comment, that finer-grained model is
-      // deliberately client-only today and isn't mirrored here yet.
-      allow write: if isStaff();
-    }
+      // Read is intentionally NOT license-gated (unlike units/lessons
+      // below) - the Discussion Groups feature needs any signed-in patron
+      // to be able to see any book's title/description regardless of
+      // license, to browse and create groups around books they don't yet
+      // own. This only exposes metadata; actual lesson content stays
+      // fully gated below. Same openness `librarySeries` already has.
+      match /books/{bookId} {
+        allow read: if signedIn();
+        // Content authoring is manager-app staff only - a reader-app
+        // patron (any signedIn() account) has no legitimate reason to
+        // write here. Interim fix: any staff member (admin or editor),
+        // not per-node scoped - see PermissionService's own doc comment,
+        // that finer-grained model is deliberately client-only today and
+        // isn't mirrored here yet.
+        allow write: if isStaff();
 
-    match /units/{unitId} {
-      allow read: if canReadBook(resource.data.bookId);
-      // Same isStaff() interim fix as books above.
-      allow write: if isStaff();
-    }
+        match /units/{unitId} {
+          allow read: if canReadBook(bookId);
+          // Same isStaff() interim fix as books above.
+          allow write: if isStaff();
 
-    match /lessons/{lessonId} {
-      // bookId is denormalized directly onto the lesson doc (see
-      // LibraryService.createLesson/ImportBookService) instead of being
-      // looked up via the parent unit - same cheap pattern `units` above
-      // already uses one level up, avoiding an extra get() on every single
-      // lesson read (the highest-traffic read path in the whole system).
-      // Every lesson has bookId as of the 2026-08-15
-      // scripts/backfill-lesson-bookid.js run - do not revert this to the
-      // get()-based check without re-running that backfill first.
-      allow read: if canReadBook(resource.data.bookId);
-      // Same isStaff() interim fix as books above.
-      allow write: if isStaff();
+          match /lessons/{lessonId} {
+            allow read: if canReadBook(bookId);
+            // Same isStaff() interim fix as books above.
+            allow write: if isStaff();
 
-      // Left signedIn()-only rather than license-gated too: a lesson's own
-      // rule above already keeps an unlicensed patron from ever discovering
-      // a lessonId to query translations for, so this is unreachable from
-      // the reader app's own UI for content the requester can't already see
-      // the parent lesson of. Known, accepted gap for a determined
-      // id-guessing attacker.
-      match /translations/{translationId} {
-        allow read, write: if signedIn();
+            // Left signedIn()-only rather than license-gated too: a
+            // lesson's own rule above already keeps an unlicensed patron
+            // from ever discovering a lessonId to query translations for,
+            // so this is unreachable from the reader app's own UI for
+            // content the requester can't already see the parent lesson
+            // of. Known, accepted gap for a determined id-guessing
+            // attacker.
+            match /translations/{translationId} {
+              allow read, write: if signedIn();
+            }
+          }
+        }
       }
     }
 

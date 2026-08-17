@@ -13,8 +13,9 @@ import {
   query,
   where,
 } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { CommonTranslation, LessonTranslation, TitleTranslation } from '../models/translation.models';
+import { getLessonRef } from './library-queries';
 
 export function getCommonTranslations(firestore: Firestore): Observable<CommonTranslation[]> {
   return collectionData(collection(firestore, 'commonTranslations'), {
@@ -22,9 +23,25 @@ export function getCommonTranslations(firestore: Firestore): Observable<CommonTr
   }) as Observable<CommonTranslation[]>;
 }
 
+// Phase 3 migration: `lessons` is nested under librarySeries/{s}/books/{b}/
+// units/{u} now, not a flat top-level collection, so a bare lessonId can no
+// longer address `lessons/{lessonId}/translations` directly - the lesson's
+// own doc ref is resolved first (getLessonRef, a collectionGroup scan - see
+// library-queries.ts's own comment), then this subscribes to that lesson's
+// now-nested `translations` subcollection. switchMap rather than a one-shot
+// lookup so this stays a live listener like every other read in this file.
 export function getTranslations(firestore: Firestore, lessonId: string): Observable<LessonTranslation[]> {
-  const ref = collection(firestore, 'lessons', lessonId, 'translations');
-  return collectionData(query(ref, orderBy('createdAt')), { idField: 'id' }) as Observable<LessonTranslation[]>;
+  return getLessonRef(firestore, lessonId).pipe(
+    switchMap((lessonRef) => {
+      if (!lessonRef) {
+        return of([]);
+      }
+      const ref = collection(lessonRef, 'translations');
+      return collectionData(query(ref, orderBy('createdAt')), {
+        idField: 'id',
+      }) as Observable<LessonTranslation[]>;
+    }),
+  );
 }
 
 /**
