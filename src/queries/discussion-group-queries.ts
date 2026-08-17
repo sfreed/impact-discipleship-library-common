@@ -69,19 +69,6 @@ export function getAllGroups(firestore: Firestore): Observable<DiscussionGroup[]
   ) as Observable<DiscussionGroup[]>;
 }
 
-/** Every group-membership doc across every group, unfiltered - lets the
- *  manager app's admin table compute a per-group member count client-side
- *  (group small enough in practice that this "fetch everything, group by
- *  groupId" approach matches the rest of this feature's scale assumptions)
- *  without a per-row subcollection query for every row in the table. Same
- *  rule basis as getMyMemberships: `members/{email}`'s read rule is
- *  unconditional for any signed-in user, so an unfiltered collectionGroup
- *  query is just as permitted as email-filtered one. */
-export function getAllGroupMemberships(firestore: Firestore): Observable<GroupMembership[]> {
-  const ref = collectionGroup(firestore, 'members');
-  return collectionData(ref) as Observable<GroupMembership[]>;
-}
-
 export function getGroup(firestore: Firestore, groupId: string): Observable<DiscussionGroup | undefined> {
   const ref = doc(firestore, 'discussionGroups', groupId);
   return docData(ref, { idField: 'id' }) as Observable<DiscussionGroup | undefined>;

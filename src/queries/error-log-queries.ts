@@ -9,21 +9,8 @@
 // errors/base-error-log-handler.ts for the one place that actually calls
 // writeErrorLog.
 
-import {
-  Firestore,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  docData,
-  collectionData,
-  limit,
-  orderBy,
-  query,
-  updateDoc,
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { ErrorLogEntry, NewErrorLogEntry } from '../models/error-log.model';
+import { Firestore, addDoc, collection, doc, updateDoc } from '@angular/fire/firestore';
+import { NewErrorLogEntry } from '../models/error-log.model';
 
 const COLLECTION = 'errorLogs';
 
@@ -45,23 +32,3 @@ export function updateErrorLogRecurrence(
   return updateDoc(doc(firestore, COLLECTION, entryId), changes);
 }
 
-/** Most recent first - backs the manager app's root-only Error Logs screen.
- *  Filtering there is entirely client-side, same as ActivityLogService.
- *  getAllActivity's identical approach. */
-export function getAllErrorLogs(firestore: Firestore, max = 500): Observable<ErrorLogEntry[]> {
-  return collectionData(query(collection(firestore, COLLECTION), orderBy('timestamp', 'desc'), limit(max)), {
-    idField: 'id',
-  }) as Observable<ErrorLogEntry[]>;
-}
-
-export function getErrorLog(firestore: Firestore, id: string): Observable<ErrorLogEntry | undefined> {
-  return docData(doc(firestore, COLLECTION, id), { idField: 'id' }) as Observable<ErrorLogEntry | undefined>;
-}
-
-export function deleteErrorLog(firestore: Firestore, id: string): Promise<void> {
-  return deleteDoc(doc(firestore, COLLECTION, id));
-}
-
-export async function deleteErrorLogs(firestore: Firestore, ids: string[]): Promise<void> {
-  await Promise.all(ids.map((id) => deleteErrorLog(firestore, id)));
-}

@@ -23,10 +23,3 @@ export const TIME_ZONES: TimeZoneOption[] = [
   { id: 'Europe/Paris', label: 'Central Europe (CET/CEST)' },
   { id: 'UTC', label: 'UTC' },
 ];
-
-/** Falls back to the raw id itself if it's not in the curated list above
- *  (e.g. a browser auto-detected a zone this list doesn't happen to name) -
- *  same "never show a blank" reasoning as usStateNameByCode. */
-export function timeZoneLabel(id: string): string {
-  return TIME_ZONES.find((tz) => tz.id === id)?.label ?? id;
-}
