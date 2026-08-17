@@ -12,7 +12,11 @@
 
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { FormioComponent, FormioSchema } from '../models/library.models';
-import { HTML_TYPES, LESSON_IMAGE_PLACEHOLDER_RE } from '../formio/form-translation.util';
+import {
+  HTML_TYPES,
+  LESSON_IMAGE_PLACEHOLDER_RE,
+  formioChildComponents,
+} from '../formio/form-translation.util';
 
 /** Replaces every `lessonimage:{id}` reference in the schema with its real
  *  data URI, fetched from Firestore. Deep-clones the schema it's given and
@@ -119,27 +123,16 @@ function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
-/** Same recursive shape as form-translation.util.ts's walkComponents (nested
- *  components/columns/rows), but only collects html/content components -
- *  returns direct references into `components` so callers can mutate `html`
- *  in place. */
+/** Collects every html/content component in the tree - returns direct
+ *  references into `components` so callers can mutate `html` in place.
+ *  Descends via the shared formioChildComponents (nested/columns/rows). */
 function collectHtmlComponents(components: FormioComponent[] | undefined): FormioComponent[] {
   const out: FormioComponent[] = [];
   for (const component of components ?? []) {
     if (HTML_TYPES.has(component.type)) {
       out.push(component);
     }
-    out.push(...collectHtmlComponents(component['components'] as FormioComponent[] | undefined));
-    const columns = component['columns'] as { components: FormioComponent[] }[] | undefined;
-    for (const column of columns ?? []) {
-      out.push(...collectHtmlComponents(column.components));
-    }
-    const rows = component['rows'];
-    if (Array.isArray(rows)) {
-      for (const row of rows as FormioComponent[][]) {
-        out.push(...collectHtmlComponents(row));
-      }
-    }
+    out.push(...collectHtmlComponents(formioChildComponents(component)));
   }
   return out;
 }

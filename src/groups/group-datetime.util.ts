@@ -84,3 +84,17 @@ export function formatGroupDateTime(epochMs: number, ianaZone: string): string {
   }
   return formatter.format(new Date(epochMs));
 }
+
+/** formatGroupDateTime, but falling back to the VIEWER's own device time zone
+ *  for legacy groups saved before startTimeZone existed. Centralizes the
+ *  `deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone` + fallback
+ *  wrapper that six reader components each restated per screen. The device
+ *  zone is resolved per call (cheap, and the viewer's zone can't change
+ *  mid-session in practice); the underlying per-zone formatter cache still
+ *  keys on the resolved zone string. */
+export function formatGroupDateTimeForViewer(epochMs: number, ianaZone?: string): string {
+  return formatGroupDateTime(
+    epochMs,
+    ianaZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
+}

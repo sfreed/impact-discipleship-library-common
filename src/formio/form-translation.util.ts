@@ -114,26 +114,28 @@ function walkComponents(components: FormioComponent[], out: TranslationField[], 
       });
     }
 
-    const nested = (component['components'] as FormioComponent[] | undefined) ?? [];
-    if (nested.length) {
-      walkComponents(nested, out, seenButtonText);
-    }
-
-    const columns = (component['columns'] as { components: FormioComponent[] }[] | undefined) ?? [];
-    for (const column of columns) {
-      walkComponents(column.components ?? [], out, seenButtonText);
-    }
-
-    // `rows` also appears on unrelated component types (e.g. a textarea's visible
-    // row count, a plain number) - only treat it as nested table/datagrid rows when
-    // it's actually shaped that way.
-    const rows = component['rows'];
-    if (Array.isArray(rows)) {
-      for (const row of rows as FormioComponent[][]) {
-        walkComponents(row ?? [], out, seenButtonText);
-      }
-    }
+    walkComponents(formioChildComponents(component), out, seenButtonText);
   }
+}
+
+/** Flattens a Form.io component's direct children across every layout shape
+ *  it can nest them under: `components` (panels/wells/containers/tabs),
+ *  `columns[].components`, and `rows[][]` (table/datagrid). `rows` also
+ *  appears on unrelated types as a plain number (a textarea's visible row
+ *  count), so it's only treated as nested rows when it's actually an array -
+ *  without that guard, a well containing a plain textarea crashes trying to
+ *  flatMap a number. Shared by every Form.io-schema walker (this file,
+ *  prayer-field.util, lesson-image-queries) so the descent can't drift. */
+export function formioChildComponents(component: FormioComponent): FormioComponent[] {
+  const nested = (component['components'] as FormioComponent[] | undefined) ?? [];
+  const columns =
+    (component['columns'] as { components?: FormioComponent[] }[] | undefined) ?? [];
+  const rows = component['rows'];
+  return [
+    ...nested,
+    ...columns.flatMap((c) => c.components ?? []),
+    ...(Array.isArray(rows) ? (rows as FormioComponent[][]).flatMap((r) => r ?? []) : []),
+  ];
 }
 
 // Matches a content block that is *only* an embedded image (the CKEditor/Form.io
