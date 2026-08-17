@@ -48,12 +48,14 @@ export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[
   }) as Observable<DiscussionGroup[]>;
 }
 
-/** Every group regardless of status/visibility, newest first - the manager
- *  app's admin table source list (unlike getOpenGroups, which is
+/** Every group regardless of status/visibility, newest first - the admin
+ *  app's Impact Groups table source list (unlike getOpenGroups, which is
  *  patron-Browse-tab-scoped to open+non-excluded groups only). No `where`
- *  filter needed - `firestore.rules`' discussionGroups read is unconditional
- *  for any signed-in user, so this doesn't hit the "unconstrained list
- *  query" restriction license-gated collections do. */
+ *  filter needed - the unified `firestore.rules`' discussionGroups read is
+ *  signedIn-open (group METADATA is deliberately browsable; the sensitive
+ *  content underneath - chat, prayer, members - is member-gated), so this
+ *  doesn't hit the "unconstrained list query" restriction license-gated
+ *  collections do. */
 // Generous safety-net cap, not real pagination - the admin Groups table
 // needs to see every group for moderation, so this intentionally sits far
 // above today's real scale rather than silently hiding older groups; it only
