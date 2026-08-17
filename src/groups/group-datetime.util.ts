@@ -53,19 +53,34 @@ export function extractTimeInZone(epochMs: number, ianaZone: string): string {
   return `${get('hour')}:${get('minute')}`;
 }
 
+/** Formatter cache for formatGroupDateTime, keyed by IANA zone. Both apps
+ *  call that function from methods invoked in templates (one call per group
+ *  row per change-detection cycle), and constructing an Intl.DateTimeFormat
+ *  is by far the expensive part of a format - caching per zone (the only
+ *  varying option) makes the per-cycle cost a Map lookup plus a cheap
+ *  format() call. Unbounded but naturally tiny: it can only ever hold the
+ *  zones of groups actually on screen, drawn from the curated TIME_ZONES
+ *  list plus device-zone fallbacks. */
+const groupDateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+
 /** Formats an epoch instant for display in a specific IANA zone (e.g.
  *  "Jul 15, 2026, 7:00 PM EDT") - the easy direction, since it's just asking
  *  Intl to render an already-known instant, not solve for one. Built from
  *  individual component options rather than dateStyle/timeStyle - per spec,
  *  those two can't be combined with timeZoneName in the same formatter. */
 export function formatGroupDateTime(epochMs: number, ianaZone: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: ianaZone,
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  }).format(new Date(epochMs));
+  let formatter = groupDateTimeFormatters.get(ianaZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: ianaZone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+    groupDateTimeFormatters.set(ianaZone, formatter);
+  }
+  return formatter.format(new Date(epochMs));
 }
