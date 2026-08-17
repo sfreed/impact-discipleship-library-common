@@ -136,6 +136,25 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
     area: 'Settings',
   },
   { text: 'Enable browser notifications', kind: 'label', area: 'Settings' },
+  { text: 'Delete account', kind: 'label', area: 'Settings' },
+  { text: 'Legal', kind: 'label', area: 'Settings' },
+  { text: 'Privacy Policy', kind: 'label', area: 'Settings' },
+  { text: 'Delete your account?', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'This permanently deletes:', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Your profile and sign-in account', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Your lesson answers, progress, and highlights', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Your book licenses', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Your group memberships (groups you lead will be closed)', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  {
+    text: 'Messages you already sent in group chats and purchase records are kept. This cannot be undone.',
+    kind: 'label',
+    area: 'Settings > Delete Account Dialog',
+  },
+  { text: 'Confirm your password', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Delete my account', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'That password is incorrect.', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Too many attempts - please wait a bit and try again.', kind: 'label', area: 'Settings > Delete Account Dialog' },
+  { text: 'Something went wrong deleting your account. Please try again.', kind: 'label', area: 'Settings > Delete Account Dialog' },
 
   // --- Messages (admin-announcement inbox) ---
   { text: 'Messages', kind: 'label', area: 'Shell > Toolbar & Menu' },
@@ -199,6 +218,12 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'That coupon code is not valid.', kind: 'label', area: 'Store' },
   { text: 'That coupon does not apply to the selected books.', kind: 'label', area: 'Store' },
   { text: 'Could not check that coupon right now. Please try again.', kind: 'label', area: 'Store' },
+  { text: 'Continue purchase in browser', kind: 'label', area: 'Store' },
+  {
+    text: "You'll finish your purchase on our website, then come back here - your new book(s) will already be unlocked.",
+    kind: 'label',
+    area: 'Store',
+  },
   {
     text: 'Your payment succeeded but we could not record your order. Please contact us with your PayPal receipt so we can unlock your books.',
     kind: 'label',
@@ -560,7 +585,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   },
 
   // --- Help: Reading & Lessons ---
-  { text: 'From <strong>My Books</strong> (in the menu, or the book list on your Home screen), tap a <strong>Book</strong>, then a <strong>Unit</strong>, to see its lessons. Tap a lesson to open it - each one is a mix of reading content and questions to answer.', kind: 'html', area: 'Help > Reading & Lessons' },
+  { text: 'From <strong>My Books</strong> (in the menu, or the book list on your Home screen), tap a <strong>Book</strong> to see all of its lessons, listed under their unit headings. Tap a lesson to open it - each one is a mix of reading content and questions to answer.', kind: 'html', area: 'Help > Reading & Lessons' },
   { text: 'On <strong>My Books</strong>, your books are grouped under their series name - handy once your library grows past a book or two.', kind: 'html', area: 'Help > Reading & Lessons' },
   { text: 'Answering and saving a lesson', kind: 'label', area: 'Help > Reading & Lessons' },
   { text: 'Fill in a lesson\'s fields, then press its <strong>Submit</strong> button (the exact label can vary lesson to lesson) to save your answers. If you\'re offline when you save, you\'ll see <em>&quot;You\'re offline - your answers are saved on this device and will sync automatically once you\'re back online.&quot;</em> - that\'s a confirmation, not an error: nothing is lost, and there\'s nothing to redo. If a save fails for any other reason, you\'ll see <em>&quot;Something went wrong saving your answers. Please try again.&quot;</em> right on the page.', kind: 'html', area: 'Help > Reading & Lessons' },
@@ -578,15 +603,15 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: '), and vice versa.', kind: 'label', area: 'Help > Reading & Lessons' },
 
   // --- Help: Store ---
-  { text: 'Buy additional book licenses individually from the <strong>Store</strong>, linked from the hamburger menu. Every book you don\'t already own is listed with a <strong>Select to purchase</strong> checkbox; a sticky header keeps a running total as you check books on and off. A book you already own shows a &quot;You already own this book&quot; badge instead of a checkbox.', kind: 'html', area: 'Help > Store' },
+  { text: 'Buy additional book licenses individually from the <strong>Store</strong>, linked from the hamburger menu. Every book you don\'t already own is listed with a <strong>Select to purchase</strong> checkbox; a sticky header keeps a running total as you check books on and off. A book on sale shows its reduced price next to the crossed-out regular one. A book you already own shows a &quot;You already own this book&quot; badge instead of a checkbox (staff accounts and accounts with free international access see their own wording there instead).', kind: 'html', area: 'Help > Store' },
   { text: 'Purchasable books are grouped into collapsible sections by series - tap a series heading to expand or collapse it. Every series starts expanded; a book that doesn\'t belong to any series lists under an &quot;Other Books&quot; heading at the end.', kind: 'html', area: 'Help > Store' },
   { text: 'Store screen', kind: 'label', area: 'Help > Store' },
   { text: 'The Store: price, running total, and ownership status per book.', kind: 'label', area: 'Help > Store' },
-  { text: 'Enter a <strong>Coupon code</strong> (appears once you\'ve selected at least one book) and click <strong>Apply</strong> for a percent-off discount - if you then uncheck the one book it applied to, the coupon is automatically removed rather than left dangling.', kind: 'html', area: 'Help > Store' },
+  { text: 'Enter a <strong>Coupon code</strong> (appears once you\'ve selected at least one book) and click <strong>Apply</strong> for a percent-off discount - the code is checked online, so a brief spinner runs while it\'s verified. If you then uncheck the one book it applied to, the coupon is automatically removed rather than left dangling.', kind: 'html', area: 'Help > Store' },
   { text: 'If a coupon brings your total to exactly <strong>$0.00</strong>, click <strong>Get Book(s)</strong> and you\'re done - no payment is collected at all.', kind: 'html', area: 'Help > Store' },
-  { text: 'Otherwise, pay with the <strong>PayPal</strong> button - this app only supports PayPal (PayPal\'s own flow lets you pay by card without an account, if you don\'t have one).', kind: 'html', area: 'Help > Store' },
+  { text: 'Otherwise, in a web browser, pay with the <strong>PayPal</strong> button - this app only supports PayPal (PayPal\'s own flow lets you pay by card without an account, if you don\'t have one). On the Android app the button reads <strong>Continue purchase in browser</strong> instead: it opens our website in your device\'s browser to finish paying there, and your new book(s) are already unlocked when you come back to the app. The $0.00 coupon path above stays in-app everywhere.', kind: 'html', area: 'Help > Store' },
   {
-    text: "Access unlocks automatically the moment your purchase completes - the confirmation screen links straight into each book you just bought, and you can start reading right away with no extra step. The Store needs an internet connection; it's unavailable while you're offline.",
+    text: "Access unlocks automatically the moment your purchase completes - the confirmation screen links straight into each book you just bought, and you can start reading right away with no extra step. You'll also receive an itemized receipt email from the library with a confirmation code, separate from PayPal's own receipt. The Store needs an internet connection; it's unavailable while you're offline.",
     kind: 'label',
     area: 'Help > Store',
   },
@@ -597,7 +622,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   },
 
   // --- Help: Settings & Appearance ---
-  { text: 'Reached from the hamburger menu (top right) - that same menu also shows your name and email at the top, above Home/My Books/Store/Impact Groups/Messages/Settings/Help and Sign out. Every change on this page applies and saves immediately - there\'s no Save button, and your choices sync to your account, so they follow you to any device you sign in on.', kind: 'html', area: 'Help > Settings & Appearance' },
+  { text: 'Reached from the hamburger menu (top right) - that same menu also shows your name and email at the top, above Home/My Books/Store/Impact Groups/Messages/Settings/Help and Sign out. Every change on this page applies and saves immediately - there\'s no Save button, and your choices sync to your account, so they follow you to any device you sign in on. (Syncing needs a connection - a change made offline still applies on this device right away, but reaches your other devices only after you change it again while online.)', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: '<strong>Dark Mode</strong> and <strong>Color Theme</strong> - light mode and dark mode each remember their own separate color theme, so switching one doesn\'t lose the other\'s choice.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: '<strong>Preferred lesson language</strong> - a lesson renders in this language when a translation exists for it, and in its original language otherwise. Choose &quot;English&quot; to always see lessons exactly as authored.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: '<strong>Push notifications</strong> - your device gets a notification for Impact Group activity (chat messages, direct messages to you, join requests and their approval, shared prayer requests) and for announcements from the library team. On the Android app, Android asks for notification permission the first time you sign in; in a web browser, use the Enable browser notifications button. This switch silences notifications for your whole account without touching either permission.', kind: 'html', area: 'Help > Settings & Appearance' },
@@ -605,7 +630,10 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Tap a message to read it - that clears its <strong>New</strong> flag and the badge count. Once read, a message can be deleted with its trash icon; unread messages cannot be deleted, so nothing can be dismissed unseen.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: 'Announcements also arrive as device notifications - automatically on the Android app, and in a web browser after you click <strong>Enable browser notifications</strong> (offered on the Messages screen and under Settings). Tapping a notification opens your inbox.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: 'Settings screen', kind: 'label', area: 'Help > Settings & Appearance' },
-  { text: 'Settings: account email and sign-in location, appearance, preferred lesson language, and push notifications.', kind: 'label', area: 'Help > Settings & Appearance' },
+  { text: 'Settings: account email and sign-in location, appearance, preferred lesson language, push notifications, account deletion, and the privacy policy.', kind: 'label', area: 'Help > Settings & Appearance' },
+  { text: 'Your account', kind: 'label', area: 'Help > Settings & Appearance' },
+  { text: '<strong>Delete account</strong> - the Account card\'s red button permanently deletes your account after you confirm with your password. It removes your profile and sign-in account, your lesson answers, progress, and highlights, your book licenses, and your group memberships (groups you lead are closed); chat messages you\'ve already sent and purchase records are kept. This cannot be undone - once it finishes you\'re returned to the login screen.', kind: 'html', area: 'Help > Settings & Appearance' },
+  { text: '<strong>Privacy Policy</strong> - the Legal card links to the full policy on the Impact Disciples website; it opens in your browser.', kind: 'html', area: 'Help > Settings & Appearance' },
   { text: 'Staying signed in', kind: 'label', area: 'Help > Settings & Appearance' },
   { text: 'For your security, you\'re automatically signed out after an hour of no activity anywhere in the app. Five minutes before that happens, a <strong>&quot;Still there?&quot;</strong> dialog warns you and offers a <strong>Stay signed in</strong> button - if you don\'t respond, you\'ll be signed out and returned to the login screen.', kind: 'html', area: 'Help > Settings & Appearance' },
 
@@ -622,6 +650,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'What needs a connection', kind: 'label', area: 'Help > Offline Support' },
   { text: 'The <strong>Store</strong> - buying a book requires PayPal, so the whole Store page shows a &quot;needs an internet connection&quot; notice while you\'re offline instead of its usual product list.', kind: 'html', area: 'Help > Offline Support' },
   { text: '<strong>Impact Groups</strong> - browsing, joining, chat, messaging, and prayer sharing all need a live connection to Firestore.', kind: 'html', area: 'Help > Offline Support' },
+  { text: '<strong>Syncing your Settings</strong> - appearance, language, and notification changes made offline still apply on this device immediately, but they reach your account (and your other devices) only after you change them again while online.', kind: 'html', area: 'Help > Offline Support' },
   { text: 'While you\'re offline, an <strong>Offline</strong> chip appears in the toolbar, and the Store and Impact Groups links are hidden from the menu entirely rather than just disabled.', kind: 'html', area: 'Help > Offline Support' },
   { text: 'Saving a lesson while offline shows &quot;You\'re offline - your answers are saved on this device and will sync automatically once you\'re back online.&quot; - a confirmation, not an error; your answers upload on their own when connectivity returns. The &quot;Something went wrong saving your answers&quot; message now only appears when a save fails for some other reason - if you see it, trying again is the right first step.', kind: 'html', area: 'Help > Offline Support' },
 
@@ -669,9 +698,10 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Licenses: buying and assigning book access', kind: 'label', area: 'Help > Impact Groups' },
   { text: 'The creator-only <strong>Licenses</strong> tab is where you buy book licenses in bulk and hand them out to your group\'s members - separate from buying a single license for yourself in the', kind: 'html', area: 'Help > Impact Groups' },
   { text: '. Click <strong>Buy Licenses</strong>, choose a quantity, and check out (or, if a discount brings the total to $0, just claim them). Licenses you don\'t hand out immediately sit in your <strong>unassigned reserve</strong> for that book - usable in this group or any other group you run for the same book, including ones you start later. From the member ledger on this tab you can then <strong>Assign</strong> a reserved license to any approved member who doesn\'t already have one, or <strong>Revoke</strong> one you\'d previously assigned (only while the group is still open and still studying the same book).', kind: 'html', area: 'Help > Impact Groups' },
+  { text: 'Accounts with free international access never need to buy licenses, so for them the <strong>Licenses</strong> tab and <strong>My License Purchases</strong> don\'t appear at all.', kind: 'html', area: 'Help > Impact Groups' },
   { text: 'Choose <strong>My License Purchases</strong> from the Menu to see every bulk license purchase you\'ve made across all your groups. Each purchase lists how many licenses it bought, how many are still sitting in your unassigned reserve versus already handed out, and which member (and which group) each assigned license currently belongs to.', kind: 'html', area: 'Help > Impact Groups' },
   { text: 'Inviting people directly', kind: 'label', area: 'Help > Impact Groups' },
-  { text: 'For a by-invite-only group, the creator gets an extra <strong>Invites</strong> tab. Click <strong>Invite by Email</strong>, enter the person\'s email, and optionally attach one of your unassigned licenses for that book. They\'ll get an email explaining the group with <strong>Yes, I\'m interested</strong> / <strong>No thanks</strong> buttons - accepting walks them through creating a free account (or signing in, if they already have one) and joins them automatically; declining lets them leave you an optional note explaining why, which shows up right on your Invites tab next to that invite. A still-pending invite can be <strong>Cancel</strong>ed at any time.', kind: 'html', area: 'Help > Impact Groups' },
+  { text: 'For a by-invite-only group, the creator gets an extra <strong>Invites</strong> tab. Click <strong>Invite by Email</strong>, enter the person\'s email, and optionally attach one of your unassigned licenses for that book. They\'ll get an email explaining the group with <strong>Yes, I\'m interested</strong> / <strong>No thanks</strong> buttons - accepting walks them through creating a free account (or signing in, if they already have one) and joins them automatically, landing them on My Impact Groups with a welcome banner that confirms they\'ve joined and says whether a book license came attached or the leader will follow up about book access; declining lets them leave you an optional note explaining why, which shows up right on your Invites tab next to that invite. A still-pending invite can be <strong>Cancel</strong>ed at any time.', kind: 'html', area: 'Help > Impact Groups' },
   { text: 'Leaving or closing a group', kind: 'label', area: 'Help > Impact Groups' },
   { text: 'Leaving a group (or withdrawing a still-pending request) is instant, from that group\'s own Overview tab. If you were currently holding a license the group\'s creator had assigned to you, leaving automatically frees it back into their reserve for that book rather than leaving it stuck with you. Closing a group (creator only) just hides it from Browse - it isn\'t deleted, and its chat, prayers, and history stay intact for anyone who still has the link.', kind: 'html', area: 'Help > Impact Groups' },
   { text: 'Chat messages, 1:1 messages, and shared prayer requests are only ever visible to approved members of that specific group - never to the public, and never to members of a different group you also belong to.', kind: 'label', area: 'Help > Impact Groups' },
@@ -728,10 +758,10 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'What needs your attention', kind: 'label', area: 'Help > Home Dashboard' },
   { text: 'A <strong>Messages</strong> card shows how many unread announcements are in your inbox - the same inbox as <strong>Messages</strong> in the menu. If you lead an Impact Group and people are waiting to join, a <strong>Join requests</strong> card appears beside it; tap it to go approve or decline them.', kind: 'html', area: 'Help > Home Dashboard' },
   { text: 'Your books and groups', kind: 'label', area: 'Help > Home Dashboard' },
-  { text: '<strong>My Books</strong> lists every book you have access to, each with a progress bar - tap one to open it. The same book list is also at <strong>My Books</strong> in the menu.', kind: 'html', area: 'Help > Home Dashboard' },
-  { text: "<strong>My Groups</strong> lists the Impact Groups you belong to with each group's next meeting date, plus a <strong>Prayers</strong> row totaling the prayer requests shared across your groups.", kind: 'html', area: 'Help > Home Dashboard' },
-  { text: "An <strong>Explore the store</strong> row appears at the bottom when there are titles you don't own yet.", kind: 'html', area: 'Help > Home Dashboard' },
-  { text: "Everything above the groups section works offline from your saved content. The groups and store rows need a connection, so they simply hide while you're offline - they come back on their own when connectivity returns.", kind: 'label', area: 'Help > Home Dashboard' },
+  { text: '<strong>My Books</strong> lists every book you have access to, grouped under collapsible series headings, each book with a progress bar - tap one to open it. The same book list is also at <strong>My Books</strong> in the menu.', kind: 'html', area: 'Help > Home Dashboard' },
+  { text: "<strong>My Groups</strong> lists the Impact Groups you belong to with each group's next meeting date - a group you lead also shows a <strong>pending</strong> tag when join requests are waiting - plus a <strong>Prayers</strong> row totaling the prayer requests shared across your groups.", kind: 'html', area: 'Help > Home Dashboard' },
+  { text: "An <strong>Explore the store</strong> row appears at the bottom whenever the Store has something for you - titles you don't own yet, or its free eBooks and resources if you already have access to everything.", kind: 'html', area: 'Help > Home Dashboard' },
+  { text: "Everything above the groups section works offline from your saved content, except the Join requests card - it needs a connection, and like the groups and store rows it simply hides while you're offline. They all come back on their own when connectivity returns.", kind: 'label', area: 'Help > Home Dashboard' },
 
   // --- Store: Free eBooks section + in-app PDF viewer ---
   { text: 'Free eBooks', kind: 'label', area: 'Store > Free eBooks' },

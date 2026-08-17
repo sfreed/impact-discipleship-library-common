@@ -55,6 +55,9 @@ export interface Book {
 
 export interface Unit {
   id: string;
+  /** Hydrated from the doc's own nested ref path at read time
+   *  (librarySeries/{seriesId}/books/{bookId}/units) - not a stored field. */
+  seriesId: string;
   bookId: string;
   title: string;
   order: number;
@@ -68,16 +71,15 @@ export type LessonStatus = 'draft' | 'published';
 
 export interface Lesson {
   id: string;
+  /** Hydrated from the doc's own nested ref path at read time - not a
+   *  stored field. */
+  seriesId: string;
   unitId: string;
-  /** Denormalized from the parent unit at creation time (see
-   *  LibraryService.createLesson) so firestore.rules' lesson read check can
-   *  be a plain field check instead of an extra get() on the parent unit on
-   *  every lesson read. Optional on the TYPE only for backward compatibility
-   *  with pre-existing lesson docs written before this field existed (see
-   *  scripts/backfill-lesson-bookid.js) - every lesson created going forward
-   *  always has it, and the rules change that relies on it should only ship
-   *  after that backfill has run. */
-  bookId?: string;
+  /** Hydrated from the doc's own nested ref path at read time (not a stored
+   *  field) - always present, unlike the old flat-schema era when this was a
+   *  denormalized field that needed a backfill. firestore.rules' license
+   *  check reads the bookId PATH segment now, not this. */
+  bookId: string;
   title: string;
   order: number;
   status: LessonStatus;
