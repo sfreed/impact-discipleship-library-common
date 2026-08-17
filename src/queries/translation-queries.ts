@@ -82,23 +82,6 @@ export function getTranslationsForLocale(
 }
 
 /**
- * One locale's shared chrome-text translations - the reader's per-lesson
- * render path only ever needs the signed-in patron's preferred language
- * (getCommonTranslations above stays for the manager's editing screens and
- * the reader's ChromeTranslationService, whose all-locale listener is what
- * makes an in-session language switch instant).
- */
-export function getCommonTranslationsForLocale(
-  firestore: Firestore,
-  locale: string,
-): Observable<CommonTranslation[]> {
-  return collectionData(
-    query(collection(firestore, 'commonTranslations'), where('locale', '==', locale)),
-    { idField: 'id' },
-  ) as Observable<CommonTranslation[]>;
-}
-
-/**
  * Every title translation recorded against one book/unit/lesson/series node,
  * across every locale - what the manager app's node-translation dialog needs
  * (it shows/edits all of a node's locales at once). nodeId alone is enough to
