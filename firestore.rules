@@ -293,39 +293,6 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
-    // A signed-in user's saved answers for a lesson's Form.io form - see
-    // the reader app's SubmissionService (doc id is
-    // deterministic, `{lessonId}_{email}`, keyed by `userEmail` field).
-    // Scoped to the submission's own owner, plus admins for read (staff
-    // reviewing patron responses).
-    match /submissions/{submissionId} {
-      // `resource == null` (doc doesn't exist yet) must be allowed explicitly:
-      // without it, `resource.data.userEmail` errors on a nonexistent doc and
-      // the whole read is denied - which broke the reader app's lesson view
-      // for any lesson the patron hadn't submitted yet (its getSubmission
-      // probe of the deterministic `{lessonId}_{email}` id was denied, and
-      // LessonViewComponent treats any read failure as "no access"). Allowing
-      // it only reveals that a guessed submission id doesn't exist - same
-      // accepted id-guessing gap as lesson translations above; the content of
-      // EXISTING submissions stays owner/admin-only.
-      allow read: if signedIn() &&
-        (resource == null || resource.data.userEmail == request.auth.token.email.lower() || isAdmin());
-      // `create` has no existing doc to check ownership against (resource is
-      // null), so it only constrains the new data's userEmail. `update` MUST
-      // also check resource.data.userEmail (the doc's existing owner) -
-      // without it, anyone who knows a target's email + a lessonId they've
-      // likely answered could update() the deterministic {lessonId}_{email}
-      // doc with their OWN userEmail and hijack/overwrite the victim's saved
-      // answers. Found in a live security sweep - delete (below) already had
-      // this right.
-      allow create: if signedIn() &&
-        request.resource.data.userEmail == request.auth.token.email.lower();
-      allow update: if signedIn() &&
-        resource.data.userEmail == request.auth.token.email.lower() &&
-        request.resource.data.userEmail == request.auth.token.email.lower();
-      allow delete: if signedIn() && resource.data.userEmail == request.auth.token.email.lower();
-    }
-
     // Order-history record for a Store purchase (see StoreComponent and
     // PurchaseService) - digital book(s) bought, coupon used, amounts, and
     // the PayPal receipt id. Read stays broad (any signed-in user - no admin
@@ -433,6 +400,29 @@ service cloud.firestore {
       // lessonStatus above, same own-email scoping as the parent.
       match /lessonHighlights/{lessonId} {
         allow read: if signedIn();
+        allow write: if signedIn() && request.auth.token.email.lower() == email;
+      }
+
+      // A signed-in user's saved answers for a lesson's Form.io form - see
+      // the reader app's SubmissionService. One doc per (user, lesson), doc
+      // id is just the lessonId (the email is already the parent path, so
+      // it doesn't need re-encoding into the doc id or a `userEmail` field
+      // the way the old flat top-level `submissions` collection needed).
+      // Narrower than the lessonStatus/lessonHighlights siblings above -
+      // saved answers are more sensitive than "did you view/highlight
+      // this", so read stays owner-or-admin rather than any signed-in
+      // user (matches the old flat collection's own access level exactly,
+      // just expressed more simply). Moving this under the owner's own
+      // path (instead of a flat collection keyed by a spoofable `userEmail`
+      // FIELD) is what makes this simple: ownership is now a property of
+      // WHERE the doc lives, not of data an attacker's own write could
+      // claim - eliminates the exact hijack class a live security sweep
+      // found in the old rule (see this file's git history), and the
+      // `resource == null` special-casing that gap's fix needed, since
+      // this rule never touches `resource.data` at all.
+      match /submissions/{lessonId} {
+        allow read: if signedIn() &&
+          (request.auth.token.email.lower() == email || isAdmin());
         allow write: if signedIn() && request.auth.token.email.lower() == email;
       }
 
