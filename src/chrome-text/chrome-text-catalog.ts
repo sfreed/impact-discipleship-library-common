@@ -190,6 +190,8 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Highlight', kind: 'label', area: 'Lesson View' },
   { text: 'Something went wrong saving your answers. Please try again.', kind: 'label', area: 'Lesson View' },
   { text: "You're offline - your answers are saved on this device and will sync automatically once you're back online.", kind: 'label', area: 'Lesson View' },
+  { text: 'Dictate your answer', kind: 'label', area: 'Lesson View' },
+  { text: 'Stop dictating', kind: 'label', area: 'Lesson View' },
 
   // --- Store ---
   { text: 'Store', kind: 'label', area: 'Store' },
