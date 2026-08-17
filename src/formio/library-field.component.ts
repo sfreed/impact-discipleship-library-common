@@ -19,15 +19,11 @@ import { Components } from '@formio/js';
 // eslint-disable-next-line import/no-internal-modules
 import FormioComponent from '@formio/js/lib/cjs/components/_classes/component/Component';
 
-export type LibraryFieldSource = 'lesson' | 'unit' | 'book' | 'series';
-
-/** Resolved field values for the current render context, keyed by source. */
-export interface LibraryFieldContext {
-  lesson?: Record<string, string | undefined>;
-  unit?: Record<string, string | undefined>;
-  book?: Record<string, string | undefined>;
-  series?: Record<string, string | undefined>;
-}
+// Types moved to library-field-context.ts (a @formio/js-free module the
+// reader app can import without installing Form.io) - re-exported here so
+// this module's existing consumers keep working unchanged.
+import type { LibraryFieldContext, LibraryFieldSource } from './library-field-context';
+export type { LibraryFieldContext, LibraryFieldSource } from './library-field-context';
 
 const SOURCE_LABELS: Record<LibraryFieldSource, string> = {
   lesson: 'Lesson',
