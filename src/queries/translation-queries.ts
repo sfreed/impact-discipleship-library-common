@@ -48,6 +48,57 @@ export function getTranslations(
 }
 
 /**
+ * One locale's translation of one lesson - what the reader app needs on
+ * every lesson open (a patron reads in exactly one preferred language), as
+ * opposed to getTranslations above, which the manager app's all-locale
+ * editing screens still need. No orderBy: a lesson has at most one
+ * translation doc per locale, so ordering is meaningless and omitting it
+ * keeps this a single-field filter that needs no composite index. Offline
+ * this is served from the persistent cache evaluating the filter over the
+ * docs OfflinePrefetchService warmed with the UNFILTERED subcollection
+ * fetch (a superset - deliberately, so a patron who changes preferred
+ * language while offline still finds the new locale cached).
+ */
+export function getTranslationsForLocale(
+  firestore: Firestore,
+  lesson: { seriesId: string; bookId: string; unitId: string; id: string },
+  locale: string,
+): Observable<LessonTranslation[]> {
+  const ref = collection(
+    firestore,
+    'librarySeries',
+    lesson.seriesId,
+    'books',
+    lesson.bookId,
+    'units',
+    lesson.unitId,
+    'lessons',
+    lesson.id,
+    'translations',
+  );
+  return collectionData(query(ref, where('locale', '==', locale)), {
+    idField: 'id',
+  }) as Observable<LessonTranslation[]>;
+}
+
+/**
+ * One locale's shared chrome-text translations - the reader's per-lesson
+ * render path only ever needs the signed-in patron's preferred language
+ * (getCommonTranslations above stays for the manager's editing screens and
+ * the reader's ChromeTranslationService, whose all-locale listener is what
+ * makes an in-session language switch instant).
+ */
+export function getCommonTranslationsForLocale(
+  firestore: Firestore,
+  locale: string,
+): Observable<CommonTranslation[]> {
+  return collectionData(
+    query(collection(firestore, 'commonTranslations'), where('locale', '==', locale)),
+    { idField: 'id' },
+  ) as Observable<CommonTranslation[]>;
+}
+
+/**
  * Every title translation recorded against one book/unit/lesson/series node,
  * across every locale - what the manager app's node-translation dialog needs
  * (it shows/edits all of a node's locales at once). nodeId alone is enough to
