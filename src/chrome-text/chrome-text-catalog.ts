@@ -108,7 +108,6 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Something went wrong joining this group. Please try again.', kind: 'label', area: 'Auth > Invite Landing' },
 
   // --- Settings ---
-  { text: 'Back to library', kind: 'label', area: 'Settings' },
   { text: 'Account', kind: 'label', area: 'Settings' },
   { text: 'Appearance', kind: 'label', area: 'Settings' },
   { text: 'Dark Mode', kind: 'label', area: 'Settings' },
@@ -174,7 +173,6 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: "You're offline - your answers are saved on this device and will sync automatically once you're back online.", kind: 'label', area: 'Lesson View' },
 
   // --- Store ---
-  { text: 'Back to library', kind: 'label', area: 'Store' },
   { text: 'Store', kind: 'label', area: 'Store' },
   { text: '{n} book selected', kind: 'label', area: 'Store' },
   { text: '{n} books selected', kind: 'label', area: 'Store' },
@@ -223,7 +221,6 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Confirm', kind: 'label', area: 'Shared > Confirm Dialog' },
 
   // --- Impact Groups: groups-list ---
-  { text: 'Back to library', kind: 'label', area: 'Impact Groups > Groups List' },
   { text: 'Impact Groups', kind: 'label', area: 'Impact Groups > Groups List' },
   { text: 'Menu', kind: 'label', area: 'Impact Groups > Groups List' },
   { text: 'My Impact Groups', kind: 'label', area: 'Impact Groups > Groups List' },
@@ -543,7 +540,6 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Unknown group', kind: 'label', area: 'Impact Groups > My License Purchases' },
 
   // --- Help: shell + overview (topic labels/descriptions shared by both) ---
-  { text: 'Back to library', kind: 'label', area: 'Help > Shell' },
   { text: 'Help', kind: 'label', area: 'Help > Shell' },
   { text: 'Help Topics', kind: 'label', area: 'Help > Shell' },
   { text: 'Back to Help Topics', kind: 'label', area: 'Help > Shell' },
