@@ -1,11 +1,27 @@
-import { fromUnixTime, isDate, isValid, parse } from 'date-fns';
+// Dependency-free (no date-fns) since the 2026-08-20 move into the shared
+// submodule: every consuming app (web, admin, reader, and eventually
+// functions) can compile this without installing anything. Behaviour is
+// pinned by date-from-timestamp.spec.ts next to it.
 
-export const dateFromTimestamp = (item) => {
+// Normalizes the several shapes a "date" arrives in from Firestore - a real
+// Date, a real Timestamp (via its `seconds`), a malformed plain
+// {seconds, nanoseconds} map, or a string - into a Date, or null when it
+// can't. Strings in the one legacy "MM/dd/yyyy" form parse; any other
+// string is returned AS-IS (the caller decides - see toMillis below).
+//
+// Return type is deliberately `any`: that is the contract every caller in
+// the web and admin apps was written against (the date-fns version inferred
+// `any` too), with callers assigning the result straight into Date-typed
+// fields. The honest type is `Date | string | null` - tightening it is a
+// separate cleanup that touches ~20 call sites; prefer toMillis() for new
+// code that just needs something sortable.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const dateFromTimestamp = (item): any => {
   if (!item) {
     return null;
   }
 
-  if (isDate(item)) {
+  if (item instanceof Date) {
     return item;
   }
 
@@ -13,13 +29,13 @@ export const dateFromTimestamp = (item) => {
     return parseStringDate(item);
   }
 
-  let normalizedDate;
+  let normalizedDate: Date | undefined;
 
   if (item?.seconds) {
-    normalizedDate = fromUnixTime(item.seconds);
+    normalizedDate = new Date(Number(item.seconds) * 1000);
   }
 
-  return isValid(normalizedDate) ? normalizedDate : null;
+  return isValidDate(normalizedDate) ? normalizedDate : null;
 };
 
 // Single canonical "give me a sortable number" helper - use this instead of
@@ -55,16 +71,25 @@ export const toMillis = (item: unknown): number => {
   return 0;
 };
 
-const parseStringDate = (dateString: string): null | Date | string => {
-  //console.warn('Wrong Date format detected: all dates must be stored as Timestamp in DB', dateString);
+const isValidDate = (value: unknown): value is Date =>
+  value instanceof Date && !isNaN(value.getTime());
 
+const parseStringDate = (dateString: string): null | Date | string => {
   if (!dateString) {
     return null;
   }
-  if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-    const date = parse(dateString, 'MM/dd/yyyy', new Date());
-    return isValid(date) ? date : null;
+  const match = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (match) {
+    // Local-time construction, same as date-fns' parse(..., 'MM/dd/yyyy')
+    // used to give; reject calendar-invalid combos (02/30/2024) the way
+    // parse() did, instead of letting Date roll them over.
+    const month = Number(match[1]);
+    const day = Number(match[2]);
+    const year = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+    const calendarValid =
+      date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+    return calendarValid ? date : null;
   }
-  //console.warn('Wrong date format detected: unsupported string format', dateString);
   return dateString;
 };

@@ -12,19 +12,19 @@ describe('dateFromTimestamp', () => {
   });
 
   it('converts a genuine Firestore Timestamp via its seconds', () => {
-    const result = dateFromTimestamp(new Timestamp(SECONDS, 0));
+    const result = dateFromTimestamp(new Timestamp(SECONDS, 0)) as Date;
     expect(result instanceof Date).toBeTrue();
     expect(result.getTime()).toBe(MILLIS);
   });
 
   it('converts a malformed plain {seconds, nanoseconds} map the same way', () => {
-    const result = dateFromTimestamp({ seconds: SECONDS, nanoseconds: 123 });
+    const result = dateFromTimestamp({ seconds: SECONDS, nanoseconds: 123 }) as Date;
     expect(result instanceof Date).toBeTrue();
     expect(result.getTime()).toBe(MILLIS);
   });
 
   it('parses an "MM/dd/yyyy" string into a local-midnight Date', () => {
-    const result = dateFromTimestamp('01/15/2024');
+    const result = dateFromTimestamp('01/15/2024') as Date;
     expect(result instanceof Date).toBeTrue();
     expect(result.getFullYear()).toBe(2024);
     expect(result.getMonth()).toBe(0);
