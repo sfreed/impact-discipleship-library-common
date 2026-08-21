@@ -1,0 +1,13 @@
+import { Timestamp } from 'firebase/firestore';
+import { BaseModel } from '../base.model';
+import { TESTIMONIAL_TYPES } from '../../lists/testimonial_types.enum';
+
+export class TestimonialModel extends BaseModel {
+  isActive = false;
+  title?: string;
+  author: string;
+  quote?: string;
+  text: string;
+  date: Timestamp | Date;
+  type: TESTIMONIAL_TYPES;
+}
