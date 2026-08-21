@@ -11,6 +11,8 @@
 // it under full `strict`, and the functions contract (Stage 2e) may pull it
 // into functions/ as well.
 
+import type { HttpFunctionName } from '../contract/functions-contract';
+
 export type ImpactProjectKey = 'dev' | 'prod' | 'emulator';
 
 export interface FirebaseWebAppConfig {
@@ -68,9 +70,12 @@ export const functionsBaseUrl = (project: ImpactProjectKey): string =>
     : `https://${FUNCTIONS_REGION}-${FIREBASE_PROJECTS[project].projectId}.cloudfunctions.net`;
 
 /** URL of an HTTP (onRequest) Cloud Function, e.g.
- *  functionUrl('prod', 'create_paypal_order'). Callables don't need this -
- *  httpsCallable resolves them from the Firebase app's projectId. */
-export const functionUrl = (project: ImpactProjectKey, functionName: string): string =>
+ *  functionUrl('prod', HTTP_FUNCTIONS.create_paypal_order). The name must
+ *  come from the shared contract (contract/functions-contract.ts), so a
+ *  function that's renamed or removed fails the consumer's compile instead
+ *  of 404ing in production. Callables don't need this - httpsCallable
+ *  resolves them from the Firebase app's projectId. */
+export const functionUrl = (project: ImpactProjectKey, functionName: HttpFunctionName): string =>
   `${functionsBaseUrl(project)}/${functionName}`;
 
 export type ImpactAppKey = 'web' | 'admin' | 'reader';
