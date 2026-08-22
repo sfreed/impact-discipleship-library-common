@@ -41,6 +41,18 @@ export interface CartItem {
   color?: string;
   language?: string;
   followUpEmailId?: string;
+  /**
+   * The product series this line belongs to (Campaign Manager v3).
+   *
+   * Carried on the ITEM so checkout can tell whether a series-targeted offer
+   * covers it without re-reading the whole catalogue mid-checkout.
+   *
+   * Absent on carts saved before this existed - localStorage carts outlive
+   * deploys - so a series offer simply will not match such a line until the
+   * shopper re-adds it. Self-healing, and never wrong in the expensive
+   * direction.
+   */
+  series?: string | null;
 }
 
 // The 5-step physical-fulfillment workflow (Store Manager > Fulfillment) -
