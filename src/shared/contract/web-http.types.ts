@@ -166,5 +166,31 @@ export interface GetYoutubeVideosResult {
   videos: unknown[];
 }
 
+/** One episode as get_youtube_podcasts_public returns it: already
+ *  normalized, so a client never has to know the YouTube payload shape.
+ *  Unlike GetYoutubeVideosResult above (raw playlistItems), this carries
+ *  `tags` - YouTube only exposes snippet.tags on the *videos* resource, so
+ *  producing this costs a second API call the passthrough never made. */
+export interface YoutubePodcast {
+  /** playlistItem id - stable per episode, used as the list track key. */
+  id: string;
+  videoId: string;
+  title: string;
+  description: string;
+  /** ISO 8601, straight from snippet.publishedAt. */
+  publishedAt: string;
+  /** Best available: maxres, else standard, else high. */
+  thumbnailUrl: string;
+  /** The video's YouTube tags; empty when none are set in YouTube Studio. */
+  tags: string[];
+}
+
+/** get_youtube_podcasts_public (GET): the podcast playlist, newest first,
+ *  server-side cached. Note the list can be served stale on a YouTube
+ *  outage - showing the last known episodes beats an empty page. */
+export interface GetYoutubePodcastsResult {
+  videos: YoutubePodcast[];
+}
+
 /** campaign_web_event (GET beacon): ?cid=<campaignId>&type=<event>; 204. */
 export type CampaignWebEventType = 'web_shown' | 'web_click';

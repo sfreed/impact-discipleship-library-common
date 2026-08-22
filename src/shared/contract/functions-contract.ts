@@ -26,6 +26,7 @@ export const HTTP_FUNCTIONS = {
   unsubscribe_from_email_list: 'unsubscribe_from_email_list',
   get_youtube_videos: 'get_youtube_videos',
   get_youtube_videos_public: 'get_youtube_videos_public',
+  get_youtube_podcasts_public: 'get_youtube_podcasts_public',
   campaign_open: 'campaign_open',
   campaign_click: 'campaign_click',
   campaign_web_event: 'campaign_web_event',
