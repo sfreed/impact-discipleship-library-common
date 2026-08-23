@@ -31,6 +31,7 @@ export const HTTP_FUNCTIONS = {
   campaign_click: 'campaign_click',
   campaign_web_event: 'campaign_web_event',
   newsletter_archive: 'newsletter_archive',
+  search_impact_groups: 'search_impact_groups',
   lookup_coupon: 'lookup_coupon',
   register_for_event: 'register_for_event',
   get_event_registration: 'get_event_registration',
