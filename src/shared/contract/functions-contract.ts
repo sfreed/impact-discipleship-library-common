@@ -104,6 +104,7 @@ export const TRIGGER_FUNCTIONS = {
   notifyGroupChatMessage: 'notifyGroupChatMessage',
   notifyConversationMessage: 'notifyConversationMessage',
   onGroupMembershipCountChanged: 'onGroupMembershipCountChanged',
+  onGroupDeletedCleanup: 'onGroupDeletedCleanup',
   notifyJoinRequestActivity: 'notifyJoinRequestActivity',
   notifyPrayerRequestShared: 'notifyPrayerRequestShared',
   onAdminUserRoleSync: 'onAdminUserRoleSync',
