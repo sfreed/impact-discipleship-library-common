@@ -40,13 +40,40 @@ export interface GeocodeResult {
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {
   async geocode(query: GeocodeQuery): Promise<GeocodeResult | undefined> {
+    // Street-level first - the precise answer when the leader typed a real,
+    // resolvable address.
+    const precise = await this.lookup(query, true);
+    if (precise || !query.address1) {
+      return precise;
+    }
+    // Nominatim answers an unmatched street with an empty array, not an
+    // error, and leaders routinely enter addresses it won't resolve: a
+    // misspelling, a venue name instead of a street, or the city/state/ZIP
+    // repeated inside the street field. Retrying without `street` yields
+    // town-level coordinates - the right granularity for a "groups within
+    // 25 miles" search anyway, and strictly better than the
+    // no-coordinates-at-all this returned before. Without this, such a
+    // group silently never appears in any radius search; every group
+    // created before this fallback existed has no lat/lng at all (see
+    // scripts/audit-group-locations.js in the admin repo).
+    return this.lookup(query, false);
+  }
+
+  /**
+   * One Nominatim attempt. Never throws - resolves to undefined on any
+   * failure, timeout, miss, or unparsable response.
+   */
+  private async lookup(
+    query: GeocodeQuery,
+    includeStreet: boolean,
+  ): Promise<GeocodeResult | undefined> {
     const params = new URLSearchParams({
       format: 'jsonv2',
       limit: '1',
       city: query.city,
       countrycodes: query.countryCode.toLowerCase(),
     });
-    if (query.address1) {
+    if (includeStreet && query.address1) {
       params.set('street', query.address1);
     }
     if (query.state) {
