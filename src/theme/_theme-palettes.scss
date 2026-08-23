@@ -187,20 +187,36 @@
 // is the single place both apps' login/signup pages pull a full reset
 // from, so the exclusion can't drift out of sync between them or between
 // color-token resets and structural ones.
-@mixin guest-page-theme-reset {
+// The look a guest page lands on is the CALLER's, not this file's: each app
+// passes its own palettes, type and corner radius so the reset restores that
+// app's identity rather than one baked in here. The defaults are the original
+// azure/violet + Roboto + squared-corner values, so an existing caller that
+// passes nothing behaves exactly as before.
+@mixin guest-page-theme-reset(
+  $primary: mat.$azure-palette,
+  $tertiary: mat.$violet-palette,
+  $typography: Roboto,
+  $font-family: (
+    Roboto,
+    'Helvetica Neue',
+    sans-serif,
+  ),
+  $corner-full: 0
+) {
   @include mat.theme(
     (
       color: (
         theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$violet-palette,
+        primary: $primary,
+        tertiary: $tertiary,
       ),
+      typography: $typography,
     )
   );
   color-scheme: light;
-  --mat-sys-corner-full: 0;
+  --mat-sys-corner-full: #{$corner-full};
   color: var(--mat-sys-on-surface);
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: $font-family;
 
   @include matrix-structural-reset;
 }
