@@ -506,6 +506,12 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Discount ({percent}% off)', kind: 'label', area: 'Impact Groups > Buy Licenses Dialog' },
   { text: 'Total', kind: 'label', area: 'Impact Groups > Buy Licenses Dialog' },
   { text: 'Get Licenses', kind: 'label', area: 'Impact Groups > Buy Licenses Dialog' },
+  {
+    text:
+      "You'll finish your purchase on our website, then come back here - your new licenses will already be waiting.",
+    kind: 'label',
+    area: 'Impact Groups > Buy Licenses Dialog',
+  },
   { text: "Payment isn't available right now. Please try again later.", kind: 'label', area: 'Impact Groups > Buy Licenses Dialog' },
   { text: 'Close', kind: 'label', area: 'Impact Groups > Buy Licenses Dialog' },
   {
