@@ -2,6 +2,7 @@ import { BaseModel } from './base.model';
 import { CoachModel } from './domain/coach.model';
 import { CourseModel } from './domain/course.model';
 import { DMMModel } from './domain/dmm.model';
+import { DockBarModel } from './domain/dock-bar.model';
 import { EventRegistrationModel } from './domain/event-registration.model';
 import { FormDefinitionModel } from './domain/form-definition.model';
 import { FormSubmissionModel } from './domain/form-submission.model';
@@ -95,6 +96,12 @@ const CASES: ModelCase[] = [
   {
     name: 'DMMModel',
     create: () => new DMMModel(),
+    defaults: { isActive: false },
+    extendsBase: true,
+  },
+  {
+    name: 'DockBarModel',
+    create: () => new DockBarModel(),
     defaults: { isActive: false },
     extendsBase: true,
   },
