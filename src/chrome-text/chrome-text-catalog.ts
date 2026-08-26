@@ -442,6 +442,14 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Unassigned reserve', kind: 'label', area: 'Impact Groups > Licenses Tab' },
   { text: 'Assigned to members', kind: 'label', area: 'Impact Groups > Licenses Tab' },
   { text: 'Buy Licenses', kind: 'label', area: 'Impact Groups > Licenses Tab' },
+  // A leader can apply a coupon to a bulk license purchase (2026-08-26).
+  // The rest of that dialog's coupon wording is REUSED from the Store's own
+  // rows ('Coupon code', 'Apply', 'Remove', 'Enter a coupon code.', 'That
+  // coupon code is not valid.', 'Could not check that coupon right now.
+  // Please try again.') rather than duplicated - only these two are
+  // specific to buying licenses for a group.
+  { text: 'That coupon does not apply to this book.', kind: 'label', area: 'Impact Groups > Licenses Tab' },
+  { text: 'Your bulk discount is already as good or better than that coupon, so we applied the bulk discount.', kind: 'label', area: 'Impact Groups > Licenses Tab' },
   { text: 'No members yet - once someone joins, you can assign a license here.', kind: 'label', area: 'Impact Groups > Licenses Tab' },
   { text: 'Member', kind: 'label', area: 'Impact Groups > Licenses Tab' },
   { text: 'Status', kind: 'label', area: 'Impact Groups > Licenses Tab' },
@@ -897,7 +905,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: '. Click <strong>Buy Licenses</strong>, choose a quantity, and check out (or, if a discount brings the total to $0, just claim them). In the Android app that button reads <strong>Continue purchase in browser</strong> instead, and opens our website to finish paying there - the same as the Store; your licenses are waiting when you come back. Licenses you don\'t hand out immediately sit in your <strong>unassigned reserve</strong> for that book - usable in this group or any other group you run for the same book, including ones you start later. From the member ledger on this tab you can then <strong>Assign</strong> a reserved license to any approved member who doesn\'t already have one, or <strong>Revoke</strong> one you\'d previously assigned (only while the group is still open and still studying the same book).', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'The Licenses tab, showing the reserve and the member ledger', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'The Licenses tab at a glance: how many licenses are still in your reserve, how many are with members, and who holds which.', kind: 'label', area: 'Guide > For Group Leaders' },
-  { text: 'Buying in bulk: the discount updates as you change the quantity, so you can see what each extra copy saves before you pay.', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Buying in bulk: the discount updates as you change the quantity, so you can see what each extra copy saves before you pay. You can also enter a coupon code - whichever is worth more, the coupon or your bulk discount, is applied; the two are never added together, and if your bulk discount already matches or beats the code we tell you so and keep the bulk discount.', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'Accounts with free international access never need to buy licenses, so for them the <strong>Licenses</strong> tab and <strong>My License Purchases</strong> don\'t appear at all.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'For a by-invite-only group, the creator gets an extra <strong>Invites</strong> tab. Click <strong>Invite by Email</strong>, enter the person\'s email, and optionally attach one of your unassigned licenses for that book. They\'ll get an email explaining the group with <strong>Yes, I\'m interested</strong> / <strong>No thanks</strong> buttons - accepting walks them through creating a free account (or signing in, if they already have one) and joins them automatically, landing them on My Impact Groups with a welcome banner that confirms they\'ve joined and says whether a book license came attached or the leader will follow up about book access; declining lets them leave you an optional note explaining why, which shows up right on your Invites tab next to that invite. A still-pending invite can be <strong>Cancel</strong>ed at any time.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'Sending an invitation: an email address, and the choice of attaching a license from your reserve.', kind: 'label', area: 'Guide > For Group Leaders' },
