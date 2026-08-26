@@ -92,12 +92,26 @@ export interface PurchaseGroupLicensesRequest {
   quantity: number;
   /** Absent for a $0 (international / fully discounted) purchase. */
   payPalOrderId?: string;
+  /** A coupon code the leader entered. The server re-resolves it against
+   *  the `coupons` collection and re-checks its tag scoping - the client
+   *  never sends a percentage, only the code, for the same reason it never
+   *  sends a price. Ignored when it beats nothing (see
+   *  chooseLicenseDiscount: bulk and coupon are exclusive, tie to bulk). */
+  couponCode?: string;
 }
 export interface PurchaseGroupLicensesResult {
   purchaseId: string;
   licenseIds: string[];
   /** Set when one of the new licenses was auto-assigned to the buyer. */
   selfAssignedLicenseId?: string;
+  /** Which discount the SERVER actually applied, so the client can confirm
+   *  what was charged rather than trusting its own preview. 'bulk' when a
+   *  quantity tier won (including over a valid coupon), 'coupon' when the
+   *  code won, 'none' when neither applied. */
+  discountSource?: 'bulk' | 'coupon' | 'none';
+  /** True when the leader's coupon was valid and applicable but the bulk
+   *  tier matched or beat it, so the code was deliberately not used. */
+  bulkBeatsCoupon?: boolean;
 }
 
 export interface AssignGroupLicenseRequest {
