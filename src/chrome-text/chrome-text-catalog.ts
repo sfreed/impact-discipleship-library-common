@@ -788,4 +788,53 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Free eBooks and resources', kind: 'label', area: 'Dashboard > Store Teaser' },
   { text: "Below the books for purchase, the Store also lists <strong>Free eBooks</strong> - PDF resources you can read without buying anything. Each one shows its cover and description with two buttons: <strong>Read</strong> opens the PDF right in the app (on the Android app it opens in your device's browser instead), and <strong>Open in new tab</strong> hands it to your browser - handy for downloading or printing.", kind: 'html', area: 'Help > Store' },
   { text: 'The list starts collapsed - tap the Free eBooks heading to open or close it.', kind: 'label', area: 'Help > Store' },
+
+  // --- Guide: the audience-organized documentation at /guide and /help ---
+  // Rendered on a PUBLIC route as well as in-app. A signed-out visitor has no
+  // commonTranslations listener (firestore.rules deny it before sign-in), so
+  // these always render in English there and translate only once signed in.
+  { text: 'Guide', kind: 'label', area: 'Guide > Shell' },
+  { text: 'Guide Home', kind: 'label', area: 'Guide > Shell' },
+  { text: 'All guides', kind: 'label', area: 'Guide > Shell' },
+  { text: 'On this page', kind: 'label', area: 'Guide > Shell' },
+
+  { text: 'Impact Discipleship Library Guide', kind: 'label', area: 'Guide > Overview' },
+  { text: 'The Impact Discipleship Library is where you read licensed lesson content, answer and save your own responses, buy book licenses, and take part in Impact Groups - patron-run book discussion groups with their own chat, messaging, and shared prayer requests.', kind: 'label', area: 'Guide > Overview' },
+  { text: 'This guide is in three parts. Start with For Everyone, then read the part that matches how you use the app. If you are organizing a group and buying books for other people, that is the Group Leaders guide.', kind: 'label', area: 'Guide > Overview' },
+  { text: '{count} sections', kind: 'label', area: 'Guide > Overview' },
+
+  { text: 'For Everyone', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Signing in, reading lessons, buying a book license, and the settings everyone shares.', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Getting started', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Your library', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Reading and answering a lesson', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Buying a book license', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Messages and announcements', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Settings and appearance', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Using the app offline', kind: 'label', area: 'Guide > For Everyone' },
+  { text: 'Your account and privacy', kind: 'label', area: 'Guide > For Everyone' },
+
+  { text: 'For Members', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Finding a group, joining it, and taking part once you are in.', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Finding a group', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Joining a group', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Accepting an invitation', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Using a license your leader gave you', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Chat, prayer, and messages', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Tracking your progress', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Leaving a group', kind: 'label', area: 'Guide > For Members' },
+
+  { text: 'For Group Leaders', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Starting a group, buying licenses in bulk, handing them out, and running the group week to week.', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Before you start', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Creating your group', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Buying licenses in bulk', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Your license reserve', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Inviting members', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Approving join requests', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Managing members', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Running your group', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Your license purchases', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Closing or reopening a group', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Troubleshooting', kind: 'label', area: 'Guide > For Group Leaders' },
 ];
