@@ -81,24 +81,50 @@ export const functionUrl = (project: ImpactProjectKey, functionName: HttpFunctio
 export type ImpactAppKey = 'web' | 'admin' | 'reader';
 
 /** The canonical public URL of each app per environment - what the other
- *  apps link to (admin's publicSiteUrl, reader's webAppUrl, the emulated
- *  dev servers on 4200/5200/4300). */
+ *  apps link to (admin's publicSiteUrl, reader's webAppUrl, the local dev
+ *  servers).
+ *
+ *  LOCAL PORTS ARE A FIXED RULE (2026-08-26). The thousands digit is the
+ *  APP, the last digit is the BACKEND:
+ *
+ *      web 4200 | admin 5200 | reader 6200     -> live data (dev project)
+ *      web 4201 | admin 5201 | reader 6201     -> Firebase emulator
+ *
+ *  Before this, an app's emulator server and its dev-data server shared a
+ *  port (admin both on 5200, web both on 4200) while every Playwright
+ *  webServer used `reuseExistingServer: true`. That combination silently
+ *  binds a suite to whatever happened to be running: the cross-app suite,
+ *  whose own header promises it cannot touch impactdisciplesdev, would
+ *  have driven the DEV-backed admin server had one been up - and on
+ *  2026-08-26 port 4200 was serving the READER while the cross config
+ *  expected web there. One port per app per backend makes that
+ *  unrepresentable rather than merely unlikely. */
 export const APP_URLS: Readonly<Record<ImpactAppKey, Readonly<Record<ImpactProjectKey, string>>>> = {
   web: {
     dev: 'https://impactdisciplesdev-public.web.app',
     prod: 'https://impactdisciples.com',
-    emulator: 'http://localhost:4200',
+    emulator: 'http://localhost:4201',
   },
   admin: {
     dev: 'https://impactdisciplesdev-admin.web.app',
     prod: 'https://impactdisciples-admin.web.app',
-    emulator: 'http://localhost:5200',
+    emulator: 'http://localhost:5201',
   },
   reader: {
     dev: 'https://impactdisciplesdev-library.web.app',
     prod: 'https://library.impactdisciples.com',
-    emulator: 'http://localhost:4300',
+    emulator: 'http://localhost:6201',
   },
+};
+
+/** Each app's LOCAL dev server when it is pointed at live (dev-project)
+ *  data - the x200 half of the port rule documented on APP_URLS above.
+ *  APP_URLS.<app>.emulator is the x201 half. Import one of these rather
+ *  than writing a localhost literal, so the rule has exactly one home. */
+export const LOCAL_APP_URLS: Readonly<Record<ImpactAppKey, string>> = {
+  web: 'http://localhost:4200',
+  admin: 'http://localhost:5200',
+  reader: 'http://localhost:6200',
 };
 
 /** Every browser origin the web and admin apps are served from - the
@@ -119,7 +145,13 @@ export const CORS_ALLOWED_ORIGINS: readonly string[] = [
   // admin, dev
   'https://impactdisciplesdev-admin.web.app',
   'https://impactdisciplesdev-admin.firebaseapp.com',
-  // local development
+  // local development - see APP_URLS above for the port rule. Both
+  // backends are listed: a browser calling a deployed function from a
+  // local page is origin-checked the same either way.
   'http://localhost:4200',
+  'http://localhost:4201',
   'http://localhost:5200',
+  'http://localhost:5201',
+  'http://localhost:6200',
+  'http://localhost:6201',
 ];
