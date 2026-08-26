@@ -625,6 +625,34 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   // account) are deliberately NOT repeated here: the catalog is an inventory
   // keyed by text, and a second row would just list the same string twice in
 
+  //
+  // Generated from the Guide sources rather than hand-written: a catalog key
+  // IS the Firestore lookup key, so it must match the rendered literal
+  // byte-for-byte. The six `Help > *` areas this replaced had already drifted
+  // from what the app rendered, which is what hand-maintenance costs over time.
+  //
+  // 'Guide > Contents' holds guide-content.ts's labels, taglines and screen
+  // descriptions. Those reach the UI through chrome.t(guide.label)-style
+  // DYNAMIC calls, which audit-chrome-translations.js cannot resolve and skips
+  // - without these rows the nav and the find-by-screen index would silently
+  // stay English-only in every locale.
+  //
+  // no commonTranslations listener - firestore.rules deny it before sign-in -
+  // so they always render in English there, and translate once signed in.
+
+  // Guide > Contents
+
+  // Guide > Overview
+
+  // Guide > Find by Screen
+
+  // Guide > Shell
+
+  // Guide > For Everyone
+
+  // Guide > For Members
+
+  // Guide > For Group Leaders
 
   // --- Guide: the audience-organized documentation at /guide and /help ---
   //
@@ -823,15 +851,19 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Click <strong>Join</strong> on any open group to send a request. It shows as <strong>Request Sent</strong> until the group\'s creator approves or declines it - you can withdraw a still-pending request at any time from the group\'s own page. Once approved, the group appears under <strong>My Impact Groups</strong> with access to its tabs below.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Browse Impact Groups, filtered search results', kind: 'label', area: 'Guide > For Members' },
   { text: 'Typing narrows the list immediately - here, searching &quot;night&quot; matches a group by name.', kind: 'html', area: 'Guide > For Members' },
+  { text: 'Searching for a group: the list narrows as you type, and Join sends your request.', kind: 'label', area: 'Guide > For Members' },
   { text: 'A by-invite-only group never appears in Browse or search - the only way in is an invitation. The leader sends it to your email address, and it arrives as a short note about the group with two buttons: <strong>Yes, I\'m interested</strong> and <strong>No thanks</strong>.', kind: 'html', area: 'Guide > For Members' },
   { text: 'You do not need an account before you click. The invitation link opens whether you are signed out, already signed in as the invited person, or signed in as somebody else - if it is a different account, the page tells you so rather than quietly joining the wrong one. Accepting walks you through creating a free account (or signing in), then joins you to the group automatically and lands you on <strong>My Impact Groups</strong> with a banner confirming you are in.', kind: 'html', area: 'Guide > For Members' },
   { text: 'That same banner tells you about the book. If the leader attached one of their licenses, it is already yours and the book is waiting in <strong>My Books</strong>. If they did not - or their reserve had run out by the time you accepted - the banner says the leader will follow up about book access instead. Either way you are a member of the group; only the book access differs.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Choosing <strong>No thanks</strong> lets you leave the leader an optional note explaining why. It is genuinely optional, and it goes only to that leader. An invitation that you never answer simply stays pending until the leader cancels it.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Opening a group takes you to its own page with a row of tabs: <strong>Overview</strong>, <strong>Members</strong>, <strong>Chat</strong>, and <strong>Prayers</strong> for everyone in the group, plus <strong>Licenses</strong> - and, for by-invite-only groups, <strong>Invites</strong> - for the creator only.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Every group has one shared chat that any approved member - including you, if you\'re the creator - can post to and read. It\'s a simple running conversation, visible to the whole group; there\'s no way to edit or delete a message once it\'s sent, so it\'s meant for casual back-and-forth, not anything you\'d need to take back.', kind: 'html', area: 'Guide > For Members' },
+  { text: 'The group chat - one running conversation everyone in the group can see.', kind: 'label', area: 'Guide > For Members' },
   { text: 'Separately from the shared chat, a group\'s creator can start a private, 1:1 message thread with any individual requester or member right from the Members tab - useful for following up on a join request, coordinating details, or a private conversation that doesn\'t belong in the group chat. Once the creator starts a thread with you, a <strong>Message the leader</strong> link appears on your own Overview tab so you can read and reply - but you can\'t start a new thread yourself; it\'s always the creator who initiates.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Some lessons include a prayer field. When you save a lesson with something written there, and you belong to at least one open Impact Group as an approved member, a <strong>&quot;Share your prayer?&quot;</strong> dialog offers to share it - check which of your groups should see it, then <strong>Share</strong> (or <strong>Not now</strong> to skip). It only asks again if you go back and change what you wrote; saving the same lesson again with the same prayer text won\'t re-prompt you.', kind: 'html', area: 'Guide > For Members' },
   { text: 'Shared prayers show up on the group\'s <strong>Prayers</strong> tab for every approved member to see and pray over, alongside which lesson prompted it and who shared it. You (the author) or the group\'s creator can remove a prayer request later if it\'s no longer needed.', kind: 'html', area: 'Guide > For Members' },
+  { text: 'The Prayers tab, listing prayers shared from lessons', kind: 'label', area: 'Guide > For Members' },
+  { text: 'Each shared prayer shows who offered it and which lesson prompted it.', kind: 'label', area: 'Guide > For Members' },
   { text: 'Chat messages, 1:1 messages, and shared prayer requests are only ever visible to approved members of that specific group - never to the public, and never to members of a different group you also belong to.', kind: 'label', area: 'Guide > For Members' },
   { text: 'Group leaders can buy book licenses in bulk and hand them out, so you may be given the book rather than buying it. When a leader assigns you one, the book simply appears in <strong>My Books</strong> - there is nothing to redeem, no code to enter, and no email you have to act on.', kind: 'html', area: 'Guide > For Members' },
   { text: 'A license does not expire. It is yours to read for as long as you hold it, exactly like one you bought yourself in the', kind: 'html', area: 'Guide > For Members' },
@@ -863,16 +895,28 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'The Location step, shown only when &quot;Offer in-person&quot; is checked.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'The creator-only <strong>Licenses</strong> tab is where you buy book licenses in bulk and hand them out to your group\'s members - separate from buying a single license for yourself in the', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: '. Click <strong>Buy Licenses</strong>, choose a quantity, and check out (or, if a discount brings the total to $0, just claim them). In the Android app that button reads <strong>Continue purchase in browser</strong> instead, and opens our website to finish paying there - the same as the Store; your licenses are waiting when you come back. Licenses you don\'t hand out immediately sit in your <strong>unassigned reserve</strong> for that book - usable in this group or any other group you run for the same book, including ones you start later. From the member ledger on this tab you can then <strong>Assign</strong> a reserved license to any approved member who doesn\'t already have one, or <strong>Revoke</strong> one you\'d previously assigned (only while the group is still open and still studying the same book).', kind: 'html', area: 'Guide > For Group Leaders' },
+  { text: 'The Licenses tab, showing the reserve and the member ledger', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'The Licenses tab at a glance: how many licenses are still in your reserve, how many are with members, and who holds which.', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'Buying in bulk: the discount updates as you change the quantity, so you can see what each extra copy saves before you pay.', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'Accounts with free international access never need to buy licenses, so for them the <strong>Licenses</strong> tab and <strong>My License Purchases</strong> don\'t appear at all.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'For a by-invite-only group, the creator gets an extra <strong>Invites</strong> tab. Click <strong>Invite by Email</strong>, enter the person\'s email, and optionally attach one of your unassigned licenses for that book. They\'ll get an email explaining the group with <strong>Yes, I\'m interested</strong> / <strong>No thanks</strong> buttons - accepting walks them through creating a free account (or signing in, if they already have one) and joins them automatically, landing them on My Impact Groups with a welcome banner that confirms they\'ve joined and says whether a book license came attached or the leader will follow up about book access; declining lets them leave you an optional note explaining why, which shows up right on your Invites tab next to that invite. A still-pending invite can be <strong>Cancel</strong>ed at any time.', kind: 'html', area: 'Guide > For Group Leaders' },
+  { text: 'Sending an invitation: an email address, and the choice of attaching a license from your reserve.', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'The Invites tab, listing sent invitations and their status', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'The Invites tab keeps every invitation you have sent, with its status - and, where someone declined, the note they left you.', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'The Members tab lists <strong>Requests to join</strong> (creator only), the approved <strong>Members</strong> roster (creator listed first, as &quot;Impact Group leader&quot;), and any <strong>Declined requests</strong> (creator only). As creator you can <strong>Approve</strong> or <strong>Reject</strong> a pending request, or <strong>Message</strong> anyone on any of the three lists - including someone you\'ve declined. Approving is blocked once the group hits its size limit, and reaching that limit closes the group automatically. There\'s no separate &quot;remove&quot; action for an already-approved member; they leave on their own from their own Overview tab.', kind: 'html', area: 'Guide > For Group Leaders' },
+  { text: 'The Members tab, with a pending request above the approved roster', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'A request waiting on you sits above the roster, with Approve and Reject beside it. Anyone on the page can be messaged directly.', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'The Overview tab summarizes the group (book, location, schedule, visibility) and, for the creator, is where every management action lives:', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: '<strong>Promote to [next book]</strong> - shown when the group\'s book is part of a series and you already own the next one. Walks you through starting a new group for that next book, pre-filled from this one, then lets you choose which approved members to bring along and whether to buy them licenses right away or let them buy their own.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: '<strong>Clone for a different book</strong> - always available as a manual alternative (needed for standalone books, or to pick something outside the series). Starts a new group pre-filled from this one for any book you own, and automatically brings your entire current roster along - no member picker, no license-buying step.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: '<strong>Invite by Email</strong> - by-invite-only groups only; see &quot;Inviting people directly,&quot; below.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: '<strong>Close Impact Group</strong> - hides it from Browse without deleting anything; there\'s still no way to delete a group you created from this app.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'If you\'re a member rather than the creator, Overview instead offers <strong>Withdraw Request</strong> (while pending) or <strong>Leave Group</strong> (once approved) - see &quot;Leaving or closing a group,&quot; below - plus a <strong>Message the leader</strong> link once the creator has started a 1:1 conversation with you (see Messaging, below).', kind: 'html', area: 'Guide > For Group Leaders' },
+  { text: 'A group Overview tab as its leader sees it', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'The Overview tab as the leader sees it - the group at a glance, with every management action gathered in one place.', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'Tap <strong>My License Purchases</strong> to see every bulk license purchase you\'ve made across all your groups. Each purchase lists how many licenses it bought, how many are still sitting in your unassigned reserve versus already handed out, and which member (and which group) each assigned license currently belongs to.', kind: 'html', area: 'Guide > For Group Leaders' },
+  { text: 'My License Purchases, listing each purchase and where its licenses went', kind: 'label', area: 'Guide > For Group Leaders' },
+  { text: 'One row per purchase, and under it every license it bought - so you can always answer "who has the books I paid for?".', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'When a group has finished the book, close it from the <strong>Overview</strong> tab with <strong>Close Impact Group</strong>. Closing takes it out of Browse and search so nobody new asks to join. It is not a deletion: the group, its members, its chat and its shared prayers all stay exactly as they were, and anyone who already belongs can still open it from <strong>My Impact Groups</strong>.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'A group with a size limit closes itself the moment approving one more person would reach that limit, so a full group stops attracting requests you would only have to decline.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'There is no way to reopen a group yourself - the app has no undo for this. If you close one by mistake, contact Impact Disciples and staff can put it back. If you are only pausing between books, consider leaving the group open instead, or starting a fresh group for the next book with Promote.', kind: 'label', area: 'Guide > For Group Leaders' },
