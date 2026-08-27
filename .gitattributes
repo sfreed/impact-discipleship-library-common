@@ -1,1 +1,21 @@
-* text=auto
+# `text=auto` alone was already doing half the job: it normalises to LF on
+# commit, which is why every blob in this repo is clean LF and none is mixed.
+#
+# What it does NOT do is pin the WORKING TREE. With no `eol`, checkout falls
+# back to core.eol, which defaults to `native` - CRLF on Windows - and that is
+# independent of core.autocrlf, so turning autocrlf off does not help either.
+# The result was 55 CRLF / 48 LF on disk in the same checkout: every file that
+# a tool had rewritten since checkout was LF, the rest CRLF.
+#
+# That split is how files end up with mixed endings INSIDE them, which
+# silently breaks multi-line edits - a literal match picks one style and
+# misses the other. The three consumer repos (admin, web, reader) hit exactly
+# that and were pinned to LF on 2026-08-26; this is the same fix here, so a
+# fresh clone on any machine agrees with them instead of depending on local
+# git config.
+#
+# No .bat/.cmd/.ps1/.sh files are tracked here. Add an `eol=crlf` exception
+# before committing one - the reader repo carries that carve-out for
+# android/gradlew.bat.
+
+* text=auto eol=lf
