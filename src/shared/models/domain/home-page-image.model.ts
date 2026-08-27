@@ -31,4 +31,22 @@ export class HomePageImageModel extends BaseModel {
    * behaviour only turns on for a slide somebody deliberately ticks.
    */
   artworkHasText?: boolean;
+
+  /**
+   * An alternative picture for phones and tablets, used below 992px in place
+   * of `image`. Optional - a slide without one shows `image` at every size,
+   * exactly as before.
+   *
+   * Why a second file rather than more CSS: `image` is authored as a wide
+   * desktop banner, 2560x1200 for the event slides. Fitting that whole banner
+   * into a 390px phone is a 6.6x reduction, which leaves the wordmark inside
+   * it too small to read; filling the phone frame instead crops half the
+   * picture away. Neither is a styling problem - one image cannot serve both
+   * shapes, so a slide that matters on a phone gets artwork cut for a phone.
+   *
+   * Near-square (about 5:4) suits the frame best: it fills a phone with almost
+   * no letterboxing. See scripts/crop-slide-for-mobile.js, which cuts one from
+   * an existing wide banner.
+   */
+  mobileImage?: ImageModel;
 }
