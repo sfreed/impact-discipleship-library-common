@@ -139,16 +139,30 @@ const ADMIN_FUNCTIONAL: E2eSpec[] = [
   {
     id: 'e2e-admin/10-tools', title: 'Tools & Reports',
     description:
-      'System email templates, the form builder, and the reports staff pull numbers from. ' +
-      'Pins that a legacy template opens in the rich-text dialog and NOT the builder - ' +
-      'opening one in the builder converts it on first save, and these are documents Cloud ' +
-      'Functions substitute placeholders into.',
-    areas: ['Email templates', 'Reports', 'Form builder'], apps: ['admin'], tests: 5,
+      'The form builder, shipping labels, and the reports staff pull numbers from. ' +
+      'Covered System Templates until 2026-08-27, when that screen was removed and every ' +
+      'template gained a home on the screen that sends it; the two tests that pinned it - ' +
+      'including the one asserting a legacy template opens in the rich-text dialog rather ' +
+      'than the builder - went with it. That conversion is still a one-way door, and is ' +
+      'now uncovered.',
+    areas: ['Reports', 'Form builder', 'Shipping'], apps: ['admin'], tests: 6,
   },
   {
     id: 'e2e-admin/11-admin-users', title: 'Staff Administration',
     description: 'The screen where access is granted - who may sign in, and with what role.',
     areas: ['Roles & permissions'], apps: ['admin'], tests: 5,
+  },
+  {
+    id: 'e2e-admin/12-chrome-palette', title: 'Email Chrome Palette',
+    description:
+      'Dragging a ready-made header or footer onto an email that already exists - the ' +
+      'thing starter templates never could, since applying one replaced the whole design. ' +
+      'Unit tests cover the drop handler and the palette index alignment; only a browser ' +
+      'can prove the drag itself, because cdkDropList has to be wired list-to-list and the ' +
+      'preview iframes sit under the cursor. Also pins that a mined newsletter footer ' +
+      'arrives with its dead Mailchimp tags gone and the postal address substituted from ' +
+      'the config document at drop time.',
+    areas: ['Email templates', 'Email designer'], apps: ['admin'], tests: 5,
   },
 ];
 
