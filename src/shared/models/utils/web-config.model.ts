@@ -23,6 +23,13 @@ export class WebConfigModel extends BaseModel{
   equippingGroupTotalCost: number;
   equippingGroupPaymentCost: number;
   adminEmailAddress: string;
+  // Recipient(s) for the daily "locked-out patron" alert - a scheduled
+  // function (lockedOutPatronAlert) emails here when a reader has a
+  // libraryUsers profile but no Firebase Auth account, i.e. cannot sign in.
+  // Comma-separated for multiple. Blank falls back to a hardcoded default in
+  // the function. Fine to keep in this world-readable config: it is a contact
+  // address, not a secret (same rule as paypalClientId below).
+  lockedOutAlertEmail?: string;
   taxImportDate?: Timestamp;
   freeShippingAmount: number;
   // paypalClientId is a public client identifier, safe to keep here. Secrets

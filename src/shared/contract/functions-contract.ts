@@ -110,6 +110,7 @@ export const TRIGGER_FUNCTIONS = {
   onAdminUserRoleSync: 'onAdminUserRoleSync',
   onPurchaseTaxSummary: 'onPurchaseTaxSummary',
   onEventRegistrationSessionCounts: 'onEventRegistrationSessionCounts',
+  lockedOutPatronAlert: 'lockedOutPatronAlert',
 } as const;
 
 export type HttpFunctionName = (typeof HTTP_FUNCTIONS)[keyof typeof HTTP_FUNCTIONS];
