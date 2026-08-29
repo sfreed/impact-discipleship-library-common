@@ -1,0 +1,79 @@
+{
+  "items": [
+    {
+      "id": "nav-home",
+      "title": "Home",
+      "kind": "page",
+      "routeKey": "home",
+      "visible": true
+    },
+    {
+      "id": "nav-training",
+      "title": "Training",
+      "kind": "group",
+      "visible": true,
+      "children": [
+        { "id": "nav-training-seminars", "title": "Seminars", "kind": "page", "routeKey": "seminars", "visible": true },
+        { "id": "nav-training-equipping", "title": "Equipping Groups", "kind": "page", "routeKey": "equipping-groups", "visible": true },
+        { "id": "nav-training-find-group", "title": "Find an Impact Group", "kind": "page", "routeKey": "impact-groups", "visible": true },
+        { "id": "nav-training-coaching", "title": "Coaching with Impact", "kind": "page", "routeKey": "coaching-with-impact", "visible": true },
+        { "id": "nav-training-lunch", "title": "Lunch and Learns", "kind": "page", "routeKey": "lunch-and-learns", "visible": true },
+        { "id": "nav-training-upcoming", "title": "Upcoming Training", "kind": "page", "routeKey": "events", "visible": true }
+      ]
+    },
+    {
+      "id": "nav-resources",
+      "title": "Resources",
+      "kind": "group",
+      "visible": true,
+      "children": [
+        { "id": "nav-resources-ebooks", "title": "E-Books", "kind": "page", "routeKey": "e-books", "visible": true },
+        { "id": "nav-resources-podcasts", "title": "Podcasts", "kind": "page", "routeKey": "podcasts", "visible": true },
+        { "id": "nav-resources-dmm", "title": "Disciple-Making Minute", "kind": "page", "routeKey": "disciple-making-minute", "visible": true },
+        { "id": "nav-resources-newsletter", "title": "Monthly Newsletter", "kind": "page", "routeKey": "monthly-newsletter", "visible": true },
+        { "id": "nav-resources-spanish", "title": "Spanish Resources", "kind": "custom", "url": "/store?category=spanish-resources", "external": false, "visible": true }
+      ]
+    },
+    {
+      "id": "nav-store",
+      "title": "Store",
+      "kind": "group",
+      "visible": true,
+      "children": [
+        { "id": "nav-store-books", "title": "Impact Books", "kind": "page", "routeKey": "store", "visible": true },
+        { "id": "nav-store-merch", "title": "Impact Merchandise", "kind": "custom", "url": "http://www.asbshops.com/lagrangehub/matthewfrady/impact", "external": true, "highlight": true, "visible": true }
+      ]
+    },
+    {
+      "id": "nav-donate",
+      "title": "Donate",
+      "kind": "page",
+      "routeKey": "give",
+      "visible": true
+    },
+    {
+      "id": "nav-team",
+      "title": "Team",
+      "kind": "page",
+      "routeKey": "team",
+      "visible": true
+    },
+    {
+      "id": "nav-summit-2027",
+      "title": "Summit 2027",
+      "kind": "page",
+      "routeKey": "summit-2027",
+      "highlight": true,
+      "visible": true
+    },
+    {
+      "id": "nav-golf",
+      "title": "Impact Golf Tournament",
+      "kind": "custom",
+      "url": "https://events.golfstatus.com/event/2nd-Annual-Impact-Golf-Tournament",
+      "external": true,
+      "highlight": true,
+      "visible": true
+    }
+  ]
+}
