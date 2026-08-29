@@ -69,5 +69,17 @@ export enum PAGE_SECTION_TYPES {
     FEATURES = 'features',
     /** Prayer Team: the copy above the join form. The form itself stays in
      *  the page. */
-    SIGNUP = 'signup'
+    SIGNUP = 'signup',
+    /**
+     * A carousel of quotes from the shared `testimonials` collection.
+     *
+     * The section stores ONLY THE ORDER, as ids. Whether a quote appears is
+     * its own Live switch, because that is a property of the testimonial
+     * rather than of any page showing it - so a quote switched off stops
+     * appearing everywhere at once, and a new one appears without anyone
+     * re-saving a page.
+     */
+    TESTIMONIALS = 'testimonials',
+    /** A heading, a passage, and a grid of pictures under it. */
+    GALLERY = 'gallery'
 }

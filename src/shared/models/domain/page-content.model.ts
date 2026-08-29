@@ -71,6 +71,21 @@ export interface PageContentBlock {
    * block. Array order IS the running order.
    */
   items?: PageContentItem[];
+  /**
+   * Which quotes a TESTIMONIALS section shows, IN ORDER.
+   *
+   * Ids into the shared `testimonials` collection rather than copies: the
+   * quotes are ordinary testimonials that happen to be shown here, and
+   * duplicating them would mean editing one and missing the other.
+   *
+   * ONLY THE ORDER lives here. Whether a quote appears is its own `isActive`,
+   * because that is a property of the testimonial - so switching one off
+   * removes it everywhere at once, and a newly added one appears without
+   * anyone re-saving this page. An id that no longer resolves is skipped,
+   * because deleting a testimonial should shorten a carousel rather than
+   * leave a blank slide in it.
+   */
+  testimonialIds?: string[];
   /** Switched off rather than deleted, so a block can come back. */
   isActive?: boolean;
 }
