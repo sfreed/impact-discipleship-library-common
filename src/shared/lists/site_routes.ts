@@ -154,6 +154,17 @@ export const RESERVED_SLUGS: readonly string[] = [
  * slash, a query or an encoded character is not one path segment, and the
  * matcher only ever sees one.
  */
+/**
+ * Original pages CUT OVER to the section kit (grown per migration). Their
+ * segments are deliberately UNRESERVED - the dynamic route serves them from
+ * page_content - and a new page cannot take the name anyway, because the
+ * migrated page itself appears among the existing kit pages the New Page
+ * dialog checks against.
+ */
+export const CUTOVER_SLUGS: readonly string[] = [
+  'lunch-and-learns' // 2026-08-30, the first
+];
+
 export function isSlugAvailable(slug: string): boolean {
   const trimmed = (slug ?? '').trim().toLowerCase();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)) {

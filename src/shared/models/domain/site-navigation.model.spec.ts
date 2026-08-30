@@ -5,7 +5,7 @@ import {
   SiteNavItem,
   validateSiteNavigation
 } from './site-navigation.model';
-import { RESERVED_SLUGS, SITE_ROUTES, isSlugAvailable, siteRoute, siteRoutePath } from '../../lists/site_routes';
+import { CUTOVER_SLUGS, RESERVED_SLUGS, SITE_ROUTES, isSlugAvailable, siteRoute, siteRoutePath } from '../../lists/site_routes';
 
 // The rules a menu has to keep, pinned here rather than in the admin screen
 // because the SEED SCRIPT and the editor both have to agree about them - a
@@ -110,6 +110,10 @@ describe('slugs a staff-created page may use', () => {
     const unreserved = SITE_ROUTES
       .map((route) => route.path.split('/').filter(Boolean)[0])
       .filter((segment): segment is string => !!segment)
+      // A CUT-OVER page's segment is unreserved BY DESIGN - the dynamic
+      // route serves it, and the migrated page itself blocks the name in
+      // the New Page dialog's duplicate check.
+      .filter((segment) => !CUTOVER_SLUGS.includes(segment))
       .filter((segment) => !RESERVED_SLUGS.includes(segment));
 
     expect(unreserved).toEqual([]);
