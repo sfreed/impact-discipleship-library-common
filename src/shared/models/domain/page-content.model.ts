@@ -118,6 +118,25 @@ export interface PageContentBlock {
   surface?: SectionSurface;
 
   /**
+   * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
+   * twelve original pages the id stays in the page component.
+   *
+   * Stored because a builder page has no component to keep it in, and PICKED
+   * because the original rule's rationale was never "no stored id" but "no
+   * typing" - a Firestore id retyped into a text box is a blank widget
+   * nobody can diagnose. The editor offers the forms that exist, by name.
+   * Approved 2026-08-30.
+   */
+  formId?: string;
+
+  /**
+   * WHICH mailing list a sign-up section joins. The web app's
+   * SubscriptionType union, chosen from SIGNUP_LISTS - a fixed choice,
+   * stored by key, never typed, same pattern as the giving buttons.
+   */
+  signupList?: 'newsletter' | 'prayer';
+
+  /**
    * Repeated entries, where a section is a list rather than a passage -
    * cards, timeline entries, price tiles, the passages in a two-column
    * block. Array order IS the running order.

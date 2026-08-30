@@ -160,7 +160,34 @@ export interface KitFields {
   video?: boolean;
   entries?: boolean;
   testimonials?: boolean;
+  /**
+   * WHICH Form Builder form this section shows, stored as `formId`.
+   *
+   * A relaxation of the original rule, approved 2026-08-30. On the twelve
+   * original pages the id lives in the page component, because "a Firestore
+   * id retyped into a text box is a blank widget nobody can diagnose" - but a
+   * builder page has no component. The rationale was never "no stored id",
+   * it was "no typing": the editor offers the forms that EXIST, by name, and
+   * picking one stores its id. Nothing is ever typed.
+   */
+  form?: boolean;
+  /**
+   * WHICH mailing list a sign-up section joins, stored as `signupList`.
+   *
+   * Same pattern as the giving buttons: a fixed choice, stored by key, never
+   * typed. The two keys are the SubscriptionType union the subscribe
+   * endpoint already accepts - so when Prayer Team migrates onto the kit,
+   * its section stores 'prayer' and behaves identically.
+   */
+  signupList?: boolean;
 }
+
+/** The lists a sign-up section may join. Keys are the web app's
+ *  SubscriptionType union - never renamed once stored. */
+export const SIGNUP_LISTS: readonly { key: 'newsletter' | 'prayer'; label: string }[] = [
+  { key: 'newsletter', label: 'Monthly newsletter' },
+  { key: 'prayer', label: 'Prayer team' }
+];
 
 export interface SectionVariant {
   /** Stored in `PageContentBlock.variant`. Never renamed once in use. */
@@ -459,22 +486,24 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         key: 'plain',
         label: 'A form under a heading',
         blurb: 'a heading over one of the forms from Form Builder',
-        fields: { heading: true, cta: true }
+        fields: { heading: true, cta: true, form: true }
       },
       {
         key: 'withCopy',
         label: 'A form beside copy',
         blurb: 'a heading and a passage beside the form, over a background photo',
-        fields: { heading: true, body: true, image: true, cta: true },
+        fields: { heading: true, body: true, image: true, cta: true, form: true },
         mediaSide: 'right'
       },
       {
-        // Prayer Team. WHICH DETAILS it asks for stays in the site - that is
-        // a decision about a mailing list rather than page copy.
+        // Prayer Team's shape. WHICH DETAILS it asks for stays in the site
+        // (name and email, a decision about a mailing list rather than page
+        // copy) - but WHICH LIST it joins is the section's, picked from the
+        // two that exist.
         key: 'mailingList',
         label: 'The sign-up form',
         blurb: 'copy above the name-and-email sign-up form',
-        fields: { body: true, cta: true }
+        fields: { body: true, cta: true, signupList: true }
       }
     ]
   },
