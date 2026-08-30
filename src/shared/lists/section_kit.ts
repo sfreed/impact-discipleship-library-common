@@ -789,7 +789,13 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // the container's width.
   'lunch-and-learns/prose': { headingStyle: 'light', copySize: 'large' },
   // About Us: the history band cropped every head off at centre focus.
-  'about-us/banner': { photoFocus: 'top' }
+  'about-us/banner': { photoFocus: 'top' },
+  // The three audience pages: the facts column sits in the brand-blue box,
+  // which the original runs with DARK text on. Same rows on all three -
+  // they are the same page three times over.
+  'equipping-groups-pastors/columns': { leftGround: 'brand' },
+  'equipping-groups-leaders/columns': { leftGround: 'brand' },
+  'equipping-groups-churches/columns': { leftGround: 'brand' }
 };
 
 /**

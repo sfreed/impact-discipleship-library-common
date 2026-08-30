@@ -149,6 +149,26 @@ export interface PageContentBlock {
   photoFocus?: 'top' | 'center' | 'bottom';
 
   /**
+   * CARD GROUNDS - a box painted behind a card or a column, from the same
+   * fixed palette as everything else. NOT a colour picker, deliberately:
+   * Shane's own follow-up was "then we'd have to let them change the text
+   * colours too", and that coupling is exactly what a palette solves - each
+   * ground defaults its ink to what reads on it, and the ink is its own
+   * small lever ('dark' | 'light') rather than a wheel.
+   *
+   * 'brand' is the equipping pages' blue box (#588AC7), which the original
+   * runs with DARK text - so that is brand's default ink, matched not
+   * invented. leftGround/rightGround card the two columns of a LIST_COLUMNS;
+   * cardGround cards every tile of a LIST_GRID. Absent = no box.
+   */
+  cardGround?: 'none' | 'panel' | 'brand' | 'dark';
+  cardInk?: 'dark' | 'light';
+  leftGround?: 'none' | 'panel' | 'brand' | 'dark';
+  leftInk?: 'dark' | 'light';
+  rightGround?: 'none' | 'panel' | 'brand' | 'dark';
+  rightInk?: 'dark' | 'light';
+
+  /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
    * twelve original pages the id stays in the page component.
    *
