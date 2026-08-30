@@ -381,6 +381,16 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         fields: { heading: true, subheading: true, body: true, entries: true }
       },
       {
+        // The Seminars picture cards, measured: HORIZONTAL dark rounded
+        // rows, a 175px square image on the left, title and copy beside it.
+        // A different arrangement, so a variant - no styling turns a
+        // vertical tile into this.
+        key: 'pictureRows',
+        label: 'Picture rows',
+        blurb: 'wide cards, each a square picture beside its title and copy',
+        fields: { heading: true, entries: true }
+      },
+      {
         key: 'icon',
         label: 'Icon tiles',
         blurb: 'an icon, a title, copy and a button per tile',
@@ -654,7 +664,7 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   { page: 'equipping-groups', type: PAGE_SECTION_TYPES.CARDS, archetype: SECTION_ARCHETYPE.LIST_ROWS, variant: 'buttonAndText', surface: 'light' },
   {
     page: 'seminars', type: PAGE_SECTION_TYPES.CARDS,
-    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture', surface: 'light',
+    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'pictureRows', surface: 'light',
     carries: 'a divider above the section'
   },
   { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.GALLERY, archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture', surface: 'light' },
@@ -665,7 +675,7 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   },
   {
     page: 'seminars', type: PAGE_SECTION_TYPES.PRICES,
-    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'price', surface: 'light',
+    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'price', surface: 'dark',
     carries: 'amounts resolve from Web Config; an unresolvable figure shows no price rather than $0'
   },
   { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.CARDS, archetype: SECTION_ARCHETYPE.LIST_ARTICLES, variant: 'plain', surface: 'light' },
@@ -793,6 +803,7 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // The three audience pages: the facts column sits in the brand-blue box,
   // which the original runs with DARK text on. Same rows on all three -
   // they are the same page three times over.
+  'seminars/prose': { headingStyle: 'light', copySize: 'large' },
   'equipping-groups-pastors/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-leaders/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }
