@@ -142,6 +142,11 @@ export interface PageContentBlock {
    *  the original pages (video ~700px of a 1600 screen), 'balanced' is an
    *  even split. Absent = large. */
   mediaSize?: 'large' | 'balanced';
+  /** Which part of a background PHOTO stays in view when the band crops it -
+   *  'top' keeps faces, 'bottom' keeps foregrounds. Photo surfaces only.
+   *  Absent = center. (Shane's About Us verdict: the history banner cropped
+   *  everyone's heads off.) */
+  photoFocus?: 'top' | 'center' | 'bottom';
 
   /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the

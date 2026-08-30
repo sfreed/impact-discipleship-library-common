@@ -787,7 +787,9 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // Grown page by page as each comparison is approved; Lunch and Learns
   // first: its OVERVIEW measures 50px/weight-500 over 20px/40 copy running
   // the container's width.
-  'lunch-and-learns/prose': { headingStyle: 'light', copySize: 'large' }
+  'lunch-and-learns/prose': { headingStyle: 'light', copySize: 'large' },
+  // About Us: the history band cropped every head off at centre focus.
+  'about-us/banner': { photoFocus: 'top' }
 };
 
 /**
