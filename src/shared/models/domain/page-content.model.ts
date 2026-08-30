@@ -176,6 +176,10 @@ export interface PageContentBlock {
   /** How many cards a tile section puts on a row before wrapping. Absent =
    *  as many as fit. Seminars' picture cards run 2-and-2. */
   cardsPerRow?: 2 | 3 | 4;
+  /** This section SHARES A ROW with the one after it, half and half - the
+   *  Contact page's two parallel halves. Falls back to stacking on phones,
+   *  and quietly stacks when there is no next section to pair with. */
+  pairWithNext?: boolean;
 
   /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
