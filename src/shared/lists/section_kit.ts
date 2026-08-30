@@ -749,3 +749,79 @@ export function resolveSurface(
 ): Exclude<SectionSurface, 'inherit'> {
   return !sectionSurface || sectionSurface === 'inherit' ? theme.surface : sectionSurface;
 }
+
+// -------------------------------------------------- migrating the twelve
+
+/**
+ * What flipping one original page onto the kit looks like, without touching
+ * anything.
+ */
+export interface KitMigrationPreview {
+  /** The blocks as the kit would store them - type, variant and surface
+   *  rewritten from LEGACY_RENDERINGS, everything else untouched. */
+  blocks: Record<string, unknown>[];
+  /** Sections that could not be mapped, as sentences. A block the map does
+   *  not know keeps its old type, WHICH THE KIT CANNOT DRAW - so a preview
+   *  must show these rather than quietly rendering a shorter page. */
+  problems: string[];
+}
+
+/**
+ * Behaviour an original page keeps in its COMPONENT that the kit stores on
+ * the block instead. Keyed `page/oldType`; applied during the flip.
+ *
+ * The two form ids are copied from the components that own them today
+ * (seminars.component.ts, contact.component.ts) - hand-carried, because the
+ * admin cannot read the web app's source, and pinned by the migration spec
+ * so a drift is a red build rather than a silently blank form.
+ */
+const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
+  'seminars/form': { formId: 'KsdeDkokfLGRI3sPFijp' },
+  'contact/form': { formId: 'N0ynW6zeYKdXQS2EkBii' },
+  'prayer-team/signup': { signupList: 'prayer' }
+};
+
+/**
+ * ONE original page's blocks, rewritten to the kit's vocabulary.
+ *
+ * THE PREVIEW AND THE MIGRATION MUST SHARE THIS FUNCTION - it is the whole
+ * reason approving a side-by-side comparison means anything. The web app's
+ * /kit-preview/<slug> route runs it in memory to draw "what the kit would
+ * do"; the eventual migration writes its output to the document. If those
+ * two ever computed the flip separately, an approved preview could migrate
+ * into something else.
+ *
+ * PURE, and it copies: the caller's blocks are never mutated, because the
+ * preview runs against the LIVE document object other code is rendering.
+ */
+export function toKitBlocks(
+  pageSlug: string,
+  blocks: readonly Record<string, unknown>[] | undefined
+): KitMigrationPreview {
+  const problems: string[] = [];
+  const rows = LEGACY_RENDERINGS.filter((r) => r.page === pageSlug);
+  // (page, oldType) is unique across all 49 rows - pinned by the spec, and
+  // load-bearing here: two rows for one pair would make this flip ambiguous.
+  const byType = new Map(rows.map((r) => [r.type as string, r]));
+
+  const mapped = (blocks ?? []).map((block) => {
+    const oldType = String(block['type'] ?? '');
+    const row = byType.get(oldType);
+    if (!row) {
+      problems.push(
+        `Section "${block['key'] ?? oldType}" (${oldType || 'no type'}) has no `
+        + 'mapping for this page - the kit would not draw it.'
+      );
+      return { ...block };
+    }
+    return {
+      ...block,
+      type: row.archetype,
+      variant: row.variant,
+      surface: row.surface,
+      ...(MIGRATION_EXTRAS[`${pageSlug}/${oldType}`] ?? {})
+    };
+  });
+
+  return { blocks: mapped, problems };
+}

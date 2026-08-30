@@ -141,7 +141,10 @@ export const RESERVED_SLUGS: readonly string[] = [
   'monthly-newsletter', 'prayer-team',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
-  'summit', 'summit-preview'
+  'summit', 'summit-preview',
+  // The migration comparison: /kit-preview/<slug> draws an original page
+  // through the section kit without touching its data (2026-08-30).
+  'kit-preview'
 ];
 
 /**

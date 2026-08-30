@@ -8,6 +8,7 @@ import {
   archetypeDef,
   kitFields,
   resolveSurface,
+  toKitBlocks,
   variantDef
 } from './section_kit';
 
@@ -254,5 +255,68 @@ describe('resolving the ground a section sits on', () => {
   it('falls back to the default theme when a page has none', () => {
     expect(resolveSurface(undefined)).toBe(DEFAULT_PAGE_THEME.surface);
     expect(DEFAULT_PAGE_THEME.surface).toBe('light');
+  });
+});
+
+describe('flipping an original page onto the kit', () => {
+  // toKitBlocks is shared by the /kit-preview route and the eventual
+  // migration - the reason approving a side-by-side means anything. These
+  // pin the flip itself.
+
+  it('rests on (page, oldType) being unique - the flip is ambiguous otherwise', () => {
+    const pairs = LEGACY_RENDERINGS.map((r) => `${r.page}/${r.type}`);
+    const dupes = pairs.filter((p, i) => pairs.indexOf(p) !== i);
+    expect(dupes).toEqual([]);
+  });
+
+  it('flips the pilot page exactly as its rows say', () => {
+    const { blocks, problems } = toKitBlocks('lunch-and-learns', [
+      { key: 'hero', type: 'pageHeader', heading: 'Lunch and Learns' },
+      { key: 'overview', type: 'prose', body: '<p>x</p>' },
+      { key: 'what', type: 'mission', videoId: 'abc' }
+    ]);
+
+    expect(problems).toEqual([]);
+    expect(blocks.map((b) => [b['type'], b['variant'], b['surface']])).toEqual([
+      [SECTION_ARCHETYPE.HERO_BAND, 'standard', 'photo'],
+      [SECTION_ARCHETYPE.COPY_CENTRED, 'plain', 'light'],
+      [SECTION_ARCHETYPE.COPY_MEDIA, 'video', 'light']
+    ]);
+    // Everything else rides along untouched.
+    expect(blocks[0]['heading']).toBe('Lunch and Learns');
+    expect(blocks[2]['videoId']).toBe('abc');
+  });
+
+  it('carries the behaviour a page component owns into the block', () => {
+    // The seminars form id and the prayer list live in web components today;
+    // the kit stores them. Hand-carried values, so this pin is what turns a
+    // drift into a red build instead of a silently blank form.
+    const seminars = toKitBlocks('seminars', [{ key: 'f', type: 'form' }]);
+    expect(seminars.blocks[0]['formId']).toBe('KsdeDkokfLGRI3sPFijp');
+
+    const prayer = toKitBlocks('prayer-team', [{ key: 's', type: 'signup' }]);
+    expect(prayer.blocks[0]['signupList']).toBe('prayer');
+
+    const contact = toKitBlocks('contact', [{ key: 'f', type: 'form' }]);
+    expect(contact.blocks[0]['formId']).toBe('N0ynW6zeYKdXQS2EkBii');
+  });
+
+  it('reports a section it cannot map instead of quietly shortening the page', () => {
+    const { blocks, problems } = toKitBlocks('lunch-and-learns', [
+      { key: 'mystery', type: 'giveOptions' }
+    ]);
+
+    expect(problems.length).toBe(1);
+    expect(problems[0]).toContain('mystery');
+    // The old type is kept, not guessed - the preview page SHOWS the problem.
+    expect(blocks[0]['type']).toBe('giveOptions');
+  });
+
+  it('never mutates the caller blocks - the preview runs on the LIVE document', () => {
+    const original = [{ key: 'hero', type: 'pageHeader' }];
+    toKitBlocks('lunch-and-learns', original);
+
+    expect(original[0].type).toBe('pageHeader');
+    expect('variant' in original[0]).toBeFalse();
   });
 });
