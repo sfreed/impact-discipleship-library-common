@@ -808,6 +808,10 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   'seminars/cards': { cardsPerRow: 2 },
   // Contact is ONE ROW of two halves - the details beside the form.
   'contact/contactInfo': { pairWithNext: true },
+  // Give: the line under the boxes is a 40px statement, and the option
+  // boxes are dark rounded cards.
+  'give/prose': { copySize: 'display' },
+  'give/giveOptions': { cardGround: 'dark' },
   'equipping-groups-pastors/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-leaders/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }

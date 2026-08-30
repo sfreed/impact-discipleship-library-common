@@ -135,9 +135,10 @@ export interface PageContentBlock {
   copyTone?: 'soft' | 'dark';
   bullets?: 'dots' | 'none';
   /** The site's TWO measured copy scales: 'large' = 20px/40 running wide
-   *  (the OVERVIEW passages), 'compact' = 14px/24 (copy beside media).
+   *  (the OVERVIEW passages), 'compact' = 14px/24 (copy beside media),
+   *  'display' = the 40px/60 statement lines (the Give page's centred line).
    *  Absent = compact. */
-  copySize?: 'large' | 'compact';
+  copySize?: 'large' | 'compact' | 'display';
   /** How much room the media half of a split section takes: 'large' matches
    *  the original pages (video ~700px of a 1600 screen), 'balanced' is an
    *  even split. Absent = large. */
