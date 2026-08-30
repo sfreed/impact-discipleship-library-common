@@ -1,6 +1,7 @@
 import { BaseModel } from '../base.model';
 import { ImageModel } from '../utils/image.model';
 import { PAGE_SECTION_TYPES } from '../../lists/page_section_types.enum';
+import { PageTheme, SectionSurface } from '../../lists/section_kit';
 
 /**
  * One SECTION of a page - a band a visitor meets on the way down it.
@@ -65,6 +66,29 @@ export interface PageContentBlock {
   videoUrl?: string;
   /** The bare YouTube id, derived from videoUrl on save. */
   videoId?: string;
+  /**
+   * WHICH LOOK, within the type. Added 2026-08-30 with the section kit.
+   *
+   * The STRUCTURAL axis - the video sits beside the copy or below it; a
+   * hero's buttons are two fixed slots or a list. No amount of styling turns
+   * one into the other, which is what separates this from `surface`.
+   *
+   * Absent means the type's first variant, so a block written before this
+   * existed draws the default rather than nothing. See SECTION_KIT.
+   */
+  variant?: string;
+
+  /**
+   * WHAT GROUND it is drawn on - light, dark, the brand tint, or its own
+   * photo. The COLOUR axis, and never structural.
+   *
+   * Absent, or 'inherit', means whatever the page's theme says, so a page
+   * reads as one thing until somebody deliberately breaks the run. About Us
+   * runs a dark history band between light story columns, which is why this
+   * lives on the SECTION at all rather than only on the page.
+   */
+  surface?: SectionSurface;
+
   /**
    * Repeated entries, where a section is a list rather than a passage -
    * cards, timeline entries, price tiles, the passages in a two-column
@@ -165,4 +189,41 @@ export interface PageContentItem {
  */
 export class PageContentModel extends BaseModel {
   blocks: PageContentBlock[] = [];
+
+  // ------------------------------------------- pages staff create themselves
+  //
+  // Everything below is undefined on the TWELVE ORIGINAL PAGES and must stay
+  // optional because of it. Those pages have a hand-written route, a nav leaf
+  // and a component; a page created in the admin has none of those, so it has
+  // to carry what a route would otherwise have supplied.
+  //
+  // A document with no `title` is one of the original twelve. That is the
+  // only thing distinguishing them, and it is deliberate - a `isBuilderPage`
+  // flag would be a second source of truth that a migration could set wrong.
+
+  /**
+   * What the browser tab says and what the Navigation picker offers.
+   *
+   * Not the page's HEADING - the hero carries its own, and they are often
+   * different: a page titled "Equipping Pastors" opens with "Equip the men
+   * who equip everyone else".
+   */
+  title?: string;
+
+  /**
+   * The page's prevailing look. A section drawn on 'inherit' gets this.
+   *
+   * On the page rather than only on each section because a page dressed one
+   * band at a time is a page nobody finishes.
+   */
+  theme?: PageTheme;
+
+  /**
+   * Whether a VISITOR can reach it. Absent counts as published, so the
+   * twelve original pages - which have no such flag - are unaffected.
+   *
+   * A page being built is reachable by anyone who guesses its URL otherwise,
+   * and half-written copy on the public site is worse than no page at all.
+   */
+  isPublished?: boolean;
 }

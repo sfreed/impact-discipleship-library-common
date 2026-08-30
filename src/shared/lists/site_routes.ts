@@ -104,3 +104,57 @@ export function siteRoutePath(key: string): string | undefined {
 /** Catalogue order, grouped, for the picker. */
 export const SITE_ROUTE_GROUPS: SiteRoute['group'][] =
   ['Main', 'Training', 'Resources', 'Store', 'Events', 'About'];
+
+/**
+ * FIRST URL SEGMENTS THE WEB APP ALREADY CLAIMS - what a staff-created page
+ * may NOT be called.
+ *
+ * A page built in the admin becomes a route by existing: the web router has
+ * one matcher that takes any single unclaimed segment and looks the slug up
+ * in `page_content`. That matcher runs LAST, so a page created as 'store' or
+ * 'events' would never be reached - the store module matched first. The page
+ * would save cleanly, appear in the nav, and open somebody else's screen.
+ * Nothing would report it.
+ *
+ * So the admin refuses these on the way in. This list is wider than
+ * SITE_ROUTES above, which names only pages worth LINKING to: `checkout` and
+ * `shopping-cart` are nobody's menu item and are still fatal as a slug.
+ *
+ * KEPT HONEST BY A SPEC. The web repo's `app-routing.spec.ts` asserts in both
+ * directions - every name here is really claimed by the router, and every
+ * segment the router claims is really named here. A hand-maintained list of
+ * another app's routes rots silently otherwise, and the way it rots is a slug
+ * that looks free and is not.
+ */
+export const RESERVED_SLUGS: readonly string[] = [
+  // home + the lazy feature modules, in app-routing.module.ts order
+  'events', 'event-details',
+  'team', 'team-details',
+  'store', 'spanish-resources', 'product-details', 'shopping-cart',
+  'checkout', 'checkout-success', 'e-books',
+  'about-us', 'contact', 'newsletter', 'give', 'seminars', 'seminar-form',
+  'equipping-groups', 'equipping-groups-pastors', 'equipping-groups-leaders',
+  'equipping-groups-churches',
+  'coaching-with-impact', 'lunch-and-learns', 'lunch-and-learn-form',
+  'discipleship-library',
+  'private-policy', 'terms', 'customer-reviews', 'consultation-survey',
+  'monthly-newsletter', 'prayer-team',
+  'disciple-making-minute', 'podcasts', 'podcasts-v2',
+  'impact-groups',
+  'summit', 'summit-preview'
+];
+
+/**
+ * Whether a slug is free for a staff-created page.
+ *
+ * Also refuses anything that is not a plain lower-case slug: a segment with a
+ * slash, a query or an encoded character is not one path segment, and the
+ * matcher only ever sees one.
+ */
+export function isSlugAvailable(slug: string): boolean {
+  const trimmed = (slug ?? '').trim().toLowerCase();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)) {
+    return false;
+  }
+  return !RESERVED_SLUGS.includes(trimmed);
+}

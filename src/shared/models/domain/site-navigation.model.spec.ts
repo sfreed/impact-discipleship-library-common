@@ -5,7 +5,7 @@ import {
   SiteNavItem,
   validateSiteNavigation
 } from './site-navigation.model';
-import { SITE_ROUTES, siteRoute, siteRoutePath } from '../../lists/site_routes';
+import { RESERVED_SLUGS, SITE_ROUTES, isSlugAvailable, siteRoute, siteRoutePath } from '../../lists/site_routes';
 
 // The rules a menu has to keep, pinned here rather than in the admin screen
 // because the SEED SCRIPT and the editor both have to agree about them - a
@@ -67,6 +67,52 @@ describe('site route catalogue', () => {
       '/summit/2027']) {
       expect(paths).withContext(`${needed} is in the menu but not the catalogue`).toContain(needed);
     }
+  });
+});
+
+describe('slugs a staff-created page may use', () => {
+  // A page created as 'store' saves cleanly, appears in the nav, and opens
+  // the shop - because the store's matcher runs before the dynamic-page one.
+  // Nothing reports it, which is why the refusal is here rather than left to
+  // whoever is typing.
+
+  it('refuses a segment the web app already routes', () => {
+    expect(isSlugAvailable('store')).toBeFalse();
+    expect(isSlugAvailable('give')).toBeFalse();
+    expect(isSlugAvailable('checkout')).toBeFalse();
+  });
+
+  it('refuses it whatever case or padding it arrives in', () => {
+    expect(isSlugAvailable('  STORE  ')).toBeFalse();
+  });
+
+  it('allows an ordinary new page', () => {
+    expect(isSlugAvailable('mens-retreat')).toBeTrue();
+    expect(isSlugAvailable('summit-2028-recap')).toBeTrue();
+  });
+
+  it('refuses anything that is not ONE plain path segment', () => {
+    // The matcher only ever sees a single segment, so a slug containing a
+    // slash would route to nothing while looking perfectly reasonable in a
+    // text box.
+    expect(isSlugAvailable('mens/retreat')).toBeFalse();
+    expect(isSlugAvailable('mens retreat')).toBeFalse();
+    expect(isSlugAvailable('retreat?year=2028')).toBeFalse();
+    expect(isSlugAvailable('-leading-hyphen')).toBeFalse();
+    expect(isSlugAvailable('trailing-hyphen-')).toBeFalse();
+    expect(isSlugAvailable('')).toBeFalse();
+  });
+
+  it('reserves every path the linkable catalogue names', () => {
+    // SITE_ROUTES is what the Navigation picker offers. If one of those
+    // destinations were NOT reserved, a staff page could be created on top
+    // of a route the menu already points at.
+    const unreserved = SITE_ROUTES
+      .map((route) => route.path.split('/').filter(Boolean)[0])
+      .filter((segment): segment is string => !!segment)
+      .filter((segment) => !RESERVED_SLUGS.includes(segment));
+
+    expect(unreserved).toEqual([]);
   });
 });
 
