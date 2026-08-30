@@ -793,9 +793,9 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // The three audience pages: the facts column sits in the brand-blue box,
   // which the original runs with DARK text on. Same rows on all three -
   // they are the same page three times over.
-  'equipping-groups-pastors/columns': { leftGround: 'brand' },
-  'equipping-groups-leaders/columns': { leftGround: 'brand' },
-  'equipping-groups-churches/columns': { leftGround: 'brand' }
+  'equipping-groups-pastors/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
+  'equipping-groups-leaders/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
+  'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }
 };
 
 /**

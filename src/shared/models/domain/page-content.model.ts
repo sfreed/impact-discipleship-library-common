@@ -156,10 +156,12 @@ export interface PageContentBlock {
    * ground defaults its ink to what reads on it, and the ink is its own
    * small lever ('dark' | 'light') rather than a wheel.
    *
-   * 'brand' is the equipping pages' blue box (#588AC7), which the original
-   * runs with DARK text - so that is brand's default ink, matched not
-   * invented. leftGround/rightGround card the two columns of a LIST_COLUMNS;
-   * cardGround cards every tile of a LIST_GRID. Absent = no box.
+   * 'brand' is the equipping pages' blue box (#588AC7). Its default ink is
+   * LIGHT - a deliberate departure: the original ran grey copy on the blue
+   * at ~1.4:1, which Shane's review called terrible, and Dark text remains
+   * one click away. leftGround/rightGround card the two columns of a
+   * LIST_COLUMNS; cardGround cards every tile of a LIST_GRID. Absent = no
+   * box.
    */
   cardGround?: 'none' | 'panel' | 'brand' | 'dark';
   cardInk?: 'dark' | 'light';
@@ -167,6 +169,10 @@ export interface PageContentBlock {
   leftInk?: 'dark' | 'light';
   rightGround?: 'none' | 'panel' | 'brand' | 'dark';
   rightInk?: 'dark' | 'light';
+  /** A column's passage HEADINGS in the brand blue - the original audience
+   *  pages run their right-side questions in #588AC7. Absent = ink. */
+  leftTitleTone?: 'ink' | 'brand';
+  rightTitleTone?: 'ink' | 'brand';
 
   /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
