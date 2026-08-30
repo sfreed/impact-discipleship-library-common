@@ -301,6 +301,22 @@ describe('flipping an original page onto the kit', () => {
     expect(contact.blocks[0]['formId']).toBe('N0ynW6zeYKdXQS2EkBii');
   });
 
+  it('carries the measured text style where a page had its own', () => {
+    // The flip sets the STARTING POINT to what the page already looked like;
+    // the same knobs stay user-editable afterwards. Lunch and Learns'
+    // OVERVIEW is the site's light 50px heading over large 20px/40 copy.
+    const { blocks } = toKitBlocks('lunch-and-learns', [
+      { key: 'overview', type: 'prose' },
+      { key: 'what', type: 'mission' }
+    ]);
+
+    expect(blocks[0]['headingStyle']).toBe('light');
+    expect(blocks[0]['copySize']).toBe('large');
+    // The mission band keeps the defaults - bold and compact ARE its look.
+    expect(blocks[1]['headingStyle']).toBeUndefined();
+    expect(blocks[1]['copySize']).toBeUndefined();
+  });
+
   it('reports a section it cannot map instead of quietly shortening the page', () => {
     const { blocks, problems } = toKitBlocks('lunch-and-learns', [
       { key: 'mystery', type: 'giveOptions' }

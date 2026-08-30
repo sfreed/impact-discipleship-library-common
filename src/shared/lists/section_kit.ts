@@ -778,7 +778,16 @@ export interface KitMigrationPreview {
 const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   'seminars/form': { formId: 'KsdeDkokfLGRI3sPFijp' },
   'contact/form': { formId: 'N0ynW6zeYKdXQS2EkBii' },
-  'prayer-team/signup': { signupList: 'prayer' }
+  'prayer-team/signup': { signupList: 'prayer' },
+
+  // TEXT STYLE the flip carries where a page's original section measured
+  // differently from the kit defaults (bold / compact). These are the same
+  // knobs the editor exposes, so after migrating the USER owns them - the
+  // flip only sets the starting point to what the page already looked like.
+  // Grown page by page as each comparison is approved; Lunch and Learns
+  // first: its OVERVIEW measures 50px/weight-500 over 20px/40 copy running
+  // the container's width.
+  'lunch-and-learns/prose': { headingStyle: 'light', copySize: 'large' }
 };
 
 /**
