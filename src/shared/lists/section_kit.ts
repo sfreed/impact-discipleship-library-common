@@ -804,6 +804,8 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // which the original runs with DARK text on. Same rows on all three -
   // they are the same page three times over.
   'seminars/prose': { headingStyle: 'light', copySize: 'large' },
+  // The picture cards run two-and-two, as the original lays them.
+  'seminars/cards': { cardsPerRow: 2 },
   'equipping-groups-pastors/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-leaders/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }

@@ -173,6 +173,9 @@ export interface PageContentBlock {
    *  pages run their right-side questions in #588AC7. Absent = ink. */
   leftTitleTone?: 'ink' | 'brand';
   rightTitleTone?: 'ink' | 'brand';
+  /** How many cards a tile section puts on a row before wrapping. Absent =
+   *  as many as fit. Seminars' picture cards run 2-and-2. */
+  cardsPerRow?: 2 | 3 | 4;
 
   /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
