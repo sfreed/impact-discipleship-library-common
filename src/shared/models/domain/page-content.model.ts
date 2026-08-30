@@ -128,9 +128,20 @@ export interface PageContentBlock {
    * closed unions, not free styling: a font box would be a second web
    * designer inside every editor.
    */
-  headingStyle?: 'bold' | 'standard';
+  /** 'bold' = Lato 900 at 50px (the mission bands); 'light' = the SAME 50px
+   *  at weight 500 (the site's own prose headings - OVERVIEW is 50/500);
+   *  'standard' = the kit's smaller 32/500. Absent = bold. */
+  headingStyle?: 'bold' | 'light' | 'standard';
   copyTone?: 'soft' | 'dark';
   bullets?: 'dots' | 'none';
+  /** The site's TWO measured copy scales: 'large' = 20px/40 running wide
+   *  (the OVERVIEW passages), 'compact' = 14px/24 (copy beside media).
+   *  Absent = compact. */
+  copySize?: 'large' | 'compact';
+  /** How much room the media half of a split section takes: 'large' matches
+   *  the original pages (video ~700px of a 1600 screen), 'balanced' is an
+   *  even split. Absent = large. */
+  mediaSize?: 'large' | 'balanced';
 
   /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
