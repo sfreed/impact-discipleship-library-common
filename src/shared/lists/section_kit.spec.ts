@@ -158,6 +158,26 @@ describe('coverage of the site as it stands', () => {
     expect(new Set(coaching.map((r) => r.surface)).size).toBeGreaterThan(1);
   });
 
+  it('means the same thing by any name the two vocabularies share', () => {
+    // PAGE_SECTION_TYPES and SECTION_ARCHETYPE overlap on 'timeline' and
+    // 'form'. That is a FEATURE - a block already storing the value the kit
+    // wants needs no migration - but only while the two agree about what it
+    // draws. If 'form' ever became a different section in the kit than it is
+    // on the twelve pages, every existing form block would quietly render as
+    // the wrong thing, with the stored data unchanged and nothing to point
+    // at. So: a shared name must map to itself.
+    const archetypes = new Set<string>(Object.values(SECTION_ARCHETYPE));
+    const wrong = LEGACY_RENDERINGS
+      .filter((r) => archetypes.has(r.type) && r.archetype !== (r.type as string))
+      .map((r) => `${r.page}/${r.type} -> ${r.archetype}`);
+
+    expect(wrong)
+      .withContext(
+        'These blocks store a value that is ALSO an archetype name, but the kit maps them '
+        + 'somewhere else - so the same stored string would mean two different sections.')
+      .toEqual([]);
+  });
+
   it('records what each unusual rendering carries, so it cannot be dropped silently', () => {
     // Not every row needs a note, but the ones that hold behaviour do. These
     // three are the ones that would be a real defect if they went: a giving

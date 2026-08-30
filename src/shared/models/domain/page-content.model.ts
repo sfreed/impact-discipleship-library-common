@@ -1,7 +1,7 @@
 import { BaseModel } from '../base.model';
 import { ImageModel } from '../utils/image.model';
 import { PAGE_SECTION_TYPES } from '../../lists/page_section_types.enum';
-import { PageTheme, SectionSurface } from '../../lists/section_kit';
+import { PageTheme, SECTION_ARCHETYPE, SectionSurface } from '../../lists/section_kit';
 
 /**
  * One SECTION of a page - a band a visitor meets on the way down it.
@@ -37,10 +37,38 @@ export interface PageContentBlock {
    * each one to the renderer its type names, so staff reorder sections and
    * the site follows.
    *
+   * TWO VOCABULARIES, DELIBERATELY, while both exist (2026-08-30):
+   *
+   *   PAGE_SECTION_TYPES  - the twelve original pages. Each has its own
+   *                         section component, which is why `banner` can be
+   *                         a photo slider on one page and a tinted band on
+   *                         another; the name only has to be unique within
+   *                         that component.
+   *   SECTION_ARCHETYPE   - pages staff created, drawn by the shared kit.
+   *                         No bespoke component exists for them, so a name
+   *                         has to mean ONE thing everywhere.
+   *
+   * The union is not a permanent shape. It is what a migration LOOKS like
+   * while it is half done, and writing it out is better than a cast that
+   * hides which pages are on which side.
+   *
+   * THE TWO VOCABULARIES OVERLAP, and where they do it is the same thing
+   * twice: 'timeline' and 'form' are both a PAGE_SECTION_TYPE and a
+   * SECTION_ARCHETYPE. That is not a collision to resolve - it means those
+   * blocks need NO migration at all, because the value they already store is
+   * the value the kit wants. `section_kit.spec.ts` pins it: any string in
+   * both enums must map to itself in LEGACY_RENDERINGS, so an overlap that
+   * ever meant two different things would fail rather than silently draw the
+   * wrong section.
+   *
+   * Nothing has to disambiguate at runtime in any case. A block reaches
+   * exactly one renderer - the one its PAGE routes to - and a renderer
+   * ignores what it does not know, which is what all ten already do.
+   *
    * Optional only because a document written before the section rework may
    * not carry one. A block with no type draws nothing.
    */
-  type?: PAGE_SECTION_TYPES;
+  type?: PAGE_SECTION_TYPES | SECTION_ARCHETYPE;
   heading?: string;
   /** A second, smaller heading - a hero's pretitle, the label under the
    *  countries figure, the year that closes the timeline. */
