@@ -118,6 +118,21 @@ export interface PageContentBlock {
   surface?: SectionSurface;
 
   /**
+   * TEXT STYLE OPTIONS - kit pages only, added 2026-08-30 when Shane
+   * compared Lunch and Learns and wanted the copy "as close as we can" to
+   * the original, but with the differences as choices rather than fate.
+   *
+   * All three DEFAULT (absent) to the site's own measured style - Lato 900
+   * heading over a wide 5px rule, #848b8a copy, grey dot bullets - so a
+   * migrated page looks like itself until somebody chooses otherwise. Small
+   * closed unions, not free styling: a font box would be a second web
+   * designer inside every editor.
+   */
+  headingStyle?: 'bold' | 'standard';
+  copyTone?: 'soft' | 'dark';
+  bullets?: 'dots' | 'none';
+
+  /**
    * WHICH Form Builder form a FORM section shows. KIT PAGES ONLY - on the
    * twelve original pages the id stays in the page component.
    *
