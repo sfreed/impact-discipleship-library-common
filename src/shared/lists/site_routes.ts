@@ -57,6 +57,11 @@ export const SITE_ROUTES = [
   { key: 'contact', path: '/contact', label: 'Contact', group: 'About', editable: true },
   { key: 'give', path: '/give', label: 'Give', group: 'Main', editable: true },
   { key: 'prayer-team', path: '/prayer-team', label: 'Prayer Team', group: 'About', editable: true },
+  // Added 2026-08-30 with the footer, which is the only place on the site
+  // that links to either. Their words live in Web Config, not page_content,
+  // which is why neither is marked editable here.
+  { key: 'privacy-policy', path: '/private-policy', label: 'Privacy Policy', group: 'About' },
+  { key: 'terms', path: '/terms', label: 'Terms & Conditions', group: 'About' },
 
   { key: 'seminars', path: '/seminars', label: 'Seminars', group: 'Training', editable: true },
   { key: 'equipping-groups', path: '/equipping-groups', label: 'Equipping Groups', group: 'Training', editable: true },
