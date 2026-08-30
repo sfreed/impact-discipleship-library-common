@@ -590,7 +590,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   { page: 'equipping-groups-leaders', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'seminars', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'lunch-and-learns', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'give', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   {
@@ -616,11 +615,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
   { page: 'seminars', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
   {
-    page: 'lunch-and-learns', type: PAGE_SECTION_TYPES.MISSION,
-    archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light',
-    carries: 'a divider above the section, so dragging it takes the rule along'
-  },
-  {
     page: 'about-us', type: PAGE_SECTION_TYPES.STORY,
     archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'image', surface: 'light',
     carries: 'three of them; the picture side alternates by position'
@@ -629,7 +623,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
 
   // ---- centred copy. The differences here are almost entirely colour.
   { page: 'seminars', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain', surface: 'light' },
-  { page: 'lunch-and-learns', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain', surface: 'light' },
   { page: 'give', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain', surface: 'light' },
   { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'withButtons', surface: 'light' },
   {
@@ -797,7 +790,6 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // Grown page by page as each comparison is approved; Lunch and Learns
   // first: its OVERVIEW measures 50px/weight-500 over 20px/40 copy running
   // the container's width.
-  'lunch-and-learns/prose': { headingStyle: 'light', copySize: 'large' },
   // About Us: the history band cropped every head off at centre focus.
   'about-us/banner': { photoFocus: 'top' },
   // The three audience pages: the facts column sits in the brand-blue box,

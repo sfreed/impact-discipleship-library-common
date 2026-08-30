@@ -92,11 +92,12 @@ describe('coverage of the site as it stands', () => {
     // 49 is the admin catalogue's own count of declared kinds. The admin
     // repo's spec pins the two lists together row by row; this is the cheap
     // version that fails first if a row is dropped while editing here.
-    expect(LEGACY_RENDERINGS.length).toBe(49);
+    // 49 minus each page CUT OVER (lunch-and-learns took its 3).
+    expect(LEGACY_RENDERINGS.length).toBe(46);
   });
 
-  it('covers all twelve editable pages', () => {
-    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(12);
+  it('covers every page still awaiting cutover', () => {
+    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(11);
   });
 
   it('resolves every rendering to a real archetype and variant', () => {
@@ -269,22 +270,11 @@ describe('flipping an original page onto the kit', () => {
     expect(dupes).toEqual([]);
   });
 
-  it('flips the pilot page exactly as its rows say', () => {
-    const { blocks, problems } = toKitBlocks('lunch-and-learns', [
-      { key: 'hero', type: 'pageHeader', heading: 'Lunch and Learns' },
-      { key: 'overview', type: 'prose', body: '<p>x</p>' },
-      { key: 'what', type: 'mission', videoId: 'abc' }
-    ]);
-
-    expect(problems).toEqual([]);
-    expect(blocks.map((b) => [b['type'], b['variant'], b['surface']])).toEqual([
-      [SECTION_ARCHETYPE.HERO_BAND, 'standard', 'photo'],
-      [SECTION_ARCHETYPE.COPY_CENTRED, 'plain', 'light'],
-      [SECTION_ARCHETYPE.COPY_MEDIA, 'video', 'light']
-    ]);
-    // Everything else rides along untouched.
-    expect(blocks[0]['heading']).toBe('Lunch and Learns');
-    expect(blocks[2]['videoId']).toBe('abc');
+  it('reports a CUT-OVER page as unmapped rather than half-flipping it', () => {
+    // lunch-and-learns migrated 2026-08-30; its rows are gone, so a stray
+    // re-run must refuse loudly instead of quietly mangling live data.
+    const { problems } = toKitBlocks('lunch-and-learns', [{ key: 'hero', type: 'pageHeader' }]);
+    expect(problems.length).toBe(1);
   });
 
   it('carries the behaviour a page component owns into the block', () => {
@@ -302,19 +292,9 @@ describe('flipping an original page onto the kit', () => {
   });
 
   it('carries the measured text style where a page had its own', () => {
-    // The flip sets the STARTING POINT to what the page already looked like;
-    // the same knobs stay user-editable afterwards. Lunch and Learns'
-    // OVERVIEW is the site's light 50px heading over large 20px/40 copy.
-    const { blocks } = toKitBlocks('lunch-and-learns', [
-      { key: 'overview', type: 'prose' },
-      { key: 'what', type: 'mission' }
-    ]);
-
+    const { blocks } = toKitBlocks('seminars', [{ key: 'ov', type: 'prose' }]);
     expect(blocks[0]['headingStyle']).toBe('light');
     expect(blocks[0]['copySize']).toBe('large');
-    // The mission band keeps the defaults - bold and compact ARE its look.
-    expect(blocks[1]['headingStyle']).toBeUndefined();
-    expect(blocks[1]['copySize']).toBeUndefined();
   });
 
   it('reports a section it cannot map instead of quietly shortening the page', () => {
