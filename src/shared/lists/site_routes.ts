@@ -176,7 +176,12 @@ export const CUTOVER_SLUGS: readonly string[] = [
   'equipping-groups', 'equipping-groups-pastors',
   'equipping-groups-leaders', 'equipping-groups-churches',
   'prayer-team', 'give', 'about-us', 'discipleship-library',
-  'seminars', 'contact', 'coaching-with-impact'
+  'seminars', 'contact', 'coaching-with-impact',
+  // 2026-08-31 - the last two, and they came from somewhere different: not
+  // from a bespoke page component but from two rich-text FIELDS in Web
+  // Config, each drawn by a hand-written route. Same end state either way -
+  // the dynamic route serves them from page_content now.
+  'private-policy', 'terms'
 ];
 
 export function isSlugAvailable(slug: string): boolean {
