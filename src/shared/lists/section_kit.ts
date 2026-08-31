@@ -100,7 +100,24 @@ export enum SECTION_ARCHETYPE {
    *  The home page's own slider, as a section any page can have (2026-08-31). */
   SLIDER = 'slider',
   /** A clock counting down to a DATE the section carries. */
-  COUNTDOWN = 'countdown'
+  COUNTDOWN = 'countdown',
+
+  // ------------------------------------------------ the two that replace them
+  //
+  // Stage 1 of the consolidation (2026-08-31). These sit BESIDE the fourteen
+  // above and nothing uses them yet: no page has been migrated and no
+  // archetype removed, so this ships dark and there is nothing to undo.
+  //
+  /** ONE TO THREE COLUMNS, each an ordered list of content pieces. Absorbs
+   *  the eight COMPOSED archetypes - hero, copy beside media, heading and
+   *  text, photo band, two columns, contact details, form and countdown. */
+  SECTION = 'section',
+  /** ONE ITEM SHAPE REPEATED, with a look. Absorbs the six REPEATERS - tiles,
+   *  rows, alternating articles, timeline, quote carousel and slides. A
+   *  repeater is not a column: twelve tiles are not twelve columns, and three
+   *  of them carry per-item state (alternation, counted chips, rotation) that
+   *  a column model has nowhere to put. */
+  LIST = 'list'
 }
 
 // ------------------------------------------------------------------ surfaces
@@ -600,6 +617,49 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         fields: { heading: true, subheading: true, body: true, image: true, entries: true, targetDate: true }
       }
     ]
+  },
+
+  // ---------------------------------------------- the two that replace them
+  //
+  // Stage 1 (2026-08-31). Beside the fourteen, used by nothing yet.
+
+  {
+    archetype: SECTION_ARCHETYPE.SECTION,
+    label: 'Section',
+    blurb: 'one, two or three columns of whatever you put in them',
+    icon: 'view_column',
+    // ONE variant, deliberately. How many columns there are is the LENGTH of
+    // `columns`, not a look: storing it twice is how the two disagree.
+    variants: [
+      {
+        key: 'columns',
+        label: 'Columns',
+        blurb: 'add columns, then add pieces to them',
+        fields: {}
+      }
+    ]
+  },
+
+  {
+    archetype: SECTION_ARCHETYPE.LIST,
+    label: 'List',
+    blurb: 'one item shape, repeated - tiles, rows, a timeline, a carousel',
+    icon: 'view_list',
+    // Here the variants ARE the looks, because the same items genuinely draw
+    // as different shapes. Each key matches the archetype/variant it absorbs,
+    // so the migration is a rename rather than a remap.
+    variants: [
+      { key: 'tiles', label: 'Picture tiles', blurb: 'a picture, a title and a line of text per tile', fields: { heading: true, subheading: true, body: true, entries: true } },
+      { key: 'pictureRows', label: 'Picture rows', blurb: 'wide cards, each a square picture beside its title and text', fields: { heading: true, entries: true } },
+      { key: 'icon', label: 'Icon tiles', blurb: 'an icon, a title, text and a button per tile', fields: { heading: true, entries: true } },
+      { key: 'price', label: 'Price tiles', blurb: 'a title, a figure from the site settings, what is included, a button', fields: { heading: true, entries: true } },
+      { key: 'rows', label: 'Labelled rows', blurb: 'a button on the left, a line of explanation on the right', fields: { heading: true, entries: true } },
+      { key: 'articles', label: 'Alternating rows', blurb: 'a full-width row per item, picture sides alternating', fields: { entries: true } },
+      { key: 'numbered', label: 'Numbered rows', blurb: 'the same, counted 01/02, with a strip of names above', fields: { entries: true } },
+      { key: 'timeline', label: 'Timeline', blurb: 'dated entries down a centre line', fields: { heading: true, subheading: true, entries: true } },
+      { key: 'quotes', label: 'Quote carousel', blurb: 'quotes you choose and order, over a background photo', fields: { heading: true, subheading: true, image: true, testimonials: true }, surfaces: ['photo'] },
+      { key: 'slides', label: 'Picture slides', blurb: 'full-width slides that rotate, each with a picture and a button', fields: { entries: true }, surfaces: ['photo'] }
+    ]
   }
 ];
 
@@ -859,3 +919,326 @@ export function toKitHomeBlocks(
 
   return { blocks, problems };
 }
+
+
+// ------------------------------------------------------- the content pieces
+//
+// WHAT A COLUMN CAN HOLD. Every one of these already existed as a field on
+// PageContentBlock or as a rendering in kit-section - this is the same
+// content, addressable one piece at a time instead of one archetype at a
+// time.
+//
+// The registry drives the editor's "Add piece" menu and the renderer's piece
+// switch from ONE declaration, the same way SECTION_KIT already drives the
+// Add-section menu and the archetype switch.
+
+/** Mirrors ContentPieceKind in page-content.model.ts. Declared here as a
+ *  string union rather than imported, because the MODEL imports this file -
+ *  the dependency runs one way and has to keep doing so. */
+export type ContentPieceKindKey =
+  | 'heading' | 'eyebrow' | 'text' | 'picture' | 'video' | 'buttons'
+  | 'form' | 'signup' | 'countdown' | 'siteDetails' | 'price' | 'note';
+
+export interface ContentPieceDef {
+  kind: ContentPieceKindKey;
+  label: string;
+  blurb: string;
+  icon: string;
+  /**
+   * Which of ContentPiece's fields this kind uses - the same idea as
+   * KitFields, one level down. The editor shows a control per true flag.
+   */
+  fields: {
+    text?: boolean;
+    level?: boolean;
+    html?: boolean;
+    image?: boolean;
+    video?: boolean;
+    buttons?: boolean;
+    form?: boolean;
+    signupList?: boolean;
+    targetDate?: boolean;
+    amount?: boolean;
+  };
+  /** Said before editing, where a piece will NOT change something staff
+   *  might expect it to. Same purpose as an archetype's caveat. */
+  caveat?: string;
+}
+
+export const CONTENT_PIECES: readonly ContentPieceDef[] = [
+  {
+    kind: 'heading',
+    label: 'Heading',
+    blurb: 'a heading, at the level you choose',
+    icon: 'title',
+    fields: { text: true, level: true }
+  },
+  {
+    kind: 'eyebrow',
+    label: 'Small line above',
+    blurb: 'the short line that sits over a heading',
+    icon: 'short_text',
+    fields: { text: true }
+  },
+  {
+    kind: 'text',
+    label: 'Text',
+    blurb: 'a passage, with the usual formatting',
+    icon: 'subject',
+    fields: { html: true }
+  },
+  {
+    kind: 'picture',
+    label: 'Picture',
+    blurb: 'a picture in the column',
+    icon: 'image',
+    fields: { image: true }
+  },
+  {
+    kind: 'video',
+    label: 'Video',
+    blurb: 'a click-to-play video; the picture is the still shown before play',
+    icon: 'play_circle',
+    fields: { video: true, image: true }
+  },
+  {
+    kind: 'buttons',
+    label: 'Buttons',
+    blurb: 'as many buttons as you add, in the order you put them',
+    icon: 'smart_button',
+    fields: { buttons: true }
+  },
+  {
+    kind: 'form',
+    label: 'Form',
+    blurb: 'one of the forms from Form Builder',
+    icon: 'assignment',
+    fields: { form: true },
+    caveat: 'WHICH form is chosen from the forms that exist, never typed. An id '
+      + 'retyped by hand is a blank widget nobody can diagnose.'
+  },
+  {
+    kind: 'signup',
+    label: 'Sign-up form',
+    blurb: 'the name-and-email sign-up, joined to one of the mailing lists',
+    icon: 'mark_email_read',
+    fields: { signupList: true },
+    caveat: 'WHICH DETAILS it asks for belongs to the site - it is a decision '
+      + 'about a mailing list, not page content. Only the list is set here.'
+  },
+  {
+    kind: 'countdown',
+    label: 'Countdown',
+    blurb: 'a clock counting to a date you set',
+    icon: 'timer',
+    fields: { targetDate: true },
+    caveat: 'A date that is missing, unreadable or already past draws no clock '
+      + 'at all - zeros read as "it starts now" and a negative reads as a bug.'
+  },
+  {
+    kind: 'siteDetails',
+    label: 'Contact details',
+    blurb: 'the address, phone, email and social links',
+    icon: 'contact_page',
+    fields: {},
+    caveat: 'These come from the site details and already feed the footer. '
+      + 'Change them in Web Config, where they have one home.'
+  },
+  {
+    kind: 'price',
+    label: 'Price',
+    blurb: 'a figure from the site settings',
+    icon: 'sell',
+    fields: { amount: true },
+    caveat: 'The figure is NAMED, never typed. A price with two homes drifts, '
+      + 'and a page is not its home - change it in Web Config.'
+  },
+  {
+    kind: 'note',
+    label: 'Small line below',
+    blurb: 'a quieter line, usually under the buttons',
+    icon: 'notes',
+    fields: { text: true }
+  }
+];
+
+export function contentPieceDef(kind: string | undefined): ContentPieceDef | undefined {
+  return CONTENT_PIECES.find((piece) => piece.kind === kind);
+}
+
+// ------------------------------------------------------------------ presets
+//
+// WHY PRESETS EXIST. Two catalogue members is the point, but "Section" on its
+// own asks staff to build a hero out of parts every time, and the old menu at
+// least told them a hero was a thing. A preset is a STARTING POINT, not a
+// type: it seeds a Section with its columns, pieces and measured styling in
+// place, and the moment it lands it is an ordinary Section like any other.
+//
+// This is what keeps the consolidation from costing usability. The Add menu
+// already renders icon + label + blurb per entry, so presets need no new UI.
+
+export interface SectionPreset {
+  key: string;
+  label: string;
+  blurb: string;
+  icon: string;
+  /** What gets written. Deliberately plain data rather than a builder
+   *  function: a preset can then be read in a review. */
+  seed: {
+    surface?: SectionSurface;
+    headingStyle?: 'bold' | 'light' | 'standard';
+    copySize?: 'large' | 'compact' | 'display';
+    mediaSide?: 'left' | 'right';
+    columns: { pieces: { kind: ContentPieceKindKey; level?: 'page' | 'section' | 'minor' }[] }[];
+  };
+}
+
+export const SECTION_PRESETS: readonly SectionPreset[] = [
+  {
+    key: 'hero',
+    label: 'Hero',
+    blurb: 'the page title over a photo, with buttons',
+    icon: 'wallpaper',
+    seed: {
+      surface: 'photo',
+      headingStyle: 'bold',
+      columns: [{ pieces: [
+        { kind: 'eyebrow' },
+        { kind: 'heading', level: 'page' },
+        { kind: 'text' },
+        { kind: 'buttons' }
+      ] }]
+    }
+  },
+  {
+    key: 'heroBesidePicture',
+    label: 'Hero beside a picture',
+    blurb: 'the page title and text on one side, a picture on the other',
+    icon: 'vertical_split',
+    seed: {
+      headingStyle: 'bold',
+      mediaSide: 'right',
+      columns: [
+        { pieces: [
+          { kind: 'eyebrow' },
+          { kind: 'heading', level: 'page' },
+          { kind: 'text' },
+          { kind: 'buttons' },
+          { kind: 'note' }
+        ] },
+        { pieces: [{ kind: 'picture' }] }
+      ]
+    }
+  },
+  {
+    key: 'textWithVideo',
+    label: 'Text with a video',
+    blurb: 'a heading and a passage on one side, a click-to-play video on the other',
+    icon: 'view_sidebar',
+    seed: {
+      mediaSide: 'right',
+      columns: [
+        { pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] },
+        { pieces: [{ kind: 'video' }] }
+      ]
+    }
+  },
+  {
+    key: 'textWithPicture',
+    label: 'Text with a picture',
+    blurb: 'a heading and a passage beside a picture',
+    icon: 'photo_library',
+    seed: {
+      columns: [
+        { pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] },
+        { pieces: [{ kind: 'picture' }] }
+      ]
+    }
+  },
+  {
+    key: 'headingAndText',
+    label: 'Heading and text',
+    blurb: 'a passage across the page, centred',
+    icon: 'subject',
+    seed: {
+      copySize: 'large',
+      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] }]
+    }
+  },
+  {
+    key: 'callToAction',
+    label: 'Call to action',
+    blurb: 'a heading, a line and a button over a photo',
+    icon: 'campaign',
+    seed: {
+      surface: 'photo',
+      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] }]
+    }
+  },
+  {
+    key: 'twoColumns',
+    label: 'Two columns of text',
+    blurb: 'two passages side by side, each with its own heading',
+    icon: 'view_column',
+    seed: {
+      columns: [
+        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
+        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] }
+      ]
+    }
+  },
+  {
+    key: 'threeColumns',
+    label: 'Three columns of text',
+    blurb: 'three passages side by side',
+    icon: 'view_week',
+    seed: {
+      columns: [
+        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
+        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
+        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] }
+      ]
+    }
+  },
+  {
+    key: 'formBesideText',
+    label: 'Form beside text',
+    blurb: 'a heading and a passage on one side, a form on the other',
+    icon: 'assignment',
+    seed: {
+      columns: [
+        { pieces: [{ kind: 'heading' }, { kind: 'text' }] },
+        { pieces: [{ kind: 'form' }] }
+      ]
+    }
+  },
+  {
+    key: 'signup',
+    label: 'Sign-up',
+    blurb: 'a heading, a line, and the name-and-email sign-up',
+    icon: 'mark_email_read',
+    seed: {
+      surface: 'tinted',
+      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'signup' }] }]
+    }
+  },
+  {
+    key: 'contact',
+    label: 'Contact details',
+    blurb: 'the address, phone, email and social links',
+    icon: 'contact_page',
+    seed: {
+      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'siteDetails' }, { kind: 'text' }] }]
+    }
+  },
+  {
+    key: 'countdown',
+    label: 'Countdown',
+    blurb: 'a clock counting to a date, over a photo',
+    icon: 'timer',
+    seed: {
+      surface: 'photo',
+      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'countdown' }, { kind: 'buttons' }] }]
+    }
+  }
+];

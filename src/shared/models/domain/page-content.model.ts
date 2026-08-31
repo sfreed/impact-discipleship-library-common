@@ -239,9 +239,24 @@ export interface PageContentBlock {
   targetDate?: string;
 
   /**
+   * THE COLUMNS a `section` block is built from - one to three, each an
+   * ordered list of pieces. See ContentPiece at the foot of this file.
+   *
+   * Present ONLY on the new `section` type. Every block written before
+   * 2026-08-31 carries the flat fields above instead, and both shapes
+   * render until the last page has migrated.
+   */
+  columns?: SectionColumn[];
+
+  /**
    * Repeated entries, where a section is a list rather than a passage -
    * cards, timeline entries, price tiles, the passages in a two-column
    * block. Array order IS the running order.
+   *
+   * On the new `list` type these are THE list. On the new `section` type
+   * they are unused - a section's buttons live on a buttons PIECE, which is
+   * what unpicks the old overload where this one field meant list data on
+   * six archetypes and buttons on five.
    */
   items?: PageContentItem[];
   /**
@@ -375,4 +390,122 @@ export class PageContentModel extends BaseModel {
    * and half-written copy on the public site is worse than no page at all.
    */
   isPublished?: boolean;
+}
+
+// ---------------------------------------------------- columns and pieces
+//
+// THE SHAPE EVERY SECTION IS MOVING TO (Stage 1, 2026-08-31).
+//
+// The fourteen archetypes above each fix their own layout and declare which
+// of this block's ~35 flat fields they use. That worked while the layouts
+// came from a census of twelve real pages, and stopped working the moment
+// the owner wanted arrangements nobody had drawn yet.
+//
+// A SECTION is one to three columns; a column is an ordered list of PIECES.
+// Everything the fourteen archetypes draw is a piece, and every piece here
+// already existed as a field - this is a rearrangement of the same content,
+// not new capability.
+//
+// NOTHING READS THESE YET on the twelve pages plus Home: the flat fields
+// stay, both shapes render, and a block carries one or the other. They are
+// removed only when the last page has migrated.
+
+/** What a piece IS. The value is stored, so rename a member freely and a
+ *  value never. */
+export type ContentPieceKind =
+  /** A heading, at a level - see ContentPiece.level. */
+  | 'heading'
+  /** The small line above a heading. */
+  | 'eyebrow'
+  /** A rich-text passage. */
+  | 'text'
+  /** A picture drawn as content, not as a ground. */
+  | 'picture'
+  /** A click-to-play YouTube video. */
+  | 'video'
+  /** One or more buttons. A LIST, so a third is an add. */
+  | 'buttons'
+  /** A form built in Form Builder, chosen by name. */
+  | 'form'
+  /** The fixed name-and-email sign-up. A DIFFERENT thing from `form`: the
+   *  fields belong to the site, only the mailing list is data. */
+  | 'signup'
+  /** A clock counting to a date the piece carries. */
+  | 'countdown'
+  /** The address, phone, email and social links, from Web Config. Editable
+   *  nowhere but Web Config, which is why it is one piece and not six. */
+  | 'siteDetails'
+  /** A figure NAMED from Web Config. Never a typed number - a price with two
+   *  homes drifts, and a page is not its home. */
+  | 'price'
+  /** A small line, quieter than body text. */
+  | 'note';
+
+/**
+ * ONE piece of content inside a column.
+ *
+ * Flat and all-optional, the same choice PageContentItem makes: one shape
+ * every piece editor can bind to, rather than a discriminated union that
+ * would make every reused control's binding path depend on the kind.
+ */
+export interface ContentPiece {
+  /** Stable within its column. What a drag reorders and an editor tracks. */
+  key: string;
+  kind: ContentPieceKind;
+  /** Absent counts as live, the same rule as sections and entries. */
+  isActive?: boolean;
+
+  /** heading, eyebrow, note. */
+  text?: string;
+  /**
+   * Which heading this is.
+   *
+   * 'page' renders the <h1>. It used to be guaranteed by the hero archetype
+   * being a singleton; with any section able to hold any heading it has to
+   * be said out loud, and the page editor can then check there is exactly
+   * one - which is more than the old arrangement could do.
+   */
+  level?: 'page' | 'section' | 'minor';
+
+  /** text - rich HTML, as body always has been. */
+  html?: string;
+
+  /** picture. */
+  image?: ImageModel;
+  photoFocus?: 'top' | 'center' | 'bottom';
+
+  /** video - the id, parsed from a pasted URL by the editor. */
+  videoId?: string;
+
+  /** buttons. Reuses PageContentItem so href() resolution, the destination
+   *  picker and the entry editor all work unchanged. */
+  buttons?: PageContentItem[];
+
+  /** form - a Firestore id, PICKED from the forms that exist, never typed. */
+  formId?: string;
+  /** signup. */
+  signupList?: 'newsletter' | 'prayer';
+  /** countdown - ISO date. Absent, unreadable or past draws no clock. */
+  targetDate?: string;
+  /** price - names a Web Config figure; the suffix is free text ("/seat"). */
+  amountKey?: string;
+  amountSuffix?: string;
+}
+
+/** One column of a section. */
+export interface SectionColumn {
+  key: string;
+  /**
+   * A painted box behind this column, from the fixed palette.
+   *
+   * REPLACES leftGround/leftInk/leftTitleTone and their right-hand twins -
+   * six fields that encoded "this section has two columns with their own
+   * colours" without ever admitting there were columns.
+   */
+  ground?: 'none' | 'panel' | 'brand' | 'dark';
+  ink?: 'dark' | 'light';
+  /** Headings in this column drawn in the brand blue - the audience pages'
+   *  right-hand questions. */
+  titleTone?: 'ink' | 'brand';
+  pieces: ContentPiece[];
 }

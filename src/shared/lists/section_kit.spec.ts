@@ -24,15 +24,20 @@ import {
 // a green run here as permission to delete a bespoke component.
 
 describe('the section kit', () => {
-  it('declares fourteen archetypes', () => {
+  it('declares sixteen archetypes - fourteen retiring, two replacing them', () => {
     // FOURTEEN came from the census of the twelve public pages. SLIDER and
     // COUNTDOWN came later (2026-08-31) from the home page, which was never
     // in that census: both were behaviour rather than layout and would
     // otherwise have stayed bespoke components forever. HERO_SPLIT left the
     // same day, folded into HERO_BAND as a second look - it was the same
     // thing in a different layout, which is what a variant is for.
-    expect(SECTION_KIT.length).toBe(14);
-    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(14);
+    // SIXTEEN is a transitional number and should shrink to TWO. The
+    // fourteen census archetypes are on their way out; SECTION and LIST
+    // replace them, and both shapes have to render while pages migrate one
+    // at a time. If this is still 16 long after the migration finished,
+    // Stage 4 was never done.
+    expect(SECTION_KIT.length).toBe(16);
+    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(16);
   });
 
   it('covers every member of the archetype enum', () => {
@@ -208,7 +213,12 @@ describe('fields a variant offers', () => {
       SECTION_ARCHETYPE.TIMELINE,
       // A slider is a list of SLIDES - the rotation is the renderer's, the
       // slides are entries like any other.
-      SECTION_ARCHETYPE.SLIDER
+      SECTION_ARCHETYPE.SLIDER,
+      // A carousel repeats one shape per item too - it just sources the
+      // list from the testimonials collection instead of its own entries.
+      SECTION_ARCHETYPE.CAROUSEL,
+      // The one that replaces all six of them (2026-08-31).
+      SECTION_ARCHETYPE.LIST
     ];
     const buttonBearing: string[] = [
       SECTION_ARCHETYPE.HERO_BAND,
@@ -224,7 +234,15 @@ describe('fields a variant offers', () => {
       for (const variant of def.variants) {
         const exception = buttonBearing.includes(def.archetype);
         const shouldHave = listArchetypes.includes(def.archetype) || exception;
-        if (shouldHave !== !!variant.fields.entries) {
+        // A list variant has to say where its items COME FROM, and there are
+        // two honest answers: its own entries, or the testimonials
+        // collection. The quote carousel is the second - the quotes belong to
+        // the Testimonials screen because the same quote can appear on more
+        // than one page, and the section stores only the order. Demanding
+        // `entries` of it would be demanding a second, private copy of
+        // somebody else's data.
+        const hasItems = !!variant.fields.entries || !!variant.fields.testimonials;
+        if (shouldHave !== hasItems) {
           mismatched.push(`${def.archetype}/${variant.key}`);
         }
       }
