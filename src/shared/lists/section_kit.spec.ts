@@ -160,8 +160,14 @@ describe('coverage of the site as it stands', () => {
 });
 
 describe('fields a variant offers', () => {
-  it('gives the standard hero its two buttons and the split hero its note', () => {
-    expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, 'standard').cta2).toBeTrue();
+  it('gives the hero band a list of buttons, and the split hero its note', () => {
+    // The hero's two FIXED button slots went away on 2026-08-31 - one look,
+    // buttons as entries. `entries` where `cta2` used to be is the whole
+    // change, and existing heroes were migrated by
+    // scripts/hero-buttons-to-entries.js rather than losing their buttons.
+    expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, 'buttonList').entries).toBeTrue();
+    expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, 'buttonList').cta2).toBeUndefined();
+
     expect(kitFields(SECTION_ARCHETYPE.HERO_SPLIT, 'standard').note).toBeTrue();
     // The split hero has one way in, not two.
     expect(kitFields(SECTION_ARCHETYPE.HERO_SPLIT, 'standard').cta2).toBeUndefined();
