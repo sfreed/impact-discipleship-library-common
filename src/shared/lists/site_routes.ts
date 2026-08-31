@@ -134,7 +134,12 @@ export const RESERVED_SLUGS: readonly string[] = [
   'checkout', 'checkout-success', 'e-books',
   'newsletter', 'seminar-form',
   'lunch-and-learn-form',
-  'private-policy', 'terms', 'customer-reviews', 'consultation-survey',
+  // 'private-policy' and 'terms' left this list on 2026-08-31. They stopped
+  // being hand-written routes and became ordinary page_content pages at the
+  // same two addresses - so reserving them would refuse the admin the slugs
+  // its own pages already occupy. The web repo's app-routing.spec.ts caught
+  // it within a minute of the routes being deleted.
+  'customer-reviews', 'consultation-survey',
   'monthly-newsletter',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
