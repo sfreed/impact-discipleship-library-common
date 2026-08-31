@@ -78,8 +78,13 @@ describe('slugs a staff-created page may use', () => {
 
   it('refuses a segment the web app already routes', () => {
     expect(isSlugAvailable('store')).toBeFalse();
-    expect(isSlugAvailable('give')).toBeFalse();
+    expect(isSlugAvailable('events')).toBeFalse();
     expect(isSlugAvailable('checkout')).toBeFalse();
+    // 'give' and the other eleven CUT-OVER segments are deliberately NOT
+    // refused here: the dynamic route serves them, and re-creating one is
+    // blocked by the New Page dialog's duplicate check against the existing
+    // page_content document instead.
+    expect(isSlugAvailable('give')).toBeTrue();
   });
 
   it('refuses it whatever case or padding it arrives in', () => {
