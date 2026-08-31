@@ -10,6 +10,8 @@ import {
   resolveSurface,
   toKitBlocks,
   variantDef
+,
+  toSectionModel, toSectionBlocks
 } from './section_kit';
 
 // The kit claims it can draw every page the site has. Nothing type-checks
@@ -309,5 +311,272 @@ describe('flipping an original page onto the kit', () => {
 
     expect(original[0].type).toBe('pageHeader');
     expect('variant' in original[0]).toBeFalse();
+  });
+});
+
+/**
+ * THE FLIP FROM FOURTEEN ARCHETYPES TO TWO.
+ *
+ * This function IS the migration - the comparison screen runs it in memory
+ * and the cutover script runs it to write, so an approved preview cannot
+ * migrate into something else. It is the same contract toKitBlocks carried
+ * through the first cutover.
+ *
+ * What these specs are actually protecting: a section that flips into
+ * something the renderer cannot draw does not throw - it draws NOTHING, and
+ * a page that is quietly one band shorter is exactly how a migration loses a
+ * piece of the site.
+ */
+describe('flipping a section into the two new members', () => {
+  it('turns every repeater into a List, changing nothing else', () => {
+    const grid = {
+      key: 'ebooks', type: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture',
+      heading: 'E-books', surface: 'light',
+      items: [{ title: 'One', isActive: true }, { title: 'Two', isActive: true }]
+    };
+
+    const out = toSectionModel(grid);
+
+    expect(out['type']).toBe(SECTION_ARCHETYPE.LIST);
+    expect(out['variant']).toBe('tiles');
+    // A RENAME. The entries are the whole value of a list and nothing here
+    // reshapes them - if this ever stops being true, the migration has
+    // started rewriting content rather than moving it.
+    expect(out['items']).toEqual(grid.items);
+    expect(out['heading']).toBe('E-books');
+    expect(out['surface']).toBe('light');
+  });
+
+  it('maps every repeater look the old archetypes had', () => {
+    const repeaters: [SECTION_ARCHETYPE, string, string][] = [
+      [SECTION_ARCHETYPE.LIST_GRID, 'picture', 'tiles'],
+      [SECTION_ARCHETYPE.LIST_GRID, 'pictureRows', 'pictureRows'],
+      [SECTION_ARCHETYPE.LIST_GRID, 'icon', 'icon'],
+      [SECTION_ARCHETYPE.LIST_GRID, 'price', 'price'],
+      [SECTION_ARCHETYPE.LIST_ROWS, 'buttonAndText', 'rows'],
+      [SECTION_ARCHETYPE.LIST_ARTICLES, 'plain', 'articles'],
+      [SECTION_ARCHETYPE.LIST_ARTICLES, 'numbered', 'numbered'],
+      [SECTION_ARCHETYPE.TIMELINE, 'centreLine', 'timeline'],
+      [SECTION_ARCHETYPE.CAROUSEL, 'quotes', 'quotes'],
+      [SECTION_ARCHETYPE.SLIDER, 'slides', 'slides']
+    ];
+
+    const wrong = repeaters.filter(([type, variant, look]) =>
+      toSectionModel({ key: 'k', type, variant })['variant'] !== look);
+
+    expect(wrong.map(([t, v]) => `${t}/${v}`))
+      .withContext('these looks flip to the wrong List variant')
+      .toEqual([]);
+  });
+
+  it('turns a hero into a Section whose heading is the PAGE title', () => {
+    // The one heading a search engine reads as the page's name. It used to
+    // be guaranteed by the hero archetype being one per page; it is explicit
+    // now, and this is where that promise is kept.
+    const out = toSectionModel({
+      key: 'pageHeader', type: SECTION_ARCHETYPE.HERO_BAND, variant: 'overPhoto',
+      surface: 'photo', heading: 'Seminars', subheading: 'EQUIPPING',
+      body: '<p>Copy.</p>', ctaTitle: 'Register', ctaUrl: '/events'
+    });
+
+    expect(out['type']).toBe(SECTION_ARCHETYPE.SECTION);
+    const pieces = (out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[];
+    const heading = pieces.find((p) => p['kind'] === 'heading');
+
+    expect(heading?.['text']).toBe('Seminars');
+    expect(heading?.['level']).toBe('page');
+    // In the order the old renderer drew them.
+    expect(pieces.map((p) => p['kind'])).toEqual(['eyebrow', 'heading', 'text', 'buttons']);
+  });
+
+  it('carries the legacy button pair across as real buttons', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'Give',
+      ctaTitle: 'One gift', ctaUrl: 'one', ctaTitle2: 'Monthly', ctaUrl2: 'monthly'
+    });
+
+    const pieces = (out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[];
+    const buttons = pieces.find((p) => p['kind'] === 'buttons')?.['buttons'] as Record<string, unknown>[];
+
+    expect(buttons.map((b) => b['title'])).toEqual(['One gift', 'Monthly']);
+    // KEYS, not addresses - the whole reason giving destinations are named.
+    expect(buttons.map((b) => b['link'])).toEqual(['one', 'monthly']);
+  });
+
+  it('puts the picture on the side the section says, not always the right', () => {
+    const right = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_MEDIA, heading: 'A', body: '<p>b</p>',
+      image: { url: 'https://example.test/p.jpg' }
+    });
+    const left = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_MEDIA, heading: 'A', body: '<p>b</p>',
+      image: { url: 'https://example.test/p.jpg' }, mediaSide: 'left'
+    });
+
+    const firstKind = (out: Record<string, unknown>) => {
+      const cols = out['columns'] as Record<string, unknown>[];
+      return ((cols[0]['pieces'] as Record<string, unknown>[])[0])['kind'];
+    };
+
+    expect(firstKind(right)).toBe('heading');
+    expect(firstKind(left)).toBe('picture');
+  });
+
+  it('gives a two-column block a FULL-WIDTH heading over its columns', () => {
+    // Nearly every two-column band on the site has one. Expressing it as a
+    // spanning column keeps the single rule - a section is columns of pieces
+    // - instead of reintroducing a heading field that only works at the top.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.LIST_COLUMNS, heading: 'Who it is for',
+      leftGround: 'panel', rightGround: 'panel',
+      items: [
+        { title: 'Leaders', body: '<p>x</p>', column: 'left', isActive: true },
+        { title: 'Teams', body: '<p>y</p>', column: 'right', isActive: true }
+      ]
+    });
+
+    const columns = out['columns'] as Record<string, unknown>[];
+    expect(columns[0]['full']).toBe(true);
+    expect(columns.length).toBe(3);
+    // The ground each side carried survives as the column's own.
+    expect(columns[1]['ground']).toBe('panel');
+    expect(columns[2]['ground']).toBe('panel');
+  });
+
+  it('keeps a form and a sign-up as the different things they are', () => {
+    const form = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'plain', formId: 'abc'
+    });
+    const signup = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'mailingList', signupList: 'prayer'
+    });
+
+    const kinds = (out: Record<string, unknown>) =>
+      ((out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[])
+        .map((p) => p['kind']);
+
+    expect(kinds(form)).toContain('form');
+    expect(kinds(signup)).toContain('signup');
+    // Never defaulted to the prayer team by accident.
+    const piece = ((signup['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[])
+      .find((p) => p['kind'] === 'signup');
+    expect(piece?.['signupList']).toBe('prayer');
+  });
+
+  it('drops the fields that became pieces, so nothing is stored twice', () => {
+    // Two copies of a heading is two sources of truth, and the one the
+    // renderer ignores is the one somebody will edit.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED,
+      heading: 'A', body: '<p>b</p>', ctaTitle: 'Go', ctaUrl: '/x'
+    });
+
+    for (const field of ['heading', 'body', 'ctaTitle', 'ctaUrl']) {
+      expect(out[field]).withContext(`${field} was left on the block`).toBeUndefined();
+    }
+  });
+
+  it('keeps the levers that are still the section’s own', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'A',
+      surface: 'tinted', headingStyle: 'light', copySize: 'large', pairWithNext: true
+    });
+
+    expect(out['surface']).toBe('tinted');
+    expect(out['headingStyle']).toBe('light');
+    expect(out['copySize']).toBe('large');
+    expect(out['pairWithNext']).toBe(true);
+  });
+
+  it('makes no empty pieces out of empty fields', () => {
+    // An empty piece is one staff have to notice and delete, on every
+    // section, forever.
+    const out = toSectionModel({ key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'A' });
+    const pieces = (out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[];
+
+    expect(pieces.map((p) => p['kind'])).toEqual(['heading']);
+  });
+
+  it('gives every piece in a section a key nothing else there uses', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.LIST_COLUMNS, heading: 'H',
+      items: [
+        { title: 'A', body: '<p>a</p>', column: 'left', isActive: true },
+        { title: 'B', body: '<p>b</p>', column: 'left', isActive: true },
+        { title: 'C', body: '<p>c</p>', column: 'right', isActive: true }
+      ]
+    });
+
+    const columns = out['columns'] as Record<string, unknown>[];
+    const keys = columns.flatMap((c) => [
+      c['key'] as string,
+      ...(c['pieces'] as Record<string, unknown>[]).map((p) => p['key'] as string)
+    ]);
+
+    expect(new Set(keys).size)
+      .withContext('two things in the migrated section share a key')
+      .toBe(keys.length);
+  });
+
+  it('produces the same output twice, so a re-run is not a second migration', () => {
+    const block = {
+      key: 'k', type: SECTION_ARCHETYPE.HERO_BAND, variant: 'besidePicture',
+      heading: 'A', body: '<p>b</p>', image: { url: 'https://example.test/p.jpg' }
+    };
+
+    expect(JSON.stringify(toSectionModel(block)))
+      .toBe(JSON.stringify(toSectionModel(block)));
+  });
+
+  it('never mutates the document it was handed', () => {
+    // The preview runs against the LIVE object the editor is rendering.
+    const block = {
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'A', body: '<p>b</p>'
+    };
+    const before = JSON.stringify(block);
+
+    toSectionModel(block);
+
+    expect(JSON.stringify(block)).toBe(before);
+  });
+});
+
+describe('flipping a whole page', () => {
+  it('reports a section it cannot express rather than dropping it', () => {
+    // Silence is the failure that matters: a preview of a page that is
+    // quietly one band shorter looks completely fine.
+    const { blocks, problems } = toSectionBlocks([
+      { key: 'a', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'A' },
+      { key: 'b', type: 'somethingNobodyMapped' }
+    ]);
+
+    expect(blocks.length).withContext('a block was dropped').toBe(2);
+    expect(problems.length).toBe(1);
+    expect(problems[0]).toContain('somethingNobodyMapped');
+  });
+
+  it('expresses every composed archetype the kit still declares', () => {
+    // THE SAFETY NET. An archetype with no builder flips to nothing the new
+    // renderer can draw, and the page loses that band silently.
+    const repeaters = new Set<string>([
+      SECTION_ARCHETYPE.LIST_GRID, SECTION_ARCHETYPE.LIST_ROWS,
+      SECTION_ARCHETYPE.LIST_ARTICLES, SECTION_ARCHETYPE.TIMELINE,
+      SECTION_ARCHETYPE.CAROUSEL, SECTION_ARCHETYPE.SLIDER
+    ]);
+    // The two that are the destination, not the source.
+    const destinations = new Set<string>([SECTION_ARCHETYPE.SECTION, SECTION_ARCHETYPE.LIST]);
+
+    const unmapped = SECTION_KIT
+      .map((def) => def.archetype as string)
+      .filter((archetype) => !repeaters.has(archetype) && !destinations.has(archetype))
+      .filter((archetype) => {
+        const variant = SECTION_KIT.find((d) => d.archetype === archetype)?.variants[0].key;
+        const out = toSectionModel({ key: 'k', type: archetype, variant, heading: 'H' });
+        return out['type'] !== SECTION_ARCHETYPE.SECTION;
+      });
+
+    expect(unmapped)
+      .withContext('these archetypes have no mapping and would migrate into nothing')
+      .toEqual([]);
   });
 });

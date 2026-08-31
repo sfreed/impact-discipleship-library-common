@@ -1242,3 +1242,291 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
     }
   }
 ];
+
+
+// ------------------------------------------- fourteen archetypes into two
+
+/**
+ * ONE SECTION, redrawn as a Section or a List.
+ *
+ * THIS FUNCTION IS THE MIGRATION. The comparison screen runs it in memory to
+ * show what a page WOULD become, and the cutover script runs the same
+ * function to write it - one definition, so an approved preview cannot
+ * migrate into something else. It is exactly the contract toKitBlocks had
+ * during the first cutover, and it held.
+ *
+ * PURE, AND IT COPIES. The preview runs against the live document object the
+ * editor is rendering; mutating it would change the page under the person
+ * looking at it.
+ *
+ * THE SIX REPEATERS ARE A RENAME. listGrid, listRows, listArticles,
+ * timeline, carousel and slider all keep their entries, their heading and
+ * their surface exactly as they are - only the type and the variant change,
+ * because a List's variants ARE those archetypes' looks. Nothing about the
+ * item data moves, which is why there is no entry-reshaping code here.
+ *
+ * THE EIGHT COMPOSED ONES BECOME COLUMNS. Their fields turn into pieces in
+ * the order the old renderer drew them, so a migrated band draws as the band
+ * it replaced.
+ */
+export function toSectionModel(
+  block: Readonly<Record<string, unknown>>
+): Record<string, unknown> {
+  const type = String(block['type'] ?? '');
+  const variant = String(block['variant'] ?? '');
+
+  const look = REPEATER_LOOKS[`${type}/${variant}`] ?? REPEATER_LOOKS[type];
+  if (look) {
+    // A rename, deliberately keeping every other field byte for byte.
+    return { ...block, type: SECTION_ARCHETYPE.LIST, variant: look };
+  }
+
+  const columns = COLUMN_BUILDERS[type]?.(block);
+  if (!columns) {
+    // NOT a silent pass-through dressed as a migration. An unmapped section
+    // keeps its old type, which the new members cannot draw - reported by
+    // toSectionBlocks below so a preview can never look like a shorter page
+    // that works.
+    return { ...block };
+  }
+
+  const migrated: Record<string, unknown> = {
+    ...block,
+    type: SECTION_ARCHETYPE.SECTION,
+    variant: 'columns',
+    columns
+  };
+
+  // The fields that BECAME pieces are dropped, so nothing is stored twice
+  // and there is no second source of truth to drift. Everything else - the
+  // surface, the text levers, the photo focus, pairWithNext - stays, because
+  // those are still the section's own.
+  for (const field of FIELDS_NOW_PIECES) {
+    delete migrated[field];
+  }
+  // The picture stays ONLY where it is the section's background rather than
+  // content: on a photo surface the renderer paints block.image itself.
+  if (migrated['surface'] !== 'photo') {
+    delete migrated['image'];
+  }
+  return migrated;
+}
+
+/** The old archetype/variant pairs that are simply a List with a look. */
+const REPEATER_LOOKS: Record<string, string> = {
+  [`${SECTION_ARCHETYPE.LIST_GRID}/picture`]: 'tiles',
+  [`${SECTION_ARCHETYPE.LIST_GRID}/pictureRows`]: 'pictureRows',
+  [`${SECTION_ARCHETYPE.LIST_GRID}/icon`]: 'icon',
+  [`${SECTION_ARCHETYPE.LIST_GRID}/price`]: 'price',
+  [SECTION_ARCHETYPE.LIST_GRID]: 'tiles',
+  [`${SECTION_ARCHETYPE.LIST_ROWS}/buttonAndText`]: 'rows',
+  [SECTION_ARCHETYPE.LIST_ROWS]: 'rows',
+  [`${SECTION_ARCHETYPE.LIST_ARTICLES}/numbered`]: 'numbered',
+  [`${SECTION_ARCHETYPE.LIST_ARTICLES}/plain`]: 'articles',
+  [SECTION_ARCHETYPE.LIST_ARTICLES]: 'articles',
+  [SECTION_ARCHETYPE.TIMELINE]: 'timeline',
+  [SECTION_ARCHETYPE.CAROUSEL]: 'quotes',
+  [SECTION_ARCHETYPE.SLIDER]: 'slides'
+};
+
+/** Fields whose content has moved into a piece. Deleted after the move so a
+ *  value never exists in two places. */
+const FIELDS_NOW_PIECES: readonly string[] = [
+  'heading', 'subheading', 'body', 'note', 'videoId', 'videoUrl',
+  'ctaTitle', 'ctaUrl', 'ctaTitle2', 'ctaUrl2', 'items',
+  'formId', 'signupList', 'targetDate',
+  'leftGround', 'leftInk', 'leftTitleTone',
+  'rightGround', 'rightInk', 'rightTitleTone'
+];
+
+type ColumnBuilder = (block: Readonly<Record<string, unknown>>) => Record<string, unknown>[];
+
+/** A piece, or nothing when there is no content for it. Filtered out below,
+ *  so an empty field does not become an empty piece staff have to delete. */
+function piece(
+  kind: ContentPieceKindKey,
+  fields: Record<string, unknown>
+): Record<string, unknown> | null {
+  const meaningful = Object.values(fields).some(
+    (value) => value !== undefined && value !== null && value !== ''
+      && !(Array.isArray(value) && value.length === 0)
+  );
+  return meaningful ? { kind, isActive: true, ...fields } : null;
+}
+
+/** The buttons a composed section carried, in the order it drew them.
+ *  An entries list wins over the legacy cta pair - blocks migrated earlier
+ *  this week already carry entries, and the pair was left in place. */
+function buttonsOf(block: Readonly<Record<string, unknown>>): Record<string, unknown> | null {
+  const items = block['items'] as Record<string, unknown>[] | undefined;
+  if (items?.length) {
+    return piece('buttons', { buttons: items });
+  }
+  const legacy: Record<string, unknown>[] = [];
+  if (block['ctaTitle']) {
+    legacy.push({ title: block['ctaTitle'], link: block['ctaUrl'], isActive: true });
+  }
+  if (block['ctaTitle2']) {
+    legacy.push({ title: block['ctaTitle2'], link: block['ctaUrl2'], isActive: true });
+  }
+  return legacy.length ? piece('buttons', { buttons: legacy }) : null;
+}
+
+/** The words half of a band, in the order every one of them drew it. */
+function wordsOf(
+  block: Readonly<Record<string, unknown>>,
+  level: 'page' | 'section' | 'minor'
+): (Record<string, unknown> | null)[] {
+  return [
+    piece('eyebrow', { text: block['subheading'] }),
+    piece('heading', { text: block['heading'], level }),
+    piece('text', { html: block['body'] }),
+    buttonsOf(block),
+    piece('note', { text: block['note'] })
+  ];
+}
+
+/** A column, keys minted from position so two runs of the migration over the
+ *  same document produce identical output. */
+function column(
+  index: number,
+  pieces: (Record<string, unknown> | null)[],
+  extra: Record<string, unknown> = {}
+): Record<string, unknown> {
+  const live = pieces.filter((p): p is Record<string, unknown> => !!p);
+  return {
+    key: `col-${index}`,
+    ...extra,
+    pieces: live.map((p, i) => ({ ...p, key: `${p['kind']}-${index}-${i + 1}` }))
+  };
+}
+
+/** The media half - a video where there is one, otherwise the picture. */
+function mediaOf(block: Readonly<Record<string, unknown>>): Record<string, unknown> | null {
+  return block['videoId']
+    ? piece('video', { videoId: block['videoId'], image: block['image'] })
+    : piece('picture', { image: block['image'], photoFocus: block['photoFocus'] });
+}
+
+/** Words first or media first. `mediaSide` is the section's stored opinion;
+ *  without one the site's own default put the picture on the right. */
+function ordered(
+  block: Readonly<Record<string, unknown>>,
+  words: Record<string, unknown>,
+  media: Record<string, unknown>
+): Record<string, unknown>[] {
+  return block['mediaSide'] === 'left' ? [media, words] : [words, media];
+}
+
+const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
+  // The page title, over a photo or beside a picture. `page` level, because
+  // this is the one heading a search engine reads as the page's name - what
+  // the hero archetype used to guarantee by being one per page.
+  [SECTION_ARCHETYPE.HERO_BAND]: (block) => {
+    const words = column(1, wordsOf(block, 'page'));
+    if (String(block['variant'] ?? '') !== 'besidePicture') {
+      return [words];
+    }
+    const media = column(2, [mediaOf(block)]);
+    return ordered(block, words, media);
+  },
+
+  [SECTION_ARCHETYPE.COPY_CENTRED]: (block) => [column(1, wordsOf(block, 'section'))],
+
+  [SECTION_ARCHETYPE.PHOTO_BAND]: (block) => [column(1, wordsOf(block, 'section'))],
+
+  [SECTION_ARCHETYPE.COPY_MEDIA]: (block) => ordered(
+    block,
+    column(1, wordsOf(block, 'section')),
+    column(2, [mediaOf(block)])
+  ),
+
+  // The section heading spans BOTH columns - which is what a full-width
+  // column is for. Each passage keeps the ground its side carried.
+  [SECTION_ARCHETYPE.LIST_COLUMNS]: (block) => {
+    const items = (block['items'] as Record<string, unknown>[] | undefined) ?? [];
+    const sideOf = (side: string) => items.filter(
+      (item) => (item['column'] ?? 'left') === side
+    );
+    const passages = (side: string) => sideOf(side).flatMap((item) => [
+      piece('heading', { text: item['heading'] ?? item['title'], level: 'minor' }),
+      piece('text', { html: item['body'] ?? item['description'] })
+    ]);
+
+    const head = column(1, [
+      piece('heading', { text: block['heading'], level: 'section' }),
+      piece('text', { html: block['body'] })
+    ], { full: true });
+
+    const columns: Record<string, unknown>[] = [];
+    if ((head['pieces'] as unknown[]).length) {
+      columns.push(head);
+    }
+    columns.push(column(2, passages('left'), {
+      ground: block['leftGround'], ink: block['leftInk'], titleTone: block['leftTitleTone']
+    }));
+    columns.push(column(3, passages('right'), {
+      ground: block['rightGround'], ink: block['rightInk'], titleTone: block['rightTitleTone']
+    }));
+    return columns;
+  },
+
+  // Seven of its nine rendered parts come from Web Config, so it is ONE
+  // piece rather than a composition - see CONTENT_PIECES.
+  [SECTION_ARCHETYPE.CONTACT_DETAILS]: (block) => [column(1, [
+    piece('heading', { text: block['heading'], level: 'section' }),
+    piece('text', { html: block['body'] }),
+    // It carries nothing of its own: every part of it comes from Web
+    // Config, which is the reason it is one piece rather than six.
+    { kind: 'siteDetails', isActive: true }
+  ])],
+
+  // The Form Builder form and the fixed three-field sign-up are DIFFERENT
+  // atoms that happened to share an archetype.
+  [SECTION_ARCHETYPE.FORM]: (block) => [column(1, [
+    piece('heading', { text: block['heading'], level: 'section' }),
+    piece('text', { html: block['body'] }),
+    String(block['variant'] ?? '') === 'mailingList'
+      ? piece('signup', { signupList: block['signupList'] ?? 'newsletter' })
+      : piece('form', { formId: block['formId'] })
+  ])],
+
+  [SECTION_ARCHETYPE.COUNTDOWN]: (block) => [column(1, [
+    piece('eyebrow', { text: block['subheading'] }),
+    piece('heading', { text: block['heading'], level: 'section' }),
+    piece('countdown', { targetDate: block['targetDate'] }),
+    piece('text', { html: block['body'] }),
+    buttonsOf(block)
+  ])]
+};
+
+/** What a whole page becomes, and everything the flip could not express. */
+export interface SectionMigrationPreview {
+  blocks: Record<string, unknown>[];
+  problems: string[];
+}
+
+/**
+ * A whole page flipped, with anything unmapped REPORTED rather than dropped.
+ *
+ * Silence is the failure mode that matters here: a section the flip cannot
+ * express would simply not draw, and a preview of a shorter page that looks
+ * fine is how a migration loses a piece of the site.
+ */
+export function toSectionBlocks(
+  blocks: readonly Record<string, unknown>[] | undefined
+): SectionMigrationPreview {
+  const problems: string[] = [];
+  const mapped = (blocks ?? []).map((block) => {
+    const migrated = toSectionModel(block);
+    const type = String(migrated['type'] ?? '');
+    if (type !== SECTION_ARCHETYPE.SECTION && type !== SECTION_ARCHETYPE.LIST) {
+      problems.push(
+        `Section "${block['key'] ?? type}" (${type || 'no type'}) has no mapping - `
+        + 'it would keep its old shape rather than becoming a Section or a List.'
+      );
+    }
+    return migrated;
+  });
+  return { blocks: mapped, problems };
+}

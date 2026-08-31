@@ -507,5 +507,20 @@ export interface SectionColumn {
   /** Headings in this column drawn in the brand blue - the audience pages'
    *  right-hand questions. */
   titleTone?: 'ink' | 'brand';
+  /**
+   * This column spans the whole row rather than taking a share of it.
+   *
+   * A HEADING ABOVE THE COLUMNS is the reason this exists, and it is not a
+   * special case: nearly every two-column band on the site has one, and the
+   * old model expressed it by giving the SECTION a heading field that the
+   * columns then sat under. Making it a full-width column instead keeps one
+   * rule - a section is columns of pieces - and costs one boolean, where a
+   * spanning heading field would have been a second way to say "content"
+   * that only ever worked at the top.
+   *
+   * It does not count towards how many columns the row has: three columns
+   * with a heading over them is a three-column section, not four.
+   */
+  full?: boolean;
   pieces: ContentPiece[];
 }
