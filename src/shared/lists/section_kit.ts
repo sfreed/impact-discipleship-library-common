@@ -244,21 +244,18 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
     blurb: 'a photo across the top with the page title over it',
     icon: 'wallpaper',
     singleton: true,
+    // ONE LOOK, not two (owner, 2026-08-31). There were two - "title and
+    // buttons" with two fixed slots, and "title and a list of buttons" - and
+    // the choice bought nothing: a list of buttons does everything two slots
+    // do and more. Asking staff to pick between them up front, before they
+    // know how many buttons they want, was a decision the screen should have
+    // been making for them. Buttons appear when buttons are added.
     variants: [
       {
-        key: 'standard',
-        label: 'Title and buttons',
-        blurb: 'a small line above, the title, a line of copy, and up to two buttons',
-        fields: { heading: true, subheading: true, body: true, image: true, cta: true, cta2: true },
-        surfaces: ['photo']
-      },
-      {
-        // Prayer Team. Its buttons are ENTRIES rather than two fixed slots so
-        // staff can add a third, reorder them, or give one an icon.
         key: 'buttonList',
-        label: 'Title and a list of buttons',
-        blurb: 'the same band, but any number of buttons, each with an optional icon',
-        fields: { heading: true, subheading: true, image: true, entries: true },
+        label: 'Title and buttons',
+        blurb: 'a small line above, the title, a line of copy, and any buttons you add',
+        fields: { heading: true, subheading: true, body: true, image: true, entries: true },
         surfaces: ['photo']
       }
     ]
