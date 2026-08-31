@@ -957,6 +957,7 @@ export interface ContentPieceDef {
     buttons?: boolean;
     form?: boolean;
     signupList?: boolean;
+    submitLabel?: boolean;
     targetDate?: boolean;
     amount?: boolean;
   };
@@ -1013,7 +1014,7 @@ export const CONTENT_PIECES: readonly ContentPieceDef[] = [
     label: 'Form',
     blurb: 'one of the forms from Form Builder',
     icon: 'assignment',
-    fields: { form: true },
+    fields: { form: true, submitLabel: true },
     caveat: 'WHICH form is chosen from the forms that exist, never typed. An id '
       + 'retyped by hand is a blank widget nobody can diagnose.'
   },
@@ -1488,7 +1489,11 @@ const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
     piece('text', { html: block['body'] }),
     String(block['variant'] ?? '') === 'mailingList'
       ? piece('signup', { signupList: block['signupList'] ?? 'newsletter' })
-      : piece('form', { formId: block['formId'] })
+      // ctaTitle on a FORM section is its SUBMIT BUTTON'S label, not a link -
+      // the archetype passed it straight to the form renderer. Dropping it
+      // turned "GET MY FREE CONSULTATION" into "Submit", which the
+      // comparison screen caught within a minute of first running.
+      : piece('form', { formId: block['formId'], submitLabel: block['ctaTitle'] })
   ])],
 
   [SECTION_ARCHETYPE.COUNTDOWN]: (block) => [column(1, [

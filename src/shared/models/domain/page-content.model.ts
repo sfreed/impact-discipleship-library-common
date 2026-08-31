@@ -483,6 +483,16 @@ export interface ContentPiece {
 
   /** form - a Firestore id, PICKED from the forms that exist, never typed. */
   formId?: string;
+  /**
+   * form - what its submit button says.
+   *
+   * The FORM archetype kept this in `ctaTitle`, which reads like a link and
+   * is not one: it is the label on the form's own submit button. The
+   * comparison screen caught it going missing the first time this migration
+   * ran - "GET MY FREE CONSULTATION" quietly became "Submit", which is
+   * exactly the kind of loss that looks like nothing at all.
+   */
+  submitLabel?: string;
   /** signup. */
   signupList?: 'newsletter' | 'prayer';
   /** countdown - ISO date. Absent, unreadable or past draws no clock. */

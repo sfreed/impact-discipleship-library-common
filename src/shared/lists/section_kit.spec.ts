@@ -580,3 +580,106 @@ describe('flipping a whole page', () => {
       .toEqual([]);
   });
 });
+
+/**
+ * WHAT THE FLIP MUST NOT LOSE.
+ *
+ * The comparison screen found the first one within a minute of running
+ * against real data: a FORM section keeps its submit button's label in
+ * `ctaTitle`, which reads like a link and is not one, and the flip dropped
+ * it - "GET MY FREE CONSULTATION" quietly became "Submit". Nothing threw,
+ * nothing looked broken, and the page was still the right length.
+ *
+ * So these are per-field, not per-section. A section that survives with one
+ * field missing is the failure mode this whole migration has to fear.
+ */
+describe('what the flip must carry across', () => {
+  /** Every string a piece anywhere in the section ended up holding. */
+  function carried(out: Record<string, unknown>): string[] {
+    const columns = (out['columns'] as Record<string, unknown>[] | undefined) ?? [];
+    const values: string[] = [];
+    const walk = (value: unknown): void => {
+      if (typeof value === 'string') {
+        values.push(value);
+      } else if (Array.isArray(value)) {
+        value.forEach(walk);
+      } else if (value && typeof value === 'object') {
+        Object.values(value as Record<string, unknown>).forEach(walk);
+      }
+    };
+    columns.forEach(walk);
+    return values;
+  }
+
+  it('keeps a form’s submit button label', () => {
+    const out = toSectionModel({
+      key: 'start', type: SECTION_ARCHETYPE.FORM, variant: 'withCopy',
+      heading: 'START TODAY', formId: 'consultation-form',
+      ctaTitle: 'GET MY FREE CONSULTATION'
+    });
+
+    const form = ((out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[])
+      .find((p) => p['kind'] === 'form');
+
+    expect(form?.['submitLabel'])
+      .withContext('the form would say "Submit" on every page of the site')
+      .toBe('GET MY FREE CONSULTATION');
+  });
+
+  it('carries every piece of WORDING off each composed archetype', () => {
+    // A block carrying every text field any archetype reads. If a builder
+    // forgets one, its words are simply absent afterwards - which is the
+    // shape of the bug the comparison caught.
+    const wordy = {
+      heading: 'THE-HEADING',
+      subheading: 'THE-EYEBROW',
+      body: '<p>THE-BODY</p>',
+      note: 'THE-NOTE',
+      ctaTitle: 'THE-BUTTON',
+      ctaUrl: '/somewhere'
+    };
+
+    const composed: [SECTION_ARCHETYPE, string, string[]][] = [
+      // Which of those words each archetype actually DREW. Not every one
+      // draws every field - a countdown has no note, a contact block has no
+      // button - so the expectation is per archetype rather than blanket.
+      [SECTION_ARCHETYPE.HERO_BAND, 'overPhoto',
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+      [SECTION_ARCHETYPE.COPY_CENTRED, 'plain',
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+      [SECTION_ARCHETYPE.COPY_MEDIA, 'picture',
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+      [SECTION_ARCHETYPE.PHOTO_BAND, 'plain',
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+      [SECTION_ARCHETYPE.CONTACT_DETAILS, 'plain', ['THE-HEADING', 'THE-BODY']],
+      [SECTION_ARCHETYPE.COUNTDOWN, 'toDate',
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-BUTTON']]
+    ];
+
+    const lost: string[] = [];
+    for (const [type, variant, expected] of composed) {
+      const words = carried(toSectionModel({ key: 'k', type, variant, ...wordy })).join(' ');
+      for (const word of expected) {
+        if (!words.includes(word)) {
+          lost.push(`${type}/${variant} lost ${word}`);
+        }
+      }
+    }
+
+    expect(lost)
+      .withContext('these words are on the page today and would not be after migrating')
+      .toEqual([]);
+  });
+
+  it('carries a form section’s words, including the one that reads like a link', () => {
+    const words = carried(toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'withCopy',
+      heading: 'THE-HEADING', body: '<p>THE-BODY</p>',
+      formId: 'a-form', ctaTitle: 'THE-BUTTON'
+    })).join(' ');
+
+    for (const word of ['THE-HEADING', 'THE-BODY', 'a-form', 'THE-BUTTON']) {
+      expect(words).withContext(`the form section lost ${word}`).toContain(word);
+    }
+  });
+});
