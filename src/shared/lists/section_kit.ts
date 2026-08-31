@@ -1069,180 +1069,21 @@ export function contentPieceDef(kind: string | undefined): ContentPieceDef | und
 
 // ------------------------------------------------------------------ presets
 //
-// WHY PRESETS EXIST. Two catalogue members is the point, but "Section" on its
-// own asks staff to build a hero out of parts every time, and the old menu at
-// least told them a hero was a thing. A preset is a STARTING POINT, not a
-// type: it seeds a Section with its columns, pieces and measured styling in
-// place, and the moment it lands it is an ordinary Section like any other.
+// TWELVE PRESETS LIVED HERE UNTIL 2026-08-31 - Hero, Text with a video,
+// Call to action - each a ready-made arrangement that placed a Section
+// already carrying its columns, pieces and measured styling.
 //
-// This is what keeps the consolidation from costing usability. The Add menu
-// already renders icon + label + blurb per entry, so presets need no new UI.
-
-export interface SectionPreset {
-  key: string;
-  label: string;
-  blurb: string;
-  icon: string;
-  /** What gets written. Deliberately plain data rather than a builder
-   *  function: a preset can then be read in a review. */
-  seed: {
-    surface?: SectionSurface;
-    headingStyle?: 'bold' | 'light' | 'standard';
-    copySize?: 'large' | 'compact' | 'display';
-    mediaSide?: 'left' | 'right';
-    columns: { pieces: { kind: ContentPieceKindKey; level?: 'page' | 'section' | 'minor' }[] }[];
-  };
-}
-
-export const SECTION_PRESETS: readonly SectionPreset[] = [
-  {
-    key: 'hero',
-    label: 'Hero',
-    blurb: 'the page title over a photo, with buttons',
-    icon: 'wallpaper',
-    seed: {
-      surface: 'photo',
-      headingStyle: 'bold',
-      columns: [{ pieces: [
-        { kind: 'eyebrow' },
-        { kind: 'heading', level: 'page' },
-        { kind: 'text' },
-        { kind: 'buttons' }
-      ] }]
-    }
-  },
-  {
-    key: 'heroBesidePicture',
-    label: 'Hero beside a picture',
-    blurb: 'the page title and text on one side, a picture on the other',
-    icon: 'vertical_split',
-    seed: {
-      headingStyle: 'bold',
-      mediaSide: 'right',
-      columns: [
-        { pieces: [
-          { kind: 'eyebrow' },
-          { kind: 'heading', level: 'page' },
-          { kind: 'text' },
-          { kind: 'buttons' },
-          { kind: 'note' }
-        ] },
-        { pieces: [{ kind: 'picture' }] }
-      ]
-    }
-  },
-  {
-    key: 'textWithVideo',
-    label: 'Text with a video',
-    blurb: 'a heading and a passage on one side, a click-to-play video on the other',
-    icon: 'view_sidebar',
-    seed: {
-      mediaSide: 'right',
-      columns: [
-        { pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] },
-        { pieces: [{ kind: 'video' }] }
-      ]
-    }
-  },
-  {
-    key: 'textWithPicture',
-    label: 'Text with a picture',
-    blurb: 'a heading and a passage beside a picture',
-    icon: 'photo_library',
-    seed: {
-      columns: [
-        { pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] },
-        { pieces: [{ kind: 'picture' }] }
-      ]
-    }
-  },
-  {
-    key: 'headingAndText',
-    label: 'Heading and text',
-    blurb: 'a passage across the page, centred',
-    icon: 'subject',
-    seed: {
-      copySize: 'large',
-      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] }]
-    }
-  },
-  {
-    key: 'callToAction',
-    label: 'Call to action',
-    blurb: 'a heading, a line and a button over a photo',
-    icon: 'campaign',
-    seed: {
-      surface: 'photo',
-      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'buttons' }] }]
-    }
-  },
-  {
-    key: 'twoColumns',
-    label: 'Two columns of text',
-    blurb: 'two passages side by side, each with its own heading',
-    icon: 'view_column',
-    seed: {
-      columns: [
-        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
-        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] }
-      ]
-    }
-  },
-  {
-    key: 'threeColumns',
-    label: 'Three columns of text',
-    blurb: 'three passages side by side',
-    icon: 'view_week',
-    seed: {
-      columns: [
-        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
-        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] },
-        { pieces: [{ kind: 'heading', level: 'minor' }, { kind: 'text' }] }
-      ]
-    }
-  },
-  {
-    key: 'formBesideText',
-    label: 'Form beside text',
-    blurb: 'a heading and a passage on one side, a form on the other',
-    icon: 'assignment',
-    seed: {
-      columns: [
-        { pieces: [{ kind: 'heading' }, { kind: 'text' }] },
-        { pieces: [{ kind: 'form' }] }
-      ]
-    }
-  },
-  {
-    key: 'signup',
-    label: 'Sign-up',
-    blurb: 'a heading, a line, and the name-and-email sign-up',
-    icon: 'mark_email_read',
-    seed: {
-      surface: 'tinted',
-      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'signup' }] }]
-    }
-  },
-  {
-    key: 'contact',
-    label: 'Contact details',
-    blurb: 'the address, phone, email and social links',
-    icon: 'contact_page',
-    seed: {
-      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'siteDetails' }, { kind: 'text' }] }]
-    }
-  },
-  {
-    key: 'countdown',
-    label: 'Countdown',
-    blurb: 'a clock counting to a date, over a photo',
-    icon: 'timer',
-    seed: {
-      surface: 'photo',
-      columns: [{ pieces: [{ kind: 'heading' }, { kind: 'text' }, { kind: 'countdown' }, { kind: 'buttons' }] }]
-    }
-  }
-];
+// They existed to answer one objection to a freeform builder: that it makes
+// every arrangement equally easy, including building a hero from scratch
+// every time. THE PIECE PALETTE ANSWERED IT BETTER. Dragging a heading,
+// some text and two buttons into a column is quick enough that a shortcut
+// for it is a concept nobody needs to learn - and twelve of them on the Add
+// bar made two members look like twelve types, which is the exact
+// impression this consolidation exists to remove. Shane asked why he was
+// seeing twelve, which is how a design tells you it is wrong.
+//
+// The reason is worth keeping: the fix for "the freeform thing is tedious"
+// was to make the freeform thing quick, not to hide it behind presets.
 
 
 // ------------------------------------------- fourteen archetypes into two
