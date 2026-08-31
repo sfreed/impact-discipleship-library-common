@@ -653,8 +653,12 @@ describe('what the flip must carry across', () => {
         ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
       [SECTION_ARCHETYPE.COPY_MEDIA, 'picture',
         ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+      // NO note: the photo band has never drawn one. Carrying it would ADD
+      // a line the page does not show, which is a different kind of wrong
+      // from losing one. Checked against dev before deciding - no photo
+      // band on the site carries a note at all.
       [SECTION_ARCHETYPE.PHOTO_BAND, 'plain',
-        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-NOTE', 'THE-BUTTON']],
+        ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-BUTTON']],
       [SECTION_ARCHETYPE.CONTACT_DETAILS, 'plain', ['THE-HEADING', 'THE-BODY']],
       [SECTION_ARCHETYPE.COUNTDOWN, 'toDate',
         ['THE-HEADING', 'THE-EYEBROW', 'THE-BODY', 'THE-BUTTON']]
@@ -821,5 +825,128 @@ describe('the shape of a migrated form section', () => {
 
     const form = (columnsOf(out)[1]['pieces'] as Record<string, unknown>[])[0];
     expect(form['submitLabel']).toBe('SEND IT');
+  });
+});
+
+/**
+ * WHAT SHANE FOUND WALKING THE PAGES (2026-08-31).
+ *
+ * Nine pages reviewed by eye against the comparison screen, and every one of
+ * these was invisible to a text check: the sections drew, the words were all
+ * present, and the pages were the right length. They are ARRANGEMENT bugs,
+ * which is the class this migration is most able to introduce and least able
+ * to detect on its own.
+ */
+describe('the arrangements a band must keep', () => {
+  const columnsOf = (out: Record<string, unknown>) =>
+    out['columns'] as Record<string, unknown>[];
+  const kindsIn = (column: Record<string, unknown>) =>
+    (column['pieces'] as Record<string, unknown>[]).map((p) => p['kind']);
+  const piecesOf = (out: Record<string, unknown>) =>
+    columnsOf(out).flatMap((c) => c['pieces'] as Record<string, unknown>[]);
+
+  it('leads a photo band with its HEADING, not its small line', () => {
+    // THE ONE BAND THAT DOES. Every other section puts the small line above
+    // the heading; this one puts it underneath, and emitting the usual order
+    // swapped the two lines on the Give page - Shane called it inverted text.
+    const out = toSectionModel({
+      key: 'mailto', type: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'address',
+      heading: 'Mail Donations by Check To:',
+      subheading: 'Impact Discipleship Ministries'
+    });
+
+    expect(kindsIn(columnsOf(out)[0]).slice(0, 2))
+      .withContext('the heading and its second line came out swapped')
+      .toEqual(['heading', 'eyebrow']);
+  });
+
+  it('every OTHER band still leads with its small line', () => {
+    // The fix must not reverse the rule everywhere else.
+    for (const type of [
+      SECTION_ARCHETYPE.HERO_BAND,
+      SECTION_ARCHETYPE.COPY_CENTRED,
+      SECTION_ARCHETYPE.COPY_MEDIA
+    ]) {
+      const out = toSectionModel({
+        key: 'k', type, heading: 'A heading', subheading: 'AN EYEBROW',
+        image: { url: 'https://example.test/p.jpg' }
+      });
+      expect(kindsIn(columnsOf(out)[0]).slice(0, 2))
+        .withContext(`${type} should lead with its eyebrow`)
+        .toEqual(['eyebrow', 'heading']);
+    }
+  });
+
+  it('splits the figure band into two columns with a display heading', () => {
+    // A large figure on one side and a paragraph on the other. It is the only
+    // thing separating this variant from the plain band, and folding it into
+    // one centred column threw the arrangement away.
+    const out = toSectionModel({
+      key: 'countries', type: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'figure',
+      heading: '40+', subheading: 'countries reached', body: '<p>Words.</p>'
+    });
+
+    const columns = columnsOf(out);
+    expect(columns.length).toBe(2);
+    expect(kindsIn(columns[0])).toEqual(['heading', 'eyebrow']);
+    expect(kindsIn(columns[1])).toEqual(['text']);
+
+    const heading = (columns[0]['pieces'] as Record<string, unknown>[])[0];
+    expect(heading['level'])
+      .withContext('the figure lost its size and drew as an ordinary heading')
+      .toBe('display');
+    // Ranged left, NOT centred - the figure variant is the one band that is.
+    expect(columns[0]['align']).toBeUndefined();
+  });
+
+  it('keeps the plain photo band centred and ordinary-sized', () => {
+    const out = toSectionModel({
+      key: 'history', type: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'title',
+      heading: 'Our history'
+    });
+
+    expect(columnsOf(out).length).toBe(1);
+    expect(columnsOf(out)[0]['align']).toBe('centre');
+    expect(piecesOf(out)[0]['level']).toBe('section');
+  });
+
+  it('keeps the video a centred band puts BELOW its copy', () => {
+    // The Coaching page's progress report lost its film entirely: the section
+    // still drew, still read correctly, and had simply stopped being a video
+    // section.
+    const out = toSectionModel({
+      key: 'report', type: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'mediaBelow',
+      heading: 'Progress report', body: '<p>Words.</p>',
+      videoId: 'ABC123', image: { url: 'https://example.test/still.jpg' }
+    });
+
+    const video = piecesOf(out).find((p) => p['kind'] === 'video');
+    expect(video)
+      .withContext('the video disappeared from the section')
+      .toBeDefined();
+    expect(video?.['videoId']).toBe('ABC123');
+    // With its still, or the poster is blank on the page.
+    expect(video?.['image']).toBeDefined();
+  });
+
+  it('draws the video between the copy and the buttons', () => {
+    // Where the archetype drew it. Order is the whole reason this is a
+    // separate variant rather than a surface.
+    const out = toSectionModel({
+      key: 'report', type: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'mediaBelow',
+      heading: 'H', body: '<p>b</p>', videoId: 'ABC123',
+      ctaTitle: 'Watch more', ctaUrl: '/x'
+    });
+
+    expect(kindsIn(columnsOf(out)[0])).toEqual(['heading', 'text', 'video', 'buttons']);
+  });
+
+  it('adds no video to a centred band that never had one', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain',
+      heading: 'H', body: '<p>b</p>'
+    });
+
+    expect(piecesOf(out).map((p) => p['kind'])).not.toContain('video');
   });
 });

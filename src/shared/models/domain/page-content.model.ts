@@ -464,8 +464,13 @@ export interface ContentPiece {
    * being a singleton; with any section able to hold any heading it has to
    * be said out loud, and the page editor can then check there is exactly
    * one - which is more than the old arrangement could do.
+   *
+   * 'display' is the odd one: still an ordinary section heading to a screen
+   * reader, drawn at figure size. It is what made the photo band's `figure`
+   * variant its own arrangement - a large number beside a paragraph - and it
+   * is a SIZE rather than a rank, which is why it does not change the tag.
    */
-  level?: 'page' | 'section' | 'minor';
+  level?: 'page' | 'section' | 'minor' | 'display';
 
   /** text - rich HTML, as body always has been. */
   html?: string;

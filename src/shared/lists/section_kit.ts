@@ -1438,13 +1438,45 @@ const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
   // Centred text, held to a readable measure - the two things that made
   // this an archetype of its own. As column properties they are available
   // to any column instead of to one kind of section.
-  [SECTION_ARCHETYPE.COPY_CENTRED]: (block) => [
-    column(1, wordsOf(block, 'section'), { align: 'centre', measure: true })
-  ],
+  // mediaBelow puts a video UNDER the copy. Leaving it out of the words
+  // dropped the Coaching page's progress-report video altogether - the
+  // section still drew, still read correctly, and had simply lost a film.
+  [SECTION_ARCHETYPE.COPY_CENTRED]: (block) => {
+    const words = wordsOf(block, 'section');
+    if (String(block['variant'] ?? '') !== 'mediaBelow') {
+      return [column(1, words, { align: 'centre', measure: true })];
+    }
+    // Between the copy and the buttons, where the archetype draws it.
+    const buttonsAt = words.findIndex((p) => p?.['kind'] === 'buttons');
+    const at = buttonsAt === -1 ? words.length : buttonsAt;
+    const withMedia = [...words];
+    withMedia.splice(at, 0, mediaOf(block));
+    return [column(1, withMedia, { align: 'centre', measure: true })];
+  },
 
-  [SECTION_ARCHETYPE.PHOTO_BAND]: (block) => [
-    column(1, wordsOf(block, 'section'), { align: 'centre', measure: true })
-  ],
+  // THE ONE BAND THAT LEADS WITH ITS HEADING. Every other section puts the
+  // small line above the heading; this one puts it underneath. Emitting the
+  // usual order swapped the two lines on the Give page, which is exactly
+  // what Shane saw and called inverted text.
+  //
+  // The `figure` variant is a different arrangement again: a display-sized
+  // figure on one side and a paragraph on the other, ranged left. That is a
+  // variant rather than a surface, and it is two columns.
+  [SECTION_ARCHETYPE.PHOTO_BAND]: (block) => {
+    const figure = String(block['variant'] ?? '') === 'figure';
+    const lead = [
+      piece('heading', { text: block['heading'], level: figure ? 'display' : 'section' }),
+      piece('eyebrow', { text: block['subheading'] })
+    ];
+    if (figure) {
+      return [column(1, lead), column(2, [piece('text', { html: block['body'] })])];
+    }
+    return [column(1, [
+      ...lead,
+      piece('text', { html: block['body'] }),
+      buttonsOf(block)
+    ], { align: 'centre', measure: true })];
+  },
 
   [SECTION_ARCHETYPE.COPY_MEDIA]: (block) => ordered(
     block,
