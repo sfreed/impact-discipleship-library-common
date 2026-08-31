@@ -58,10 +58,12 @@ export const SITE_ROUTES = [
   { key: 'give', path: '/give', label: 'Give', group: 'Main', editable: true },
   { key: 'prayer-team', path: '/prayer-team', label: 'Prayer Team', group: 'About', editable: true },
   // Added 2026-08-30 with the footer, which is the only place on the site
-  // that links to either. Their words live in Web Config, not page_content,
-  // which is why neither is marked editable here.
-  { key: 'privacy-policy', path: '/private-policy', label: 'Privacy Policy', group: 'About' },
-  { key: 'terms', path: '/terms', label: 'Terms & Conditions', group: 'About' },
+  // that links to either. Their words lived in Web Config rather than
+  // page_content until 2026-08-31, which is why neither was marked editable;
+  // they are ordinary pages now, with their own screens and their own
+  // sections, so the picker should stop saying otherwise.
+  { key: 'privacy-policy', path: '/private-policy', label: 'Privacy Policy', group: 'About', editable: true },
+  { key: 'terms', path: '/terms', label: 'Terms & Conditions', group: 'About', editable: true },
 
   { key: 'seminars', path: '/seminars', label: 'Seminars', group: 'Training', editable: true },
   { key: 'equipping-groups', path: '/equipping-groups', label: 'Equipping Groups', group: 'Training', editable: true },
