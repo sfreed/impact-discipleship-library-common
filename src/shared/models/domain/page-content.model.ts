@@ -202,6 +202,21 @@ export interface PageContentBlock {
   signupList?: 'newsletter' | 'prayer';
 
   /**
+   * What a COUNTDOWN counts toward, as an ISO date string ('2027-02-05' or a
+   * full timestamp).
+   *
+   * A STRING, not a Firestore Timestamp, on purpose: this document is edited
+   * whole by the section editor and read by three apps, and MIGRATION.md
+   * already carries a running list of date fields that arrive in three
+   * different shapes. One text shape that every consumer parses the same way
+   * is worth more here than a native type.
+   *
+   * A date that cannot be parsed, or one already past, draws no clock rather
+   * than a row of zeros or a negative count - see the renderer.
+   */
+  targetDate?: string;
+
+  /**
    * Repeated entries, where a section is a list rather than a passage -
    * cards, timeline entries, price tiles, the passages in a two-column
    * block. Array order IS the running order.

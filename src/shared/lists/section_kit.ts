@@ -91,7 +91,12 @@ export enum SECTION_ARCHETYPE {
   CONTACT_DETAILS = 'contactDetails',
   /** A band with nothing editable on it - a section only so that it can be
    *  moved and switched off. */
-  FIXED_BAND = 'fixedBand'
+  FIXED_BAND = 'fixedBand',
+  /** Full-width slides that rotate: a picture, words over it, a button.
+   *  The home page's own slider, as a section any page can have (2026-08-31). */
+  SLIDER = 'slider',
+  /** A clock counting down to a DATE the section carries. */
+  COUNTDOWN = 'countdown'
 }
 
 // ------------------------------------------------------------------ surfaces
@@ -180,6 +185,15 @@ export interface KitFields {
    * its section stores 'prayer' and behaves identically.
    */
   signupList?: boolean;
+  /**
+   * The date a COUNTDOWN counts toward, stored as `targetDate`.
+   *
+   * Stored on the section, not read from an event: the home page's countdown
+   * was wired to the summit and could therefore only ever be the summit. A
+   * date on the section makes the same band work for a registration
+   * deadline, a launch, or next year's conference.
+   */
+  targetDate?: boolean;
 }
 
 /** The lists a sign-up section may join. Keys are the web app's
@@ -285,6 +299,17 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         label: 'Copy with a picture',
         blurb: 'a picture beside the copy',
         fields: { heading: true, body: true, image: true, cta: true },
+        mediaSide: 'auto'
+      },
+      {
+        // BUTTONS AS ENTRIES, the same shape heroBand's buttonList uses:
+        // two fixed cta slots cover most sections, and the moment a third is
+        // wanted they stop covering anything. As entries they can be added,
+        // removed and reordered like any other list (2026-08-31).
+        key: 'buttonList',
+        label: 'Copy with a picture and several buttons',
+        blurb: 'a picture beside the copy, with as many buttons as you add',
+        fields: { heading: true, body: true, image: true, entries: true },
         mediaSide: 'auto'
       }
     ]
@@ -550,6 +575,46 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         fields: {}
       }
     ]
+  },
+  {
+    // The home page's slider, as an archetype rather than a special case
+    // (2026-08-31, owner's call). It stayed component-owned through the
+    // twelve-page cutover because a rotating set of slides is behaviour and
+    // not layout - but the BEHAVIOUR is the same wherever it appears, and
+    // what changes per site is the slides. So the rotation belongs to the
+    // renderer and the slides are entries, like every other list here.
+    archetype: SECTION_ARCHETYPE.SLIDER,
+    label: 'Slider',
+    blurb: 'full-width slides that rotate, each with a picture and a button',
+    icon: 'view_carousel',
+    singleton: true,
+    variants: [
+      {
+        key: 'slides',
+        label: 'Picture slides',
+        blurb: 'a picture per slide with a heading, a line of copy and a button over it',
+        fields: { entries: true }
+      }
+    ]
+  },
+  {
+    // A countdown to a DATE THE SECTION CARRIES. The home page's summit
+    // banner counted down too, but to a date buried in a component - so it
+    // could only ever be the summit. Storing the date makes it a countdown
+    // to anything: a registration deadline, a launch, the next conference.
+    archetype: SECTION_ARCHETYPE.COUNTDOWN,
+    label: 'Countdown',
+    blurb: 'a clock counting down to a date you set, with a heading and a button',
+    icon: 'timer',
+    singleton: false,
+    variants: [
+      {
+        key: 'toDate',
+        label: 'Countdown to a date',
+        blurb: 'days, hours, minutes and seconds until the date, over a picture',
+        fields: { heading: true, subheading: true, body: true, image: true, cta: true, targetDate: true }
+      }
+    ]
   }
 ];
 
@@ -700,4 +765,106 @@ export function toKitBlocks(
   });
 
   return { blocks: mapped, problems };
+}
+
+// ------------------------------------------------- the home page's own flip
+
+/**
+ * What the HOME page's sections become in the kit's vocabulary.
+ *
+ * The twelve public pages flipped through toKitBlocks() above. Home was left
+ * out of that cutover because it is a different collection with a different
+ * model - `home_sections`, keyed by `id`, each type naming a component the
+ * home page already knew how to draw - and because two of its six sections
+ * are behaviour rather than layout.
+ *
+ * THE SAME CONTRACT AS toKitBlocks: this function IS the migration. The
+ * comparison screen renders its output, so what staff approve is what gets
+ * written, and there is no second implementation to drift from it.
+ *
+ * The two behavioural sections are archetypes now rather than special cases
+ * (owner's call 2026-08-31): SLIDER rotates, COUNTDOWN counts, and both take
+ * their content as ordinary fields and entries.
+ */
+export interface HomeKitExtras {
+  /**
+   * The slider's slides, which live in their OWN collection
+   * (`home_page_images`) rather than on the section - so they have to be
+   * handed in. Migrating turns them into the section's entries; until then
+   * this is how the preview shows a real slider rather than an empty band.
+   */
+  slides?: readonly Record<string, unknown>[];
+  /**
+   * What the countdown counts to, as an ISO string.
+   *
+   * Today's banner reads the summit EVENT's start date, which is why it can
+   * only ever be the summit. The kit section stores its own date; passing
+   * the summit's here is what makes the comparison show the same clock as
+   * the live page.
+   */
+  countdownTo?: string;
+}
+
+export function toKitHomeBlocks(
+  sections: readonly Record<string, unknown>[] | undefined,
+  extras: HomeKitExtras = {}
+): KitMigrationPreview {
+  const problems: string[] = [];
+
+  const blocks = (sections ?? []).map((section) => {
+    const type = String(section['type'] ?? '');
+    // Carried on every block: what a visitor sees is still decided by
+    // isActive, and the running order is still the array's order.
+    const base = {
+      key: String(section['id'] ?? type),
+      isActive: section['isActive'],
+      heading: section['title'],
+      body: section['subtitle'],
+      image: section['image'],
+      ctaTitle: section['ctaTitle'],
+      ctaUrl: section['ctaUrl'] ?? section['ctaDestination']
+    };
+
+    switch (type) {
+      case 'video':
+        return { ...base, type: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video',
+          surface: 'dark', videoId: section['videoId'] };
+
+      case 'banner':
+        return { ...base, type: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'image', surface: 'light' };
+
+      case 'services':
+        return { ...base, type: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture',
+          surface: 'light', cardsPerRow: 4, items: section['items'] };
+
+      case 'subscribe':
+        return { ...base, type: SECTION_ARCHETYPE.FORM, variant: 'mailingList',
+          surface: 'tinted', signupList: 'newsletter' };
+
+      case 'testimonials':
+        return { ...base, type: SECTION_ARCHETYPE.CAROUSEL, variant: 'quotes',
+          surface: 'photo', testimonialIds: section['testimonialIds'] };
+
+      case 'slider':
+        // The slides are a different collection today - see HomeKitExtras.
+        return { ...base, type: SECTION_ARCHETYPE.SLIDER, variant: 'slides',
+          surface: 'photo', items: extras.slides ?? [] };
+
+      case 'summitBanner':
+        return { ...base, type: SECTION_ARCHETYPE.COUNTDOWN, variant: 'toDate',
+          surface: 'photo', targetDate: extras.countdownTo };
+
+      default:
+        // Same rule as the twelve: an unmapped section keeps its old type,
+        // WHICH THE KIT CANNOT DRAW. Reported rather than silently dropped,
+        // so a preview can never look like a shorter page that works.
+        problems.push(
+          `Section "${section['id'] ?? type}" (${type || 'no type'}) has no mapping - `
+          + 'the kit would not draw it.'
+        );
+        return { ...section, key: String(section['id'] ?? type) };
+    }
+  });
+
+  return { blocks, problems };
 }
