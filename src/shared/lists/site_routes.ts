@@ -138,10 +138,13 @@ export const RESERVED_SLUGS: readonly string[] = [
   'monthly-newsletter',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
-  'summit', 'summit-preview'
-  // 'kit-preview' was here for the migration's comparison screens. Both the
-  // route and the screens retired with the last page - the home page - on
-  // 2026-08-31, so reserving it would refuse staff a slug that is free.
+  'summit', 'summit-preview',
+  // BACK, for a second migration. It was here for the first cutover's
+  // comparison screens, retired with the last of the twelve original pages
+  // on 2026-08-31, and returns hours later for the same job one level up -
+  // fourteen archetypes into two. It retires again when the last page
+  // migrates, and this line goes with it.
+  'kit-preview'
   //
   // 'home' is deliberately NOT reserved either: no route claims it (the home
   // page is at '/'), and the New Page dialog already refuses it because
