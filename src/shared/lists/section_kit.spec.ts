@@ -24,9 +24,13 @@ import {
 // a green run here as permission to delete a bespoke component.
 
 describe('the section kit', () => {
-  it('declares fourteen archetypes, one per layout the census found', () => {
-    expect(SECTION_KIT.length).toBe(14);
-    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(14);
+  it('declares sixteen archetypes - the census fourteen, plus the home page\'s two', () => {
+    // FOURTEEN came from the census of the twelve public pages. SLIDER and
+    // COUNTDOWN came later (2026-08-31) from the home page, which was never
+    // in that census: both were behaviour rather than layout and would
+    // otherwise have stayed bespoke components forever.
+    expect(SECTION_KIT.length).toBe(16);
+    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(16);
   });
 
   it('covers every member of the archetype enum', () => {
@@ -183,15 +187,20 @@ describe('fields a variant offers', () => {
     const listArchetypes: string[] = [
       SECTION_ARCHETYPE.LIST_ROWS, SECTION_ARCHETYPE.LIST_GRID,
       SECTION_ARCHETYPE.LIST_ARTICLES, SECTION_ARCHETYPE.LIST_COLUMNS,
-      SECTION_ARCHETYPE.TIMELINE
+      SECTION_ARCHETYPE.TIMELINE,
+      // A slider is a list of SLIDES - the rotation is the renderer's, the
+      // slides are entries like any other (2026-08-31).
+      SECTION_ARCHETYPE.SLIDER
     ];
 
     const mismatched: string[] = [];
     for (const def of SECTION_KIT as readonly ArchetypeDef[]) {
       for (const variant of def.variants) {
-        // The button-list hero is the one deliberate exception: it is not a
-        // list SECTION, but its buttons are entries.
-        const exception = def.archetype === SECTION_ARCHETYPE.HERO_BAND && variant.key === 'buttonList';
+        // `buttonList` is the deliberate exception WHEREVER it appears: the
+        // section is not a list, but its buttons are entries, which is the
+        // whole point of the variant. On heroBand since the kit was drawn,
+        // and on copyMedia since 2026-08-31.
+        const exception = variant.key === 'buttonList';
         const shouldHave = listArchetypes.includes(def.archetype) || exception;
         if (shouldHave !== !!variant.fields.entries) {
           mismatched.push(`${def.archetype}/${variant.key}`);
