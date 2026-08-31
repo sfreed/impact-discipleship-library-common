@@ -24,13 +24,15 @@ import {
 // a green run here as permission to delete a bespoke component.
 
 describe('the section kit', () => {
-  it('declares sixteen archetypes - the census fourteen, plus the home page\'s two', () => {
+  it('declares fifteen archetypes', () => {
     // FOURTEEN came from the census of the twelve public pages. SLIDER and
     // COUNTDOWN came later (2026-08-31) from the home page, which was never
     // in that census: both were behaviour rather than layout and would
-    // otherwise have stayed bespoke components forever.
-    expect(SECTION_KIT.length).toBe(16);
-    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(16);
+    // otherwise have stayed bespoke components forever. HERO_SPLIT left the
+    // same day, folded into HERO_BAND as a second look - it was the same
+    // thing in a different layout, which is what a variant is for.
+    expect(SECTION_KIT.length).toBe(15);
+    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(15);
   });
 
   it('covers every member of the archetype enum', () => {
@@ -160,17 +162,20 @@ describe('coverage of the site as it stands', () => {
 });
 
 describe('fields a variant offers', () => {
-  it('gives the hero band a list of buttons, and the split hero its note', () => {
-    // The hero's two FIXED button slots went away on 2026-08-31 - one look,
-    // buttons as entries. `entries` where `cta2` used to be is the whole
-    // change, and existing heroes were migrated by
-    // scripts/hero-buttons-to-entries.js rather than losing their buttons.
-    expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, 'buttonList').entries).toBeTrue();
-    expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, 'buttonList').cta2).toBeUndefined();
-
-    expect(kitFields(SECTION_ARCHETYPE.HERO_SPLIT, 'standard').note).toBeTrue();
-    // The split hero has one way in, not two.
-    expect(kitFields(SECTION_ARCHETYPE.HERO_SPLIT, 'standard').cta2).toBeUndefined();
+  it('gives BOTH hero looks a list of buttons and a note line', () => {
+    // The hero's two FIXED button slots went away on 2026-08-31, and the
+    // separate HERO_SPLIT archetype went with them: it was the same thing -
+    // the page's <h1>, one per page - in a different layout, which is what a
+    // variant is for. Existing sections were migrated by
+    // scripts/merge-hero-split.js and cta-buttons-to-entries.js.
+    for (const look of ['overPhoto', 'besidePicture']) {
+      expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, look).entries)
+        .withContext(look).toBeTrue();
+      expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, look).note)
+        .withContext(look).toBeTrue();
+      expect(kitFields(SECTION_ARCHETYPE.HERO_BAND, look).cta2)
+        .withContext(look).toBeUndefined();
+    }
   });
 
   it('falls back to the first variant when a block names none', () => {
@@ -206,7 +211,7 @@ describe('fields a variant offers', () => {
       SECTION_ARCHETYPE.SLIDER
     ];
     const buttonBearing: string[] = [
-      SECTION_ARCHETYPE.HERO_BAND, SECTION_ARCHETYPE.HERO_SPLIT,
+      SECTION_ARCHETYPE.HERO_BAND,
       SECTION_ARCHETYPE.COPY_MEDIA, SECTION_ARCHETYPE.COPY_CENTRED,
       SECTION_ARCHETYPE.COUNTDOWN
     ];

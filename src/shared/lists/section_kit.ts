@@ -59,9 +59,10 @@ export enum SECTION_ARCHETYPE {
   /** A background photo with a pretitle, title, copy and buttons over it.
    *  Six of today's cases; five already share `<app-header>`. */
   HERO_BAND = 'heroBand',
-  /** Copy on one side and a product shot on the other. The reader app's
-   *  landing page, and the only section using the `note` field. */
-  HERO_SPLIT = 'heroSplit',
+  // HERO_SPLIT was here until 2026-08-31. It was the same THING as HERO_BAND
+  // - the page's <h1>, one per page - in a different layout, which is what a
+  // variant is for. It is `heroBand` with variant `besidePicture` now, and
+  // existing sections were migrated by scripts/merge-hero-split.js.
   /** A heading and a passage beside an image or a click-to-play video.
    *  The largest family on the site. */
   COPY_MEDIA = 'copyMedia',
@@ -250,33 +251,35 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
     // do and more. Asking staff to pick between them up front, before they
     // know how many buttons they want, was a decision the screen should have
     // been making for them. Buttons appear when buttons are added.
+    // TWO LOOKS, ONE HERO (owner, 2026-08-31). "Hero with a screenshot" used
+    // to be its own archetype, and it looked like a near-duplicate of
+    // "text beside media" - same grid, same fields. It is not: what makes a
+    // hero a hero is that it carries the page's <h1> and there is only one
+    // of it. That is true of both looks and of neither body section, so the
+    // two heroes belong together and the split-with-a-picture look is a
+    // VARIANT rather than an archetype of its own.
     variants: [
       {
-        key: 'buttonList',
-        label: 'Title and buttons',
+        key: 'overPhoto',
+        label: 'Title over a photo',
         blurb: 'a small line above, the title, a line of text, and any buttons you add',
-        fields: { heading: true, subheading: true, body: true, image: true, entries: true },
+        fields: { heading: true, subheading: true, body: true, image: true, entries: true, note: true },
         surfaces: ['photo']
-      }
-    ]
-  },
-
-  {
-    archetype: SECTION_ARCHETYPE.HERO_SPLIT,
-    label: 'Hero with a screenshot',
-    blurb: 'text on one side, a product shot on the other',
-    icon: 'vertical_split',
-    singleton: true,
-    variants: [
+      },
       {
-        key: 'standard',
-        label: 'Text and a screenshot',
-        blurb: 'an eyebrow, the title, a lede, any buttons you add, and a small line under them',
+        // The reader app's landing page. No `surfaces` restriction: the
+        // picture is beside the words rather than behind them, so this look
+        // works on any ground - which is exactly why it could never have
+        // been a surface on the one above.
+        key: 'besidePicture',
+        label: 'Title beside a picture',
+        blurb: 'the title and text on one side, a picture on the other, and any buttons you add',
         fields: { heading: true, subheading: true, body: true, note: true, image: true, entries: true },
         mediaSide: 'right'
       }
     ]
   },
+
 
   {
     archetype: SECTION_ARCHETYPE.COPY_MEDIA,
