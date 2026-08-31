@@ -585,10 +585,6 @@ export interface LegacyRendering {
 
 export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   // ---- heroes. Five of these six are already one shared component.
-  { page: 'equipping-groups', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'equipping-groups-pastors', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'equipping-groups-leaders', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'seminars', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'give', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
   { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
@@ -609,10 +605,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
     archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'dark',
     carries: 'asks YouTube for highres'
   },
-  { page: 'equipping-groups', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
-  { page: 'equipping-groups-pastors', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
-  { page: 'equipping-groups-leaders', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
-  { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
   { page: 'seminars', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
   {
     page: 'about-us', type: PAGE_SECTION_TYPES.STORY,
@@ -654,7 +646,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
   },
 
   // ---- lists
-  { page: 'equipping-groups', type: PAGE_SECTION_TYPES.CARDS, archetype: SECTION_ARCHETYPE.LIST_ROWS, variant: 'buttonAndText', surface: 'light' },
   {
     page: 'seminars', type: PAGE_SECTION_TYPES.CARDS,
     archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'pictureRows', surface: 'light',
@@ -677,13 +668,6 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
     archetype: SECTION_ARCHETYPE.LIST_ARTICLES, variant: 'numbered', surface: 'light',
     carries: 'the #what-it-does anchor; the jump strip; .mp4 entries play muted inline via [muted] as a PROPERTY'
   },
-  {
-    page: 'equipping-groups-pastors', type: PAGE_SECTION_TYPES.COLUMNS,
-    archetype: SECTION_ARCHETYPE.LIST_COLUMNS, variant: 'twoColumn', surface: 'light',
-    carries: 'a passage may be a heading, a Web Config price line, a button, or all three'
-  },
-  { page: 'equipping-groups-leaders', type: PAGE_SECTION_TYPES.COLUMNS, archetype: SECTION_ARCHETYPE.LIST_COLUMNS, variant: 'twoColumn', surface: 'light' },
-  { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.COLUMNS, archetype: SECTION_ARCHETYPE.LIST_COLUMNS, variant: 'twoColumn', surface: 'light' },
   { page: 'about-us', type: PAGE_SECTION_TYPES.TIMELINE, archetype: SECTION_ARCHETYPE.TIMELINE, variant: 'centreLine', surface: 'light' },
 
   // ---- the rest
@@ -711,11 +695,7 @@ export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
     page: 'contact', type: PAGE_SECTION_TYPES.CONTACT_INFO,
     archetype: SECTION_ARCHETYPE.CONTACT_DETAILS, variant: 'standard', surface: 'light',
     carries: 'address, email, phone and five social links from Web Config'
-  },
-  { page: 'equipping-groups', type: PAGE_SECTION_TYPES.CONSULT_BANNER, archetype: SECTION_ARCHETYPE.FIXED_BAND, variant: 'consultation', surface: 'tinted' },
-  { page: 'equipping-groups-pastors', type: PAGE_SECTION_TYPES.CONSULT_BANNER, archetype: SECTION_ARCHETYPE.FIXED_BAND, variant: 'consultation', surface: 'tinted' },
-  { page: 'equipping-groups-leaders', type: PAGE_SECTION_TYPES.CONSULT_BANNER, archetype: SECTION_ARCHETYPE.FIXED_BAND, variant: 'consultation', surface: 'tinted' },
-  { page: 'equipping-groups-churches', type: PAGE_SECTION_TYPES.CONSULT_BANNER, archetype: SECTION_ARCHETYPE.FIXED_BAND, variant: 'consultation', surface: 'tinted' }
+  }
 ];
 
 // ------------------------------------------------------------------ lookups
@@ -804,8 +784,6 @@ const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
   // boxes are dark rounded cards.
   'give/prose': { copySize: 'display' },
   'give/giveOptions': { cardGround: 'dark' },
-  'equipping-groups-pastors/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
-  'equipping-groups-leaders/columns': { leftGround: 'brand', rightTitleTone: 'brand' },
   'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }
 };
 

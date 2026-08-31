@@ -68,12 +68,22 @@ describe('the section kit', () => {
     expect(dupes).toEqual([]);
   });
 
-  it('declares no variant the site does not use', () => {
+  it('declares no variant the site does not use or has not graduated', () => {
     // The failure this catches is inventing a palette bigger than the site
-    // needs. Every variant here should have been read off a real page; one
-    // that was not is a guess, and a guess in a shared kit is a section
-    // nobody asked for that everyone has to keep working.
+    // needs: every variant was read off a real page. A GRADUATED variant is
+    // one whose source pages have all CUT OVER - their rows are gone, but
+    // the variant is live on the migrated pages themselves. The whole spec
+    // retires with the last row.
+    const GRADUATED = new Set([
+      'heroBand/standard',        // lunch-and-learns + the equipping four
+      'copyCentred/plain',        // lunch (give still holds a row)
+      'copyMedia/video',          // lunch + equipping
+      'listRows/buttonAndText',   // the equipping hub's course list
+      'listColumns/twoColumn',    // the three audience pages
+      'fixedBand/consultation'    // all four equipping pages
+    ]);
     const used = new Set(LEGACY_RENDERINGS.map((r) => `${r.archetype}/${r.variant}`));
+    GRADUATED.forEach((g) => used.add(g));
     const unused: string[] = [];
     for (const def of SECTION_KIT) {
       for (const variant of def.variants) {
@@ -93,11 +103,11 @@ describe('coverage of the site as it stands', () => {
     // repo's spec pins the two lists together row by row; this is the cheap
     // version that fails first if a row is dropped while editing here.
     // 49 minus each page CUT OVER (lunch-and-learns took its 3).
-    expect(LEGACY_RENDERINGS.length).toBe(46);
+    expect(LEGACY_RENDERINGS.length).toBe(30);
   });
 
   it('covers every page still awaiting cutover', () => {
-    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(11);
+    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(7);
   });
 
   it('resolves every rendering to a real archetype and variant', () => {
