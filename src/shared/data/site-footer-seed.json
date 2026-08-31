@@ -1,8 +1,20 @@
 {
   "brandTitle": "Impact Discipleship Ministries",
   "brandLinks": [
-    { "id": "foot-give", "title": "Give", "kind": "page", "routeKey": "give", "visible": true },
-    { "id": "foot-prayer", "title": "Join the Prayer Team", "kind": "page", "routeKey": "prayer-team", "visible": true }
+    {
+      "id": "foot-give",
+      "title": "Give",
+      "kind": "page",
+      "routeKey": "give",
+      "visible": true
+    },
+    {
+      "id": "foot-prayer",
+      "title": "Join the Prayer Team",
+      "kind": "page",
+      "routeKey": "prayer-team",
+      "visible": true
+    }
   ],
   "attribution": "@2024 Ken Adams All Right reserved.",
   "columns": [
@@ -11,12 +23,48 @@
       "heading": "Information",
       "visible": true,
       "links": [
-        { "id": "foot-events", "title": "Events", "kind": "page", "routeKey": "events", "visible": true },
-        { "id": "foot-shop", "title": "Shop", "kind": "page", "routeKey": "store", "visible": true },
-        { "id": "foot-team", "title": "Meet the Team", "kind": "page", "routeKey": "team", "visible": true },
-        { "id": "foot-about", "title": "About Us", "kind": "page", "routeKey": "about-us", "visible": true },
-        { "id": "foot-privacy", "title": "Privacy Policy", "kind": "page", "routeKey": "privacy-policy", "visible": true },
-        { "id": "foot-terms", "title": "Terms & Condition", "kind": "page", "routeKey": "terms", "visible": true }
+        {
+          "id": "foot-events",
+          "title": "Events",
+          "kind": "page",
+          "routeKey": "events",
+          "visible": true
+        },
+        {
+          "id": "foot-shop",
+          "title": "Shop",
+          "kind": "page",
+          "routeKey": "store",
+          "visible": true
+        },
+        {
+          "id": "foot-team",
+          "title": "Meet the Team",
+          "kind": "page",
+          "routeKey": "team",
+          "visible": true
+        },
+        {
+          "id": "foot-about",
+          "title": "About Us",
+          "kind": "page",
+          "routeKey": "about-us",
+          "visible": true
+        },
+        {
+          "id": "foot-privacy",
+          "title": "Privacy Policy",
+          "kind": "page",
+          "routeKey": "privacy-policy",
+          "visible": true
+        },
+        {
+          "id": "foot-terms",
+          "title": "Terms & Condition",
+          "kind": "page",
+          "routeKey": "terms",
+          "visible": true
+        }
       ]
     },
     {
@@ -24,11 +72,41 @@
       "heading": "Training",
       "visible": true,
       "links": [
-        { "id": "foot-upcoming", "title": "Upcoming Training", "kind": "page", "routeKey": "events", "visible": true },
-        { "id": "foot-seminars", "title": "Seminars", "kind": "page", "routeKey": "seminars", "visible": true },
-        { "id": "foot-equipping", "title": "Equipping Groups", "kind": "page", "routeKey": "equipping-groups", "visible": true },
-        { "id": "foot-coaching", "title": "Coaching with Impact", "kind": "page", "routeKey": "coaching-with-impact", "visible": true },
-        { "id": "foot-lunch", "title": "Lunch and Learns", "kind": "page", "routeKey": "lunch-and-learns", "visible": true }
+        {
+          "id": "foot-upcoming",
+          "title": "Upcoming Training",
+          "kind": "page",
+          "routeKey": "events",
+          "visible": true
+        },
+        {
+          "id": "foot-seminars",
+          "title": "Seminars",
+          "kind": "page",
+          "routeKey": "seminars",
+          "visible": true
+        },
+        {
+          "id": "foot-equipping",
+          "title": "Equipping Groups",
+          "kind": "page",
+          "routeKey": "equipping-groups",
+          "visible": true
+        },
+        {
+          "id": "foot-coaching",
+          "title": "Coaching with Impact",
+          "kind": "page",
+          "routeKey": "coaching-with-impact",
+          "visible": true
+        },
+        {
+          "id": "foot-lunch",
+          "title": "Lunch and Learns",
+          "kind": "page",
+          "routeKey": "lunch-and-learns",
+          "visible": true
+        }
       ]
     },
     {
@@ -36,16 +114,34 @@
       "heading": "Free Resources",
       "visible": true,
       "links": [
-        { "id": "foot-ebooks", "title": "E-Books", "kind": "page", "routeKey": "e-books", "visible": true },
-        { "id": "foot-podcasts", "title": "Podcasts", "kind": "page", "routeKey": "podcasts", "visible": true },
-        { "id": "foot-dmm", "title": "Disciple-Making Minute", "kind": "page", "routeKey": "disciple-making-minute", "visible": true }
+        {
+          "id": "foot-ebooks",
+          "title": "E-Books",
+          "kind": "page",
+          "routeKey": "e-books",
+          "visible": true
+        },
+        {
+          "id": "foot-podcasts",
+          "title": "Podcasts",
+          "kind": "page",
+          "routeKey": "podcasts",
+          "visible": true
+        },
+        {
+          "id": "foot-dmm",
+          "title": "Disciple-Making Minute",
+          "kind": "page",
+          "routeKey": "disciple-making-minute",
+          "visible": true
+        }
       ]
     }
   ],
   "newsletterHeading": "newsletter",
   "newsletterBlurb": "Join over 1,000 people who get free and fresh content delivered automatically each time we publish.",
-  "bottomText": "Copyright © SRFreedConsulting all rights reserved. For inquiries, ",
+  "bottomText": "Copyright © Impact Discipleship Ministries all rights reserved. For inquiries, ",
   "bottomLinkLabel": "contact",
-  "bottomLinkUrl": "mailto:shane.freed@srfreedconsulting.com",
+  "bottomLinkUrl": "mailto:info@impactdisciples.com",
   "backgroundImage": "https://firebasestorage.googleapis.com/v0/b/impactdisciples-a82a8.appspot.com/o/Web-Pages%2FShared%2Ffooter.PNG?alt=media&token=d3761dba-c027-414a-8487-931627a7304f"
 }
