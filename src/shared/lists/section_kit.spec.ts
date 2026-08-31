@@ -683,3 +683,68 @@ describe('what the flip must carry across', () => {
     }
   });
 });
+
+/**
+ * THE TWO THINGS THAT MADE A BAND AN ARCHETYPE.
+ *
+ * The centred band's whole difference was that its text was centred, and
+ * every single-column band on the site holds its words to a readable width
+ * rather than letting them run edge to edge. As column properties they stop
+ * being kinds of section.
+ *
+ * The first comparison against real data showed both going missing - the
+ * migrated page's copy ran the full screen and the centred bands ranged
+ * left. Neither threw and neither lost a word, which is why a text check
+ * passed them.
+ */
+describe('the look a column carries', () => {
+  const columnsOf = (out: Record<string, unknown>) =>
+    out['columns'] as Record<string, unknown>[];
+
+  it('centres the band that was centred, and holds its measure', () => {
+    const out = toSectionModel({
+      key: 'overview', type: SECTION_ARCHETYPE.COPY_CENTRED, heading: 'OVERVIEW'
+    });
+
+    expect(columnsOf(out)[0]['align']).toBe('centre');
+    expect(columnsOf(out)[0]['measure']).toBe(true);
+  });
+
+  it('holds a hero’s copy without centring it', () => {
+    // The hero is ranged LEFT and held to its measured width. Centring it
+    // too would be a change nobody asked for, dressed as a migration.
+    const out = toSectionModel({
+      key: 'pageHeader', type: SECTION_ARCHETYPE.HERO_BAND, variant: 'overPhoto',
+      heading: 'Seminars', body: '<p>Words.</p>'
+    });
+
+    expect(columnsOf(out)[0]['measure']).toBe(true);
+    expect(columnsOf(out)[0]['align']).toBeUndefined();
+  });
+
+  it('does NOT hold a hero that sits beside a picture', () => {
+    // Beside a picture the column is already half the row - holding it again
+    // would make it half of a half.
+    const out = toSectionModel({
+      key: 'pageHeader', type: SECTION_ARCHETYPE.HERO_BAND, variant: 'besidePicture',
+      heading: 'Seminars', image: { url: 'https://example.test/p.jpg' }
+    });
+
+    const words = columnsOf(out).find((c) =>
+      (c['pieces'] as Record<string, unknown>[]).some((p) => p['kind'] === 'heading'));
+
+    expect(words?.['measure']).toBeUndefined();
+  });
+
+  it('leaves a two-column band’s columns to share the row', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_MEDIA, heading: 'A', body: '<p>b</p>',
+      image: { url: 'https://example.test/p.jpg' }
+    });
+
+    for (const column of columnsOf(out)) {
+      expect(column['measure']).toBeUndefined();
+      expect(column['align']).toBeUndefined();
+    }
+  });
+});

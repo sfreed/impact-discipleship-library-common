@@ -532,5 +532,25 @@ export interface SectionColumn {
    * with a heading over them is a three-column section, not four.
    */
   full?: boolean;
+  /**
+   * Text centred rather than ranged left.
+   *
+   * The centred band was an ARCHETYPE - one of the fourteen - and the only
+   * thing that made it one was this. Made a column property, it stops being
+   * a kind of section and becomes something any column can be.
+   */
+  align?: 'centre';
+  /**
+   * Hold this column to a READABLE WIDTH rather than letting it run the
+   * whole track.
+   *
+   * Both single-column bands on the site do this and it is the reason the
+   * first comparison showed the migrated hero running its copy the full
+   * screen width: measured at 840px on the hero and 70 characters on a
+   * centred passage, and the kit let both run edge to edge, which Shane
+   * called out on sight the first time round. A column that spans the row
+   * needs it most, which is exactly when nothing else constrains it.
+   */
+  measure?: boolean;
   pieces: ContentPiece[];
 }

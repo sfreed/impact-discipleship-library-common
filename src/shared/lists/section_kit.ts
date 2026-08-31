@@ -1424,17 +1424,27 @@ const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
   // this is the one heading a search engine reads as the page's name - what
   // the hero archetype used to guarantee by being one per page.
   [SECTION_ARCHETYPE.HERO_BAND]: (block) => {
-    const words = column(1, wordsOf(block, 'page'));
-    if (String(block['variant'] ?? '') !== 'besidePicture') {
+    const beside = String(block['variant'] ?? '') === 'besidePicture';
+    // Ranged left, but HELD: the hero copy is 840px on the original, and
+    // a single column that spans the row has nothing else to stop it.
+    const words = column(1, wordsOf(block, 'page'), beside ? {} : { measure: true });
+    if (!beside) {
       return [words];
     }
     const media = column(2, [mediaOf(block)]);
     return ordered(block, words, media);
   },
 
-  [SECTION_ARCHETYPE.COPY_CENTRED]: (block) => [column(1, wordsOf(block, 'section'))],
+  // Centred text, held to a readable measure - the two things that made
+  // this an archetype of its own. As column properties they are available
+  // to any column instead of to one kind of section.
+  [SECTION_ARCHETYPE.COPY_CENTRED]: (block) => [
+    column(1, wordsOf(block, 'section'), { align: 'centre', measure: true })
+  ],
 
-  [SECTION_ARCHETYPE.PHOTO_BAND]: (block) => [column(1, wordsOf(block, 'section'))],
+  [SECTION_ARCHETYPE.PHOTO_BAND]: (block) => [
+    column(1, wordsOf(block, 'section'), { align: 'centre', measure: true })
+  ],
 
   [SECTION_ARCHETYPE.COPY_MEDIA]: (block) => ordered(
     block,
