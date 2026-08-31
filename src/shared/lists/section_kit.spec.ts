@@ -68,33 +68,8 @@ describe('the section kit', () => {
     expect(dupes).toEqual([]);
   });
 
-  it('declares no variant the site does not use or has not graduated', () => {
-    // The failure this catches is inventing a palette bigger than the site
-    // needs: every variant was read off a real page. A GRADUATED variant is
-    // one whose source pages have all CUT OVER - their rows are gone, but
-    // the variant is live on the migrated pages themselves. The whole spec
-    // retires with the last row.
-    const GRADUATED = new Set([
-      'heroBand/standard',        // lunch-and-learns + the equipping four
-      'copyCentred/plain',        // lunch (give still holds a row)
-      'copyMedia/video',          // lunch + equipping
-      'listRows/buttonAndText',   // the equipping hub's course list
-      'listColumns/twoColumn',    // the three audience pages
-      'fixedBand/consultation'    // all four equipping pages
-    ]);
-    const used = new Set(LEGACY_RENDERINGS.map((r) => `${r.archetype}/${r.variant}`));
-    GRADUATED.forEach((g) => used.add(g));
-    const unused: string[] = [];
-    for (const def of SECTION_KIT) {
-      for (const variant of def.variants) {
-        if (!used.has(`${def.archetype}/${variant.key}`)) {
-          unused.push(`${def.archetype}/${variant.key}`);
-        }
-      }
-    }
-
-    expect(unused).toEqual([]);
-  });
+  // The unused-variant check retired with the last LEGACY row (2026-08-31):
+  // every variant graduated onto the migrated pages themselves.
 });
 
 describe('coverage of the site as it stands', () => {
@@ -102,12 +77,13 @@ describe('coverage of the site as it stands', () => {
     // 49 is the admin catalogue's own count of declared kinds. The admin
     // repo's spec pins the two lists together row by row; this is the cheap
     // version that fails first if a row is dropped while editing here.
-    // 49 minus each page CUT OVER (lunch-and-learns took its 3).
-    expect(LEGACY_RENDERINGS.length).toBe(30);
+    // ZERO: all twelve pages have cut over (2026-08-31). The map stays as
+    // the refusal list - see the re-flip test below.
+    expect(LEGACY_RENDERINGS.length).toBe(0);
   });
 
   it('covers every page still awaiting cutover', () => {
-    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(7);
+    expect(new Set(LEGACY_RENDERINGS.map((r) => r.page)).size).toBe(0);
   });
 
   it('resolves every rendering to a real archetype and variant', () => {
@@ -156,19 +132,6 @@ describe('coverage of the site as it stands', () => {
     expect(doubled).toEqual([]);
   });
 
-  it('allows two of a NON-singleton archetype on one page, told apart by surface', () => {
-    // This is the point of separating colour from structure, so it is worth
-    // pinning rather than leaving as a happy accident. Coaching's intro and
-    // its closing block are both centred copy with buttons; what makes them
-    // different bands is that one is light and one is tinted. Under the old
-    // model they had to be two different TYPES to coexist on one page.
-    const coaching = LEGACY_RENDERINGS.filter(
-      (r) => r.page === 'coaching-with-impact' && r.archetype === SECTION_ARCHETYPE.COPY_CENTRED
-    );
-
-    expect(coaching.length).toBeGreaterThan(1);
-    expect(new Set(coaching.map((r) => r.surface)).size).toBeGreaterThan(1);
-  });
 
   it('means the same thing by any name the two vocabularies share', () => {
     // PAGE_SECTION_TYPES and SECTION_ARCHETYPE overlap on 'timeline' and
@@ -190,17 +153,6 @@ describe('coverage of the site as it stands', () => {
       .toEqual([]);
   });
 
-  it('records what each unusual rendering carries, so it cannot be dropped silently', () => {
-    // Not every row needs a note, but the ones that hold behaviour do. These
-    // three are the ones that would be a real defect if they went: a giving
-    // button that could be pointed anywhere, an anchor other sections link
-    // to, and a video that will not autoplay without the property form.
-    const notes = LEGACY_RENDERINGS.filter((r) => r.carries).map((r) => r.carries!.toLowerCase());
-
-    expect(notes.some((n) => n.includes('hosted payment'))).toBeTrue();
-    expect(notes.some((n) => n.includes('#history'))).toBeTrue();
-    expect(notes.some((n) => n.includes('[muted]'))).toBeTrue();
-  });
 });
 
 describe('fields a variant offers', () => {
@@ -280,32 +232,16 @@ describe('flipping an original page onto the kit', () => {
     expect(dupes).toEqual([]);
   });
 
-  it('reports a CUT-OVER page as unmapped rather than half-flipping it', () => {
-    // lunch-and-learns migrated 2026-08-30; its rows are gone, so a stray
-    // re-run must refuse loudly instead of quietly mangling live data.
-    const { problems } = toKitBlocks('lunch-and-learns', [{ key: 'hero', type: 'pageHeader' }]);
-    expect(problems.length).toBe(1);
+  it('reports EVERY page as unmapped - a re-flip of migrated data must refuse', () => {
+    for (const page of ['lunch-and-learns', 'seminars', 'coaching-with-impact']) {
+      const { problems } = toKitBlocks(page, [{ key: 'k', type: 'pageHeader' }]);
+      expect(problems.length).withContext(page).toBe(1);
+    }
   });
 
-  it('carries the behaviour a page component owns into the block', () => {
-    // The seminars form id and the prayer list live in web components today;
-    // the kit stores them. Hand-carried values, so this pin is what turns a
-    // drift into a red build instead of a silently blank form.
-    const seminars = toKitBlocks('seminars', [{ key: 'f', type: 'form' }]);
-    expect(seminars.blocks[0]['formId']).toBe('KsdeDkokfLGRI3sPFijp');
+  // The extras tests (form ids, prayer list, text styles) retired with the
+  // cutovers that moved those values INTO the documents.
 
-    const prayer = toKitBlocks('prayer-team', [{ key: 's', type: 'signup' }]);
-    expect(prayer.blocks[0]['signupList']).toBe('prayer');
-
-    const contact = toKitBlocks('contact', [{ key: 'f', type: 'form' }]);
-    expect(contact.blocks[0]['formId']).toBe('N0ynW6zeYKdXQS2EkBii');
-  });
-
-  it('carries the measured text style where a page had its own', () => {
-    const { blocks } = toKitBlocks('seminars', [{ key: 'ov', type: 'prose' }]);
-    expect(blocks[0]['headingStyle']).toBe('light');
-    expect(blocks[0]['copySize']).toBe('large');
-  });
 
   it('reports a section it cannot map instead of quietly shortening the page', () => {
     const { blocks, problems } = toKitBlocks('lunch-and-learns', [

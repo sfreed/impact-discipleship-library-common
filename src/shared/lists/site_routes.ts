@@ -132,11 +132,10 @@ export const RESERVED_SLUGS: readonly string[] = [
   'team', 'team-details',
   'store', 'spanish-resources', 'product-details', 'shopping-cart',
   'checkout', 'checkout-success', 'e-books',
-  'about-us', 'contact', 'newsletter', 'give', 'seminars', 'seminar-form',
-  'coaching-with-impact', 'lunch-and-learn-form',
-  'discipleship-library',
+  'newsletter', 'seminar-form',
+  'lunch-and-learn-form',
   'private-policy', 'terms', 'customer-reviews', 'consultation-survey',
-  'monthly-newsletter', 'prayer-team',
+  'monthly-newsletter',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
   'summit', 'summit-preview',
@@ -160,9 +159,12 @@ export const RESERVED_SLUGS: readonly string[] = [
  * dialog checks against.
  */
 export const CUTOVER_SLUGS: readonly string[] = [
-  'lunch-and-learns', // 2026-08-30, the first
+  // 2026-08-30/31 - the whole dozen, in cutover order
+  'lunch-and-learns',
   'equipping-groups', 'equipping-groups-pastors',
-  'equipping-groups-leaders', 'equipping-groups-churches'
+  'equipping-groups-leaders', 'equipping-groups-churches',
+  'prayer-team', 'give', 'about-us', 'discipleship-library',
+  'seminars', 'contact', 'coaching-with-impact'
 ];
 
 export function isSlugAvailable(slug: string): boolean {

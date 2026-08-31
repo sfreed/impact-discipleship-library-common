@@ -584,118 +584,11 @@ export interface LegacyRendering {
 }
 
 export const LEGACY_RENDERINGS: readonly LegacyRendering[] = [
-  // ---- heroes. Five of these six are already one shared component.
-  { page: 'seminars', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'give', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.PAGE_HEADER, archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'standard', surface: 'photo' },
-  {
-    page: 'prayer-team', type: PAGE_SECTION_TYPES.PAGE_HEADER,
-    archetype: SECTION_ARCHETYPE.HERO_BAND, variant: 'buttonList', surface: 'photo',
-    carries: 'buttons come from entries, each with an optional icon'
-  },
-  {
-    page: 'discipleship-library', type: PAGE_SECTION_TYPES.PAGE_HEADER,
-    archetype: SECTION_ARCHETYPE.HERO_SPLIT, variant: 'standard', surface: 'dark',
-    carries: 'the only use of `note`; the button opens the reader app, whose URL stays in the site'
-  },
-
-  // ---- copy beside media
-  {
-    page: 'about-us', type: PAGE_SECTION_TYPES.MISSION,
-    archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'dark',
-    carries: 'asks YouTube for highres'
-  },
-  { page: 'seminars', type: PAGE_SECTION_TYPES.MISSION, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'video', surface: 'light' },
-  {
-    page: 'about-us', type: PAGE_SECTION_TYPES.STORY,
-    archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'image', surface: 'light',
-    carries: 'three of them; the picture side alternates by position'
-  },
-  { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.STORY, archetype: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'image', surface: 'light' },
-
-  // ---- centred copy. The differences here are almost entirely colour.
-  { page: 'seminars', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain', surface: 'light' },
-  { page: 'give', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'plain', surface: 'light' },
-  { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.PROSE, archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'withButtons', surface: 'light' },
-  {
-    page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.MISSION,
-    archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'mediaBelow', surface: 'light',
-    carries: 'passes disablePlaceholder, or YouTube draws a second play button'
-  },
-  {
-    page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.BANNER,
-    archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'withButtons', surface: 'tinted'
-  },
-  {
-    page: 'discipleship-library', type: PAGE_SECTION_TYPES.PROSE,
-    archetype: SECTION_ARCHETYPE.COPY_CENTRED, variant: 'withButtons', surface: 'tinted',
-    carries: 'the button opens the reader app, whose URL stays in the site'
-  },
-
-  // ---- photo bands
-  {
-    page: 'about-us', type: PAGE_SECTION_TYPES.BANNER,
-    archetype: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'title', surface: 'photo',
-    carries: 'the #history anchor the story buttons point at'
-  },
-  { page: 'about-us', type: PAGE_SECTION_TYPES.COUNTRIES, archetype: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'figure', surface: 'photo' },
-  {
-    page: 'give', type: PAGE_SECTION_TYPES.ADDRESS_BAND,
-    archetype: SECTION_ARCHETYPE.PHOTO_BAND, variant: 'address', surface: 'photo',
-    carries: 'the postal address comes from Web Config'
-  },
-
-  // ---- lists
-  {
-    page: 'seminars', type: PAGE_SECTION_TYPES.CARDS,
-    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'pictureRows', surface: 'light',
-    carries: 'a divider above the section'
-  },
-  { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.GALLERY, archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture', surface: 'light' },
-  {
-    page: 'give', type: PAGE_SECTION_TYPES.GIVE_OPTIONS,
-    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'icon', surface: 'light',
-    carries: 'each button opens one of three hosted payment pages, chosen by KEY and never typed'
-  },
-  {
-    page: 'seminars', type: PAGE_SECTION_TYPES.PRICES,
-    archetype: SECTION_ARCHETYPE.LIST_GRID, variant: 'price', surface: 'dark',
-    carries: 'amounts resolve from Web Config; an unresolvable figure shows no price rather than $0'
-  },
-  { page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.CARDS, archetype: SECTION_ARCHETYPE.LIST_ARTICLES, variant: 'plain', surface: 'light' },
-  {
-    page: 'discipleship-library', type: PAGE_SECTION_TYPES.FEATURES,
-    archetype: SECTION_ARCHETYPE.LIST_ARTICLES, variant: 'numbered', surface: 'light',
-    carries: 'the #what-it-does anchor; the jump strip; .mp4 entries play muted inline via [muted] as a PROPERTY'
-  },
-  { page: 'about-us', type: PAGE_SECTION_TYPES.TIMELINE, archetype: SECTION_ARCHETYPE.TIMELINE, variant: 'centreLine', surface: 'light' },
-
-  // ---- the rest
-  {
-    page: 'coaching-with-impact', type: PAGE_SECTION_TYPES.TESTIMONIALS,
-    archetype: SECTION_ARCHETYPE.CAROUSEL, variant: 'quotes', surface: 'photo',
-    carries: 'reads the shared testimonials collection; the section stores only the order'
-  },
-  {
-    page: 'contact', type: PAGE_SECTION_TYPES.FORM,
-    archetype: SECTION_ARCHETYPE.FORM, variant: 'plain', surface: 'light',
-    carries: 'the form id stays in the site; this page has NO stylesheet of its own'
-  },
-  {
-    page: 'seminars', type: PAGE_SECTION_TYPES.FORM,
-    archetype: SECTION_ARCHETYPE.FORM, variant: 'withCopy', surface: 'photo',
-    carries: 'the form id stays in the site'
-  },
-  {
-    page: 'prayer-team', type: PAGE_SECTION_TYPES.SIGNUP,
-    archetype: SECTION_ARCHETYPE.FORM, variant: 'mailingList', surface: 'light',
-    carries: 'the three fields it asks for stay in the site'
-  },
-  {
-    page: 'contact', type: PAGE_SECTION_TYPES.CONTACT_INFO,
-    archetype: SECTION_ARCHETYPE.CONTACT_DETAILS, variant: 'standard', surface: 'light',
-    carries: 'address, email, phone and five social links from Web Config'
-  }
+  // EMPTY since 2026-08-31: all twelve original pages have CUT OVER. Each
+  // migration deleted its rows, and toKitBlocks now reports ANY page as
+  // unmapped - which is exactly right, because a re-flip of migrated data
+  // must refuse loudly. The type and the function stay for the spec that
+  // pins that refusal.
 ];
 
 // ------------------------------------------------------------------ lookups
@@ -759,32 +652,9 @@ export interface KitMigrationPreview {
  * so a drift is a red build rather than a silently blank form.
  */
 const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
-  'seminars/form': { formId: 'KsdeDkokfLGRI3sPFijp' },
-  'contact/form': { formId: 'N0ynW6zeYKdXQS2EkBii' },
-  'prayer-team/signup': { signupList: 'prayer' },
-
-  // TEXT STYLE the flip carries where a page's original section measured
-  // differently from the kit defaults (bold / compact). These are the same
-  // knobs the editor exposes, so after migrating the USER owns them - the
-  // flip only sets the starting point to what the page already looked like.
-  // Grown page by page as each comparison is approved; Lunch and Learns
-  // first: its OVERVIEW measures 50px/weight-500 over 20px/40 copy running
-  // the container's width.
-  // About Us: the history band cropped every head off at centre focus.
-  'about-us/banner': { photoFocus: 'top' },
-  // The three audience pages: the facts column sits in the brand-blue box,
-  // which the original runs with DARK text on. Same rows on all three -
-  // they are the same page three times over.
-  'seminars/prose': { headingStyle: 'light', copySize: 'large' },
-  // The picture cards run two-and-two, as the original lays them.
-  'seminars/cards': { cardsPerRow: 2 },
-  // Contact is ONE ROW of two halves - the details beside the form.
-  'contact/contactInfo': { pairWithNext: true },
-  // Give: the line under the boxes is a 40px statement, and the option
-  // boxes are dark rounded cards.
-  'give/prose': { copySize: 'display' },
-  'give/giveOptions': { cardGround: 'dark' },
-  'equipping-groups-churches/columns': { leftGround: 'brand', rightTitleTone: 'brand' }
+  // Emptied with the last cutover - each page's extras (form ids, the
+  // prayer list, per-section text styles) were flipped INTO its document
+  // and now live there, user-editable.
 };
 
 /**
