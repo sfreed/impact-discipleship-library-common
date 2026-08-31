@@ -202,6 +202,28 @@ export interface PageContentBlock {
   signupList?: 'newsletter' | 'prayer';
 
   /**
+   * WHICH SIDE the picture or video sits on, where a section has both text
+   * and media.
+   *
+   * A SETTING, not a variant (owner, 2026-08-31). It used to be fixed by the
+   * variant - "text with a video" always put the video on the right - or
+   * alternated by position down a list. Both are still the DEFAULT when this
+   * is unset, so nothing that was never touched moves; but a section can now
+   * be told, and staff do not have to pick a different look to get a picture
+   * on the left.
+   */
+  mediaSide?: 'left' | 'right';
+
+  /**
+   * Whether the passage comes BEFORE the heading rather than after it.
+   *
+   * The stacked equivalent of mediaSide: "heading and text" is the usual
+   * order, and this is how a section says "text, then heading" without
+   * needing a variant of its own.
+   */
+  textFirst?: boolean;
+
+  /**
    * What a COUNTDOWN counts toward, as an ISO date string ('2027-02-05' or a
    * full timestamp).
    *

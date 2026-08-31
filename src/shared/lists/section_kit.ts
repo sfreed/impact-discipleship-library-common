@@ -254,7 +254,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
       {
         key: 'buttonList',
         label: 'Title and buttons',
-        blurb: 'a small line above, the title, a line of copy, and any buttons you add',
+        blurb: 'a small line above, the title, a line of text, and any buttons you add',
         fields: { heading: true, subheading: true, body: true, image: true, entries: true },
         surfaces: ['photo']
       }
@@ -264,15 +264,15 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
   {
     archetype: SECTION_ARCHETYPE.HERO_SPLIT,
     label: 'Hero with a screenshot',
-    blurb: 'copy on one side, a product shot on the other',
+    blurb: 'text on one side, a product shot on the other',
     icon: 'vertical_split',
     singleton: true,
     variants: [
       {
         key: 'standard',
-        label: 'Copy and a screenshot',
-        blurb: 'an eyebrow, the title, a lede, one button, and a small line under it',
-        fields: { heading: true, subheading: true, body: true, note: true, image: true, cta: true },
+        label: 'Text and a screenshot',
+        blurb: 'an eyebrow, the title, a lede, any buttons you add, and a small line under them',
+        fields: { heading: true, subheading: true, body: true, note: true, image: true, entries: true },
         mediaSide: 'right'
       }
     ]
@@ -280,32 +280,29 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
 
   {
     archetype: SECTION_ARCHETYPE.COPY_MEDIA,
-    label: 'Copy beside media',
+    label: 'Text beside media',
     blurb: 'a heading and a passage on one side, a picture or video on the other',
     icon: 'view_sidebar',
+    // WHICH SIDE the media sits on is a SETTING on the section now, not a
+    // property of the variant (owner, 2026-08-31). The variants below still
+    // name a default, and a section that has never been told otherwise keeps
+    // it - but "picture on the left" is a choice staff make per section
+    // rather than something they have to pick a different look to get.
     variants: [
       {
         key: 'video',
-        label: 'Copy with a video',
-        blurb: 'a click-to-play video beside the copy; the photo is the still shown before play',
-        fields: { heading: true, subheading: true, body: true, image: true, video: true, cta: true },
+        label: 'Text with a video',
+        blurb: 'a click-to-play video beside the text; the photo is the still shown before play',
+        fields: { heading: true, subheading: true, body: true, image: true, video: true, entries: true },
         mediaSide: 'right'
       },
       {
+        // The buttonList variant that used to sit here is gone: EVERY variant
+        // takes a list of buttons now, so it was a second way to say the same
+        // thing.
         key: 'image',
-        label: 'Copy with a picture',
-        blurb: 'a picture beside the copy',
-        fields: { heading: true, body: true, image: true, cta: true },
-        mediaSide: 'auto'
-      },
-      {
-        // BUTTONS AS ENTRIES, the same shape heroBand's buttonList uses:
-        // two fixed cta slots cover most sections, and the moment a third is
-        // wanted they stop covering anything. As entries they can be added,
-        // removed and reordered like any other list (2026-08-31).
-        key: 'buttonList',
-        label: 'Copy with a picture and several buttons',
-        blurb: 'a picture beside the copy, with as many buttons as you add',
+        label: 'Text with a picture',
+        blurb: 'a picture beside the text',
         fields: { heading: true, body: true, image: true, entries: true },
         mediaSide: 'auto'
       }
@@ -314,30 +311,27 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
 
   {
     archetype: SECTION_ARCHETYPE.COPY_CENTRED,
-    label: 'Heading and copy',
+    label: 'Heading and text',
     blurb: 'a passage across the page, centred',
     icon: 'subject',
     variants: [
       {
+        // `plain` and `withButtons` were one variant apart: whether there
+        // were buttons. Buttons are entries now, so they appear when they are
+        // added and there is nothing to choose between (2026-08-31).
         key: 'plain',
-        label: 'Heading and copy',
-        blurb: 'a heading with a passage under it',
-        fields: { heading: true, body: true }
+        label: 'Heading and text',
+        blurb: 'a heading with a passage under it, and any buttons you add',
+        fields: { heading: true, subheading: true, body: true, entries: true }
       },
       {
-        key: 'withButtons',
-        label: 'Heading, copy and buttons',
-        blurb: 'the same, with up to two buttons under it',
-        fields: { heading: true, subheading: true, body: true, cta: true, cta2: true }
-      },
-      {
-        // Coaching's progress report: the video sits BELOW the copy rather
+        // Coaching's progress report: the video sits BELOW the text rather
         // than beside it, which is a layout, not a colour - so it is a
         // variant here rather than a surface on COPY_MEDIA.
         key: 'mediaBelow',
-        label: 'Heading, copy, then a video',
-        blurb: 'centred copy with a click-to-play video under it and a button below that',
-        fields: { heading: true, subheading: true, body: true, image: true, video: true, cta: true }
+        label: 'Heading, text, then a video',
+        blurb: 'centred text with a click-to-play video under it and any buttons below that',
+        fields: { heading: true, subheading: true, body: true, image: true, video: true, entries: true }
       }
     ]
   },
@@ -399,7 +393,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
       {
         key: 'picture',
         label: 'Picture tiles',
-        blurb: 'a picture, a title and a line of copy per tile',
+        blurb: 'a picture, a title and a line of text per tile',
         fields: { heading: true, subheading: true, body: true, entries: true }
       },
       {
@@ -409,13 +403,13 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         // vertical tile into this.
         key: 'pictureRows',
         label: 'Picture rows',
-        blurb: 'wide cards, each a square picture beside its title and copy',
+        blurb: 'wide cards, each a square picture beside its title and text',
         fields: { heading: true, entries: true }
       },
       {
         key: 'icon',
         label: 'Icon tiles',
-        blurb: 'an icon, a title, copy and a button per tile',
+        blurb: 'an icon, a title, text and a button per tile',
         fields: { heading: true, entries: true }
       },
       {
@@ -438,7 +432,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
       {
         key: 'plain',
         label: 'Alternating rows',
-        blurb: 'a cover, a heading, copy and a button per row',
+        blurb: 'a cover, a heading, text and a button per row',
         fields: { entries: true },
         mediaSide: 'auto'
       },
@@ -522,7 +516,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
       },
       {
         key: 'withCopy',
-        label: 'A form beside copy',
+        label: 'A form beside text',
         blurb: 'a heading and a passage beside the form, over a background photo',
         fields: { heading: true, body: true, image: true, cta: true, form: true },
         mediaSide: 'right'
@@ -534,7 +528,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         // two that exist.
         key: 'mailingList',
         label: 'The sign-up form',
-        blurb: 'copy above the name-and-email sign-up form',
+        blurb: 'text above the name-and-email sign-up form',
         fields: { body: true, cta: true, signupList: true }
       }
     ]
@@ -589,7 +583,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
       {
         key: 'slides',
         label: 'Picture slides',
-        blurb: 'a picture per slide with a heading, a line of copy and a button over it',
+        blurb: 'a picture per slide with a heading, a line of text and a button over it',
         fields: { entries: true }
       }
     ]
@@ -609,7 +603,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         key: 'toDate',
         label: 'Countdown to a date',
         blurb: 'days, hours, minutes and seconds until the date, over a picture',
-        fields: { heading: true, subheading: true, body: true, image: true, cta: true, targetDate: true }
+        fields: { heading: true, subheading: true, body: true, image: true, entries: true, targetDate: true }
       }
     ]
   }
