@@ -24,15 +24,15 @@ import {
 // a green run here as permission to delete a bespoke component.
 
 describe('the section kit', () => {
-  it('declares fifteen archetypes', () => {
+  it('declares fourteen archetypes', () => {
     // FOURTEEN came from the census of the twelve public pages. SLIDER and
     // COUNTDOWN came later (2026-08-31) from the home page, which was never
     // in that census: both were behaviour rather than layout and would
     // otherwise have stayed bespoke components forever. HERO_SPLIT left the
     // same day, folded into HERO_BAND as a second look - it was the same
     // thing in a different layout, which is what a variant is for.
-    expect(SECTION_KIT.length).toBe(15);
-    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(15);
+    expect(SECTION_KIT.length).toBe(14);
+    expect(new Set(SECTION_KIT.map((d) => d.archetype)).size).toBe(14);
   });
 
   it('covers every member of the archetype enum', () => {

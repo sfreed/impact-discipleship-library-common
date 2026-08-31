@@ -90,9 +90,12 @@ export enum SECTION_ARCHETYPE {
   FORM = 'form',
   /** The address, email, phone and social links, from Web Config. */
   CONTACT_DETAILS = 'contactDetails',
-  /** A band with nothing editable on it - a section only so that it can be
-   *  moved and switched off. */
-  FIXED_BAND = 'fixedBand',
+  // FIXED_BAND was here until 2026-08-31. It existed for ONE band - the
+  // consultation banner - whose words, picture and button were hardcoded in
+  // the web app, so a section that nobody could edit was the best the kit
+  // could offer. A photo band with buttons is the same thing and editable,
+  // which is the whole point of the builder. Migrated by
+  // scripts/merge-consultation-band.js.
   /** Full-width slides that rotate: a picture, words over it, a button.
    *  The home page's own slider, as a section any page can have (2026-08-31). */
   SLIDER = 'slider',
@@ -346,17 +349,20 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
     icon: 'panorama',
     variants: [
       {
+        // Was heading-and-photo only. It takes a passage and buttons now
+        // (2026-08-31), which is what let the hardcoded consultation banner
+        // become an ordinary section instead of its own archetype.
         key: 'title',
-        label: 'A line across a photo',
-        blurb: 'one heading over a full-width photo',
-        fields: { heading: true, image: true },
+        label: 'Words over a photo',
+        blurb: 'a heading, an optional passage and any buttons, over a full-width photo',
+        fields: { heading: true, body: true, image: true, entries: true },
         surfaces: ['photo']
       },
       {
         key: 'figure',
         label: 'A big number',
         blurb: 'a large figure with a label, and a paragraph beside it',
-        fields: { heading: true, subheading: true, body: true, image: true },
+        fields: { heading: true, subheading: true, body: true, image: true, entries: true },
         surfaces: ['photo']
       },
       {
@@ -366,7 +372,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
         key: 'address',
         label: 'A band with the postal address',
         blurb: 'a heading, a line, and the ministry address from the site details',
-        fields: { heading: true, subheading: true, image: true },
+        fields: { heading: true, subheading: true, image: true, entries: true },
         surfaces: ['photo']
       }
     ]
@@ -555,21 +561,6 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
     ]
   },
 
-  {
-    archetype: SECTION_ARCHETYPE.FIXED_BAND,
-    label: 'Consultation banner',
-    blurb: 'the shared "receive a free consultation" band',
-    icon: 'campaign',
-    singleton: true,
-    variants: [
-      {
-        key: 'consultation',
-        label: 'Consultation banner',
-        blurb: 'nothing on it is edited - it is a section so it can be moved or switched off',
-        fields: {}
-      }
-    ]
-  },
   {
     // The home page's slider, as an archetype rather than a special case
     // (2026-08-31, owner's call). It stayed component-owned through the
