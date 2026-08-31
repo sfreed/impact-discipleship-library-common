@@ -190,23 +190,31 @@ describe('fields a variant offers', () => {
   it('declares entries exactly where a variant is a list', () => {
     // A list variant with no `entries` opens an editor with nothing to add
     // to; a non-list variant with `entries` shows a list nothing draws.
+    // A section's entries are one of two things, and every variant that
+    // declares them must be one or the other (2026-08-31):
+    //
+    //   CONTENT - the tiles, rows, slides or passages the section IS.
+    //   BUTTONS - on a section that is not a list but has buttons. They were
+    //             one or two fixed slots until the owner asked for "as many
+    //             as they want"; a list is what that means.
     const listArchetypes: string[] = [
       SECTION_ARCHETYPE.LIST_ROWS, SECTION_ARCHETYPE.LIST_GRID,
       SECTION_ARCHETYPE.LIST_ARTICLES, SECTION_ARCHETYPE.LIST_COLUMNS,
       SECTION_ARCHETYPE.TIMELINE,
       // A slider is a list of SLIDES - the rotation is the renderer's, the
-      // slides are entries like any other (2026-08-31).
+      // slides are entries like any other.
       SECTION_ARCHETYPE.SLIDER
+    ];
+    const buttonBearing: string[] = [
+      SECTION_ARCHETYPE.HERO_BAND, SECTION_ARCHETYPE.HERO_SPLIT,
+      SECTION_ARCHETYPE.COPY_MEDIA, SECTION_ARCHETYPE.COPY_CENTRED,
+      SECTION_ARCHETYPE.COUNTDOWN
     ];
 
     const mismatched: string[] = [];
     for (const def of SECTION_KIT as readonly ArchetypeDef[]) {
       for (const variant of def.variants) {
-        // `buttonList` is the deliberate exception WHEREVER it appears: the
-        // section is not a list, but its buttons are entries, which is the
-        // whole point of the variant. On heroBand since the kit was drawn,
-        // and on copyMedia since 2026-08-31.
-        const exception = variant.key === 'buttonList';
+        const exception = buttonBearing.includes(def.archetype);
         const shouldHave = listArchetypes.includes(def.archetype) || exception;
         if (shouldHave !== !!variant.fields.entries) {
           mismatched.push(`${def.archetype}/${variant.key}`);
