@@ -1494,17 +1494,29 @@ const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
 
   // The Form Builder form and the fixed three-field sign-up are DIFFERENT
   // atoms that happened to share an archetype.
-  [SECTION_ARCHETYPE.FORM]: (block) => [column(1, [
-    piece('heading', { text: block['heading'], level: 'section' }),
-    piece('text', { html: block['body'] }),
-    String(block['variant'] ?? '') === 'mailingList'
+  //
+  // TWO COLUMNS on the withCopy variant - words on the left, form on the
+  // right. That split IS the variant, and folding it into one column was a
+  // real regression: the migrated Seminars page stacked a form under its
+  // words where the site puts them side by side. Shane caught it in the
+  // comparison.
+  [SECTION_ARCHETYPE.FORM]: (block) => {
+    const words = wordsOf(block, 'section').filter((p) => p?.['kind'] !== 'buttons');
+    const control = String(block['variant'] ?? '') === 'mailingList'
       ? piece('signup', { signupList: block['signupList'] ?? 'newsletter' })
       // ctaTitle on a FORM section is its SUBMIT BUTTON'S label, not a link -
       // the archetype passed it straight to the form renderer. Dropping it
       // turned "GET MY FREE CONSULTATION" into "Submit", which the
       // comparison screen caught within a minute of first running.
-      : piece('form', { formId: block['formId'], submitLabel: block['ctaTitle'] })
-  ])],
+      : piece('form', { formId: block['formId'], submitLabel: block['ctaTitle'] });
+
+    if (String(block['variant'] ?? '') !== 'withCopy') {
+      // The sign-up band is centred on the site - the form itself already
+      // centres, but its heading and words did not follow it across.
+      return [column(1, [...words, control], { align: 'centre', measure: true })];
+    }
+    return [column(1, words), column(2, [control])];
+  },
 
   [SECTION_ARCHETYPE.COUNTDOWN]: (block) => [column(1, [
     piece('eyebrow', { text: block['subheading'] }),

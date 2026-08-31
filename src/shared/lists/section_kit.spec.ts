@@ -618,7 +618,11 @@ describe('what the flip must carry across', () => {
       ctaTitle: 'GET MY FREE CONSULTATION'
     });
 
-    const form = ((out['columns'] as Record<string, unknown>[])[0]['pieces'] as Record<string, unknown>[])
+    // ACROSS EVERY COLUMN, not the first: the split variant puts the words
+    // on the left and the form on the right, so which column holds it is
+    // not this check's business.
+    const form = (out['columns'] as Record<string, unknown>[])
+      .flatMap((c) => c['pieces'] as Record<string, unknown>[])
       .find((p) => p['kind'] === 'form');
 
     expect(form?.['submitLabel'])
@@ -746,5 +750,76 @@ describe('the look a column carries', () => {
       expect(column['measure']).toBeUndefined();
       expect(column['align']).toBeUndefined();
     }
+  });
+});
+
+/**
+ * THE SHAPE A FORM SECTION KEEPS.
+ *
+ * The withCopy variant puts the words on the left and the form on the right,
+ * and that split IS the variant - it is the only thing separating it from
+ * the plain one. Folding it into a single column stacked a form under its
+ * own words, which Shane caught in the comparison.
+ *
+ * ARRANGEMENT IS AS EASY TO LOSE AS CONTENT and much harder to spot: every
+ * word was present, in the right order, in the right section.
+ */
+describe('the shape of a migrated form section', () => {
+  const columnsOf = (out: Record<string, unknown>) =>
+    out['columns'] as Record<string, unknown>[];
+  const kindsIn = (column: Record<string, unknown>) =>
+    (column['pieces'] as Record<string, unknown>[]).map((p) => p['kind']);
+
+  it('keeps words and form side by side on the split variant', () => {
+    const out = toSectionModel({
+      key: 'start', type: SECTION_ARCHETYPE.FORM, variant: 'withCopy',
+      heading: 'START TODAY', body: '<p>Words.</p>',
+      formId: 'consultation', ctaTitle: 'GET MY FREE CONSULTATION'
+    });
+
+    const columns = columnsOf(out);
+    expect(columns.length)
+      .withContext('the form was stacked under its words instead of beside them')
+      .toBe(2);
+    expect(kindsIn(columns[0])).toEqual(['heading', 'text']);
+    expect(kindsIn(columns[1])).toEqual(['form']);
+  });
+
+  it('stacks the plain variant, which has no second column', () => {
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'plain',
+      heading: 'Get in touch', formId: 'contact'
+    });
+
+    expect(columnsOf(out).length).toBe(1);
+    expect(kindsIn(columnsOf(out)[0])).toEqual(['heading', 'form']);
+  });
+
+  it('centres the sign-up band, heading and all', () => {
+    // The sign-up form centres itself; its heading and words did not follow
+    // it across, so the band read as ranged left with a centred form in it.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'mailingList',
+      heading: 'STAY IN THE LOOP', signupList: 'newsletter'
+    });
+
+    expect(columnsOf(out)[0]['align']).toBe('centre');
+    expect(kindsIn(columnsOf(out)[0])).toEqual(['heading', 'signup']);
+  });
+
+  it('never turns a form section’s button text into a link', () => {
+    // ctaTitle is the SUBMIT button's label here. Emitting a buttons piece
+    // from it would put a dead link beside the form AND leave the form
+    // saying "Submit".
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.FORM, variant: 'withCopy',
+      heading: 'H', formId: 'f', ctaTitle: 'SEND IT'
+    });
+
+    const everyKind = columnsOf(out).flatMap(kindsIn);
+    expect(everyKind).not.toContain('buttons');
+
+    const form = (columnsOf(out)[1]['pieces'] as Record<string, unknown>[])[0];
+    expect(form['submitLabel']).toBe('SEND IT');
   });
 });
