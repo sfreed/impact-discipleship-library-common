@@ -834,12 +834,18 @@ export function toKitHomeBlocks(
         return { ...base, type: SECTION_ARCHETYPE.COPY_MEDIA, variant: 'image', surface: 'light' };
 
       case 'services':
-        return { ...base, type: SECTION_ARCHETYPE.LIST_GRID, variant: 'picture',
-          surface: 'light', cardsPerRow: 4, items: section['items'] };
+        // pictureRows, TWO PER ROW: the home strip's cards are horizontal -
+        // a square picture beside the words - which is the same card the
+        // Seminars page uses, and they sit two across rather than four
+        // (owner, 2026-08-31, comparing against the live page).
+        return { ...base, type: SECTION_ARCHETYPE.LIST_GRID, variant: 'pictureRows',
+          surface: 'light', cardsPerRow: 2, items: section['items'] };
 
       case 'subscribe':
+        // 'photo', not a tint: the live block sits on its own background
+        // image, and the section already carries that image.
         return { ...base, type: SECTION_ARCHETYPE.FORM, variant: 'mailingList',
-          surface: 'tinted', signupList: 'newsletter' };
+          surface: 'photo', signupList: 'newsletter' };
 
       case 'testimonials':
         return { ...base, type: SECTION_ARCHETYPE.CAROUSEL, variant: 'quotes',
