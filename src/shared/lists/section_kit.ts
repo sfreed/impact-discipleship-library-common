@@ -1516,13 +1516,16 @@ const COLUMN_BUILDERS: Record<string, ColumnBuilder> = {
 
   // Seven of its nine rendered parts come from Web Config, so it is ONE
   // piece rather than a composition - see CONTENT_PIECES.
+  // INDENTED as a whole - heading and details together. See
+  // SectionColumn.inset for why it is a column lever rather than padding
+  // on the details themselves.
   [SECTION_ARCHETYPE.CONTACT_DETAILS]: (block) => [column(1, [
     piece('heading', { text: block['heading'], level: 'section' }),
     piece('text', { html: block['body'] }),
     // It carries nothing of its own: every part of it comes from Web
     // Config, which is the reason it is one piece rather than six.
     { kind: 'siteDetails', isActive: true }
-  ])],
+  ], { inset: true })],
 
   // The Form Builder form and the fixed three-field sign-up are DIFFERENT
   // atoms that happened to share an archetype.

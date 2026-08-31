@@ -557,5 +557,16 @@ export interface SectionColumn {
    * needs it most, which is exactly when nothing else constrains it.
    */
   measure?: boolean;
+  /**
+   * Indent this column's contents off the page gutter.
+   *
+   * The contact details are why it exists (Shane, 2026-08-31): flush against
+   * the gutter they read as forgotten rather than placed. It is a COLUMN
+   * lever rather than padding on the details themselves because the old
+   * archetype wraps its heading in that block and a migrated section does
+   * not - padding the block would move the heading on one side only, and the
+   * comparison would show a difference the change never intended.
+   */
+  inset?: boolean;
   pieces: ContentPiece[];
 }
