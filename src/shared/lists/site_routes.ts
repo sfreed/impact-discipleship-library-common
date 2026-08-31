@@ -138,10 +138,14 @@ export const RESERVED_SLUGS: readonly string[] = [
   'monthly-newsletter',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
-  'summit', 'summit-preview',
-  // The migration comparison: /kit-preview/<slug> draws an original page
-  // through the section kit without touching its data (2026-08-30).
-  'kit-preview'
+  'summit', 'summit-preview'
+  // 'kit-preview' was here for the migration's comparison screens. Both the
+  // route and the screens retired with the last page - the home page - on
+  // 2026-08-31, so reserving it would refuse staff a slug that is free.
+  //
+  // 'home' is deliberately NOT reserved either: no route claims it (the home
+  // page is at '/'), and the New Page dialog already refuses it because
+  // page_content/home exists.
 ];
 
 /**
