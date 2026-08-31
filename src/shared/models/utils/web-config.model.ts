@@ -15,8 +15,14 @@ export class WebConfigModel extends BaseModel{
   //
   // Dropped from the dev document by scripts/web-config-cleanup.js. Every
   // one was a box somebody could fill in, save, and watch change nothing.
-  policy: string;
-  tos: string
+  // policy and tos left on 2026-08-31. They held the Privacy Policy and
+  // Terms of Use wording, drawn by two bespoke components at hand-written
+  // routes - the last two pages on the site whose WORDS staff could change
+  // but whose shape they could not. Both are ordinary page_content pages
+  // now, and the fields were kept as a second copy until somebody had read
+  // them. Cleared by scripts/web-config-drop-page-words.js, which backed
+  // the document up first and refused to write unless the pages really
+  // carried the words - they did, to the word: 1083 and 426.
   email: string;
   phone: string;
   address: Address;
