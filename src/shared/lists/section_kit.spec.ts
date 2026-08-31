@@ -213,7 +213,10 @@ describe('fields a variant offers', () => {
     const buttonBearing: string[] = [
       SECTION_ARCHETYPE.HERO_BAND,
       SECTION_ARCHETYPE.COPY_MEDIA, SECTION_ARCHETYPE.COPY_CENTRED,
-      SECTION_ARCHETYPE.COUNTDOWN
+      SECTION_ARCHETYPE.COUNTDOWN,
+      // Gained buttons when the consultation banner became an ordinary
+      // section rather than an archetype of its own (2026-08-31).
+      SECTION_ARCHETYPE.PHOTO_BAND
     ];
 
     const mismatched: string[] = [];
