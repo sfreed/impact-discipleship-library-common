@@ -52,14 +52,12 @@ export interface PageContentBlock {
    * while it is half done, and writing it out is better than a cast that
    * hides which pages are on which side.
    *
-   * THE TWO VOCABULARIES OVERLAP, and where they do it is the same thing
-   * twice: 'timeline' and 'form' are both a PAGE_SECTION_TYPE and a
-   * SECTION_ARCHETYPE. That is not a collision to resolve - it means those
-   * blocks need NO migration at all, because the value they already store is
-   * the value the kit wants. `section_kit.spec.ts` pins it: any string in
-   * both enums must map to itself in LEGACY_RENDERINGS, so an overlap that
-   * ever meant two different things would fail rather than silently draw the
-   * wrong section.
+   * THE OVERLAP THAT MATTERED IS GONE. 'timeline' and 'form' used to be a
+   * member of BOTH enums, and a spec pinned them to mean the same thing on
+   * each side so those blocks needed no migration at all. SECTION_ARCHETYPE
+   * is two members now - 'section' and 'list' - and neither is a
+   * PAGE_SECTION_TYPE, so the two vocabularies no longer share a single
+   * string (2026-09-01).
    *
    * Nothing has to disambiguate at runtime in any case. A block reaches
    * exactly one renderer - the one its PAGE routes to - and a renderer

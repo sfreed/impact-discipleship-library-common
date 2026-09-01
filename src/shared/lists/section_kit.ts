@@ -189,15 +189,10 @@ export interface SectionVariant {
   /** What it draws, in a phrase, for the Add menu. */
   blurb: string;
   fields: KitFields;
-  /**
-   * Where the media sits, for the archetypes that have any.
-   *
-   * `auto` alternates by the section's position among its own kind - the
-   * rule About Us's story columns and the Library's feature rows already
-   * follow. Nothing stores a side: a stored side is a second source of
-   * truth that reordering silently breaks.
-   */
-  mediaSide?: 'auto' | 'left' | 'right';
+  // `mediaSide` was declared here and is gone (2026-09-01). A variant could
+  // fix which side a composed archetype's picture sat on; neither of the two
+  // members has a picture half to place. A Section says it by which column
+  // holds the picture, and a List has no such half at all.
   /** Surfaces this variant is known to work on. Empty means all of them. */
   surfaces?: readonly SectionSurface[];
 }
