@@ -1185,14 +1185,39 @@ type ColumnBuilder = (block: Readonly<Record<string, unknown>>) => Record<string
 
 /** A piece, or nothing when there is no content for it. Filtered out below,
  *  so an empty field does not become an empty piece staff have to delete. */
+/**
+ * Which fields are CONTENT, as opposed to how content is drawn.
+ *
+ * The emptiness test below has to judge a piece on these alone. It used to
+ * look at every field it was handed, and a heading built from an empty
+ * heading with `level: 'section'` therefore counted as meaningful - the
+ * LEVEL made it look like it had something in it. That put an empty heading
+ * into a full-width column on every migrated two-column band, which drew a
+ * stray rule on the page and showed as a phantom third column in the
+ * editor. Shane, looking at Equipping - Leaders: "why is there three
+ * columns... i dont see anything like that on the leaders page... or in
+ * prod." There was nothing to see; that was the bug.
+ */
+const PIECE_CONTENT_FIELDS = [
+  'text', 'html', 'image', 'videoId', 'buttons', 'formId', 'signupList',
+  'targetDate', 'amountKey'
+];
+
 function piece(
   kind: ContentPieceKindKey,
   fields: Record<string, unknown>
 ): Record<string, unknown> | null {
-  const meaningful = Object.values(fields).some(
-    (value) => value !== undefined && value !== null && value !== ''
-      && !(Array.isArray(value) && value.length === 0)
-  );
+  const meaningful = PIECE_CONTENT_FIELDS.some((name) => {
+    const value = fields[name];
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      // Rich text arrives as HTML, and "<p></p>" is as empty as "".
+      return value.replace(/<[^>]*>/g, '').trim() !== '';
+    }
+    return !(Array.isArray(value) && value.length === 0);
+  });
   return meaningful ? { kind, isActive: true, ...fields } : null;
 }
 

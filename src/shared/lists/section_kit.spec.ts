@@ -950,3 +950,94 @@ describe('the arrangements a band must keep', () => {
     expect(piecesOf(out).map((p) => p['kind'])).not.toContain('video');
   });
 });
+
+/**
+ * A PIECE IS JUDGED ON ITS CONTENT, not on every field it was handed.
+ *
+ * The flip used to ask whether ANY field held something. A heading built
+ * from an empty heading still carried `level: 'section'`, so it counted as
+ * meaningful and an empty heading piece was made - which on a two-column
+ * band went into a FULL-WIDTH column of its own, drew a horizontal rule with
+ * nothing above it, and showed as a phantom third column in the editor.
+ *
+ * Shane found it by looking at a page: "why is there three columns... i dont
+ * see anything like that on the leaders page... or in prod." There was
+ * nothing to see, which is exactly why no check caught it - the section drew,
+ * the words were all present, and the page was the right length.
+ */
+describe('what the flip counts as an empty piece', () => {
+  const piecesOf = (out: Record<string, unknown>) =>
+    ((out['columns'] as Record<string, unknown>[]) ?? [])
+      .flatMap((c) => c['pieces'] as Record<string, unknown>[]);
+
+  it('makes NO heading from a section that has none', () => {
+    // `level` is how a heading is drawn, not something to draw.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED, body: '<p>Words.</p>'
+    });
+
+    expect(piecesOf(out).map((p) => p['kind']))
+      .withContext('an empty heading draws a rule with nothing above it')
+      .not.toContain('heading');
+  });
+
+  it('makes NO picture from a section that has none', () => {
+    // Same trap one field along: photoFocus is how a picture is cropped.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_MEDIA,
+      heading: 'A', body: '<p>b</p>', photoFocus: 'top'
+    });
+
+    expect(piecesOf(out).map((p) => p['kind'])).not.toContain('picture');
+  });
+
+  it('treats markup with no words in it as empty', () => {
+    // A rich-text box that was typed in and cleared leaves its tags behind.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.COPY_CENTRED,
+      heading: 'A heading', body: '<p></p>'
+    });
+
+    expect(piecesOf(out).map((p) => p['kind'])).toEqual(['heading']);
+  });
+
+  it('leaves no FULL-WIDTH column behind when a band has no heading', () => {
+    // The phantom third column. A two-column band whose heading is empty is
+    // a two-column band.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.LIST_COLUMNS,
+      items: [
+        { title: 'A', body: '<p>a</p>', column: 'left', isActive: true },
+        { title: 'B', body: '<p>b</p>', column: 'right', isActive: true }
+      ]
+    });
+
+    const columns = out['columns'] as Record<string, unknown>[];
+    expect(columns.length)
+      .withContext('an empty spanning heading is still counted as a column')
+      .toBe(2);
+    expect(columns.some((c) => c['full'])).toBeFalse();
+  });
+
+  it('KEEPS the full-width column when the band really has a heading', () => {
+    // The fix must not go the other way and drop a heading that exists.
+    const out = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.LIST_COLUMNS, heading: 'Who it is for',
+      items: [{ title: 'A', body: '<p>a</p>', column: 'left', isActive: true }]
+    });
+
+    const columns = out['columns'] as Record<string, unknown>[];
+    expect(columns[0]['full']).toBeTrue();
+    expect((columns[0]['pieces'] as Record<string, unknown>[])[0]['text'])
+      .toBe('Who it is for');
+  });
+
+  it('still makes the pieces that carry no content of their own', () => {
+    // siteDetails reads Web Config; a countdown draws its own clock. Judging
+    // those on "has content" would delete them.
+    const contact = toSectionModel({
+      key: 'k', type: SECTION_ARCHETYPE.CONTACT_DETAILS, heading: 'Find us'
+    });
+    expect(piecesOf(contact).map((p) => p['kind'])).toContain('siteDetails');
+  });
+});
