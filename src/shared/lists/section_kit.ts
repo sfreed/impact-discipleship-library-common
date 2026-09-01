@@ -324,6 +324,8 @@ export interface ContentPieceDef {
     submitLabel?: boolean;
     targetDate?: boolean;
     amount?: boolean;
+    /** heading - offer "read but not seen". See ContentPiece.hidden. */
+    hidden?: boolean;
   };
   /** Said before editing, where a piece will NOT change something staff
    *  might expect it to. Same purpose as an archetype's caveat. */
@@ -336,7 +338,7 @@ export const CONTENT_PIECES: readonly ContentPieceDef[] = [
     label: 'Heading',
     blurb: 'a heading, at the level you choose',
     icon: 'title',
-    fields: { text: true, level: true }
+    fields: { text: true, level: true, hidden: true }
   },
   {
     kind: 'eyebrow',

@@ -470,6 +470,27 @@ export interface ContentPiece {
    */
   level?: 'page' | 'section' | 'minor' | 'display';
 
+  /**
+   * heading - IN THE MARKUP, NOT ON THE SCREEN.
+   *
+   * The heading is rendered as its real tag and read by screen readers and
+   * search engines exactly as any other, and then positioned off-screen so
+   * nobody looking at the page sees it.
+   *
+   * WHY IT EXISTS (2026-09-01). The home page opens on a full-width picture
+   * slider, so the only place a visible heading can go is a band of words
+   * above that slider - which was tried, and looked wrong. Without one the
+   * page had no <h1> at all, which is the heading a search engine reads the
+   * page by. This is the way to have both, and it is not a trick: the words
+   * describe the page truthfully, which is the line between an accessible
+   * heading and cloaking.
+   *
+   * NOT `display: none` and NOT `visibility: hidden` - both of those are
+   * skipped by screen readers too, which would defeat the point. See
+   * `.kit-sr-only` in kit-section.component.scss.
+   */
+  hidden?: boolean;
+
   /** text - rich HTML, as body always has been. */
   html?: string;
 
