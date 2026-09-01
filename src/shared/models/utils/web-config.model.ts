@@ -45,8 +45,16 @@ export class WebConfigModel extends BaseModel{
   instagram: string | null ;
   inpersonSeminarCost: number;
   onlineSeminarCost: number;
-  equippingGroupTotalCost: number;
-  equippingGroupPaymentCost: number;
+  // equippingGroupTotalCost and equippingGroupPaymentCost left on
+  // 2026-08-31. They fed one sentence on two pages - the equipping COST
+  // block on Churches and Pastors - and nothing else on the site read
+  // either. The figures are typed into those headings now, alongside every
+  // other word of that block, so a setting existing purely to feed two
+  // sentences is one lever fewer to remember. Owner's call.
+  //
+  // The seminar figures below deliberately stay NAMED: they appear on
+  // price tiles on more than one page, which is the case a shared figure
+  // is actually for.
   // Recipient(s) for the daily "locked-out patron" alert - a scheduled
   // function (lockedOutPatronAlert) emails here when a reader has a
   // libraryUsers profile but no Firebase Auth account, i.e. cannot sign in.
