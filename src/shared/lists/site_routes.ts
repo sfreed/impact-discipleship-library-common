@@ -145,13 +145,12 @@ export const RESERVED_SLUGS: readonly string[] = [
   'monthly-newsletter',
   'disciple-making-minute', 'podcasts', 'podcasts-v2',
   'impact-groups',
-  'summit', 'summit-preview',
-  // BACK, for a second migration. It was here for the first cutover's
-  // comparison screens, retired with the last of the twelve original pages
-  // on 2026-08-31, and returns hours later for the same job one level up -
-  // fourteen archetypes into two. It retires again when the last page
-  // migrates, and this line goes with it.
-  'kit-preview'
+  'summit', 'summit-preview'
+  // 'kit-preview' was here twice and is gone for good (2026-09-01). It
+  // reserved the comparison route, which existed to draw a page both ways
+  // before it migrated - first the twelve original pages, then the fourteen
+  // archetypes. There is nothing left to migrate from, so there is nothing
+  // to compare against, so the route and this line both go.
   //
   // 'home' is deliberately NOT reserved either: no route claims it (the home
   // page is at '/'), and the New Page dialog already refuses it because
