@@ -190,6 +190,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Previous lesson', kind: 'label', area: 'Lesson View' },
   { text: 'Next lesson', kind: 'label', area: 'Lesson View' },
   { text: 'Email this lesson to me', kind: 'label', area: 'Book Detail' },
+  { text: 'Emailing a lesson needs a connection', kind: 'label', area: 'Book Detail' },
   { text: 'Sent to {email}', kind: 'label', area: 'Book Detail' },
   { text: "Couldn't send that lesson. Please try again.", kind: 'label', area: 'Book Detail' },
   { text: 'Something went wrong saving your answers. Please try again.', kind: 'label', area: 'Lesson View' },
