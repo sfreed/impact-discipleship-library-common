@@ -18,26 +18,38 @@ describe('tenantPath', () => {
     expect(tenantPath('site_navigation')).toBe(`tenants/${TENANT_ID}/site_navigation`);
   });
 
-  it('leaves everything else exactly as it was', () => {
-    // The narrowness of the move IS the safety. A stray rename here would
-    // point a live screen at a collection that does not exist.
-    for (const untouched of ['customers', 'purchases', 'events', 'admin_users',
-      'campaigns', 'forms', 'products', 'libraryUsers', 'errorLogs']) {
+  it('leaves the PERMANENTLY excluded collections exactly as they are', () => {
+    // This list used to name whatever had not moved yet - customers,
+    // products, events - which made it a to-do list rather than a rule, and
+    // it went red the moment Wave 2 moved them. Correctly red, and useless:
+    // a test that has to be edited every wave is telling you nothing on the
+    // waves in between.
+    //
+    // These five are different. Each is excluded for a reason that will
+    // never expire, so the assertion means the same thing forever.
+    const permanentlyExcluded = [
+      'mail',         // the firestore-send-email extension's watch path
+      'errorLogs',    // written before a caller is authenticated
+      'e2e_runs',     // a record of test runs, not of the ministry
+      'meta',         // schema and counter markers
+      'systemState'   // the system's own bookkeeping
+    ];
+    for (const untouched of permanentlyExcluded) {
       expect(tenantPath(untouched))
-        .withContext(`${untouched} must not move`)
+        .withContext(`${untouched} must NEVER move`)
         .toBe(untouched);
+      expect(TENANT_COLLECTIONS)
+        .withContext(`${untouched} must never enter the list`)
+        .not.toContain(untouched);
     }
   });
 
-  it('never moves a collection owned by something outside this repo', () => {
-    // `mail` is watched by the firestore-send-email extension, whose path is
-    // configured in Firebase rather than here. Nesting it stops email with no
-    // code change to blame - so it is pinned rather than left to a comment.
-    // `errorLogs` is written pre-auth against a top-level rules exception.
-    expect(tenantPath('mail')).toBe('mail');
-    expect(tenantPath('errorLogs')).toBe('errorLogs');
-    expect(TENANT_COLLECTIONS).not.toContain('mail');
-    expect(TENANT_COLLECTIONS).not.toContain('errorLogs');
+  it('does not move a collection nobody has asked it to', () => {
+    // A name absent from the list comes back untouched. This is what makes
+    // "add a name to move a collection" safe: leaving one out cannot
+    // half-migrate it, it simply does nothing.
+    expect(tenantPath('some_collection_that_does_not_exist'))
+      .toBe('some_collection_that_does_not_exist');
   });
 
   it('nests every collection it claims to, and only those', () => {
