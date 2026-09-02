@@ -118,7 +118,42 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   'subtemplates',
   'popup_templates',
   'appConfig',
-  'lessonTemplates'
+  'lessonTemplates',
+
+  // Wave 2 - business data that Cloud Functions READ and WRITE but no
+  // trigger WATCHES. The distinction is the whole basis of the ordering: a
+  // function reading the wrong path returns nothing and a screen is visibly
+  // empty; a trigger watching the wrong path never runs and says nothing.
+  //
+  // DELIBERATELY HELD BACK to Wave 3, though they would otherwise fit here:
+  // `libraryUsers` and `discussionGroups` are named inside firestore.rules
+  // HELPER FUNCTIONS - hasBookLicense(), isApprovedGroupMember() and friends
+  // resolve them with get()/exists() rather than a match block. Moving either
+  // means rewriting paths that gate every licensed lesson read in the reader,
+  // so they go with the triggers, not with the ordinary business data.
+  // `groupLicenses` and `groupInvites` follow them because the group-deletion
+  // cleanup treats all four as one unit.
+  'customers',
+  'tag_applications',
+  'tag_rules',
+  'affilliate_sales',
+  'campaign_emails',
+  'campaigns',
+  'campaign_events',
+  'campaign_sends',
+  'campaign_offers',
+  'campaign_popups',
+  'log-messages',
+  'activityLog',
+  'adminMessages',
+  'tax_rate_summaries',
+  'shipping-labels',
+  'shipping-label-batches',
+  'products',
+  'coupons',
+  'pending_orders',
+  'events',
+  'lessonImages'
 ];
 
 /**
