@@ -191,6 +191,22 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Next lesson', kind: 'label', area: 'Lesson View' },
   { text: 'Email this lesson to me', kind: 'label', area: 'Book Detail' },
   { text: 'Emailing a lesson needs a connection', kind: 'label', area: 'Book Detail' },
+  { text: "That setting couldn't be saved. Please try again.", kind: 'label', area: 'Settings' },
+  {
+    text: "You're offline - deleting your account needs a connection.",
+    kind: 'label',
+    area: 'Settings',
+  },
+  {
+    text: "You're offline - deleting a message needs a connection.",
+    kind: 'label',
+    area: 'Messages',
+  },
+  {
+    text: "You're offline - this setting will need setting again once you're connected.",
+    kind: 'label',
+    area: 'Settings',
+  },
   { text: 'Sent to {email}', kind: 'label', area: 'Book Detail' },
   { text: "Couldn't send that lesson. Please try again.", kind: 'label', area: 'Book Detail' },
   { text: 'Something went wrong saving your answers. Please try again.', kind: 'label', area: 'Lesson View' },
