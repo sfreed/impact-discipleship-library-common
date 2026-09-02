@@ -1,5 +1,3 @@
-import { PAGE_SECTION_TYPES } from './page_section_types.enum';
-
 /**
  * THE SECTION KIT - one set of sections able to draw every public page.
  *
@@ -254,10 +252,10 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
 
 // ------------------------------------------------------------------ lookups
 
-const BY_ARCHETYPE = new Map<string, ArchetypeDef>(
-  SECTION_KIT.map((def): [string, ArchetypeDef] => [def.archetype, def])
-);
-
+// BY_ARCHETYPE was the index behind archetypeDef()/variantDef()/kitFields(),
+// all of which went with the fourteen archetypes on 2026-09-01. Nothing has
+// looked anything up by archetype since - there are two members and the
+// renderer switches on them directly.
 
 /** The ground a section is actually drawn on, once the page's theme has had
  *  its say. One place, so the renderer and the admin preview cannot differ. */
@@ -269,20 +267,12 @@ export function resolveSurface(
 }
 
 
-/**
- * Behaviour an original page keeps in its COMPONENT that the kit stores on
- * the block instead. Keyed `page/oldType`; applied during the flip.
- *
- * The two form ids are copied from the components that own them today
- * (seminars.component.ts, contact.component.ts) - hand-carried, because the
- * admin cannot read the web app's source, and pinned by the migration spec
- * so a drift is a red build rather than a silently blank form.
- */
-const MIGRATION_EXTRAS: Record<string, Record<string, unknown>> = {
-  // Emptied with the last cutover - each page's extras (form ids, the
-  // prayer list, per-section text styles) were flipped INTO its document
-  // and now live there, user-editable.
-};
+// MIGRATION_EXTRAS held the behaviour an original page kept in its COMPONENT
+// that the kit had to store on the block instead - form ids, the prayer
+// list, per-section text styles - keyed `page/oldType` and applied during
+// the flip. It was emptied when the last page cut over on 2026-08-31, and
+// the transform that read it went with the archetypes the day after. An
+// empty map nothing reads is not a record of anything.
 
 
 // ------------------------------------------------------- the content pieces
