@@ -89,6 +89,7 @@ export const SITE_HOSTNAMES: readonly string[] = [
  *   rules exception is keyed to the top-level path.
  */
 export const TENANT_COLLECTIONS: readonly string[] = [
+  // Wave 0 - what the public site renders and Page Manager edits.
   'page_content',
   'site_navigation',
   'site_footer',
@@ -97,7 +98,27 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   'testimonials',
   'impact_team',
   'dmms',
-  'faq'
+  'faq',
+
+  // Wave 1 - reference data. No Firestore trigger watches any of these, so
+  // every way of getting one wrong fails LOUDLY: a read returns nothing and
+  // a screen is visibly empty. That is the whole reason this wave goes
+  // first - if the tooling is wrong, it is wrong here, where a mistake costs
+  // a re-run rather than a silently unfulfilled order.
+  'commonTranslations',
+  'titleTranslations',
+  'coaches',
+  'organizations',
+  'locations',
+  'product_categories',
+  'series',
+  'product_tags',
+  'forms',
+  'bulkDiscountTiers',
+  'subtemplates',
+  'popup_templates',
+  'appConfig',
+  'lessonTemplates'
 ];
 
 /**
