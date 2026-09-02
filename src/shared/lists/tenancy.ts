@@ -153,7 +153,33 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   'coupons',
   'pending_orders',
   'events',
-  'lessonImages'
+  'lessonImages',
+
+  // Wave 3 - the entangled ones, and the reason for all the scaffolding.
+  //
+  // These carry SUBCOLLECTIONS - a patron's submissions, highlights and
+  // progress under `libraryUsers`; members, chat, conversations and prayer
+  // requests under `discussionGroups`; and the whole books/units/lessons/
+  // translations tree under `librarySeries`, which is 590 documents beneath
+  // three. The migration tool was flat until this wave and would have taken
+  // the parents, left every child behind, and printed "copied".
+  //
+  // `libraryUsers` and `discussionGroups` are also named inside
+  // firestore.rules HELPER functions rather than match blocks - hasBookLicense(),
+  // isApprovedGroupMember() and friends resolve them with get()/exists() - so
+  // their paths there had to move in the same change or every licensed lesson
+  // read in the reader is denied.
+  'purchases',
+  'event-registrations',
+  'admin_users',
+  'eventSessionCounts',
+  'mail_templates',
+  'event-announcements',
+  'groupLicenses',
+  'groupInvites',
+  'libraryUsers',
+  'discussionGroups',
+  'librarySeries'
 ];
 
 /**

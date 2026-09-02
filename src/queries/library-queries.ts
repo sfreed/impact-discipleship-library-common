@@ -32,6 +32,7 @@ import {
   orderBy,
   query,
 } from '@angular/fire/firestore';
+import { tenantPath } from '../shared/lists/tenancy';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { Book, Lesson, Unit } from '../models/library.models';
 
@@ -105,7 +106,10 @@ export function getLessons(
 ): Observable<Lesson[]> {
   const ref = collection(
     firestore,
-    'librarySeries',
+    // The seam returns a multi-segment path here ('tenants/{id}/librarySeries')
+    // and the SDK joins every argument with '/', so it lands in exactly the
+    // right place - this stays a first segment, not a special case.
+    tenantPath('librarySeries'),
     unit.seriesId,
     'books',
     unit.bookId,
