@@ -1,3 +1,4 @@
+import { tenantPath } from '../shared/lists/tenancy';
 // Plain-function Firestore reads shared between both apps' translation
 // services. Each app's own CommonTranslationService/TranslationService/
 // TitleTranslationService calls these for its shared reads and keeps its own
@@ -17,7 +18,7 @@ import { Observable, map } from 'rxjs';
 import { CommonTranslation, LessonTranslation, TitleTranslation } from '../models/translation.models';
 
 export function getCommonTranslations(firestore: Firestore): Observable<CommonTranslation[]> {
-  return collectionData(collection(firestore, 'commonTranslations'), {
+  return collectionData(collection(firestore, tenantPath('commonTranslations')), {
     idField: 'id',
   }) as Observable<CommonTranslation[]>;
 }
@@ -30,9 +31,7 @@ export function getTranslations(
   firestore: Firestore,
   lesson: { seriesId: string; bookId: string; unitId: string; id: string },
 ): Observable<LessonTranslation[]> {
-  const ref = collection(
-    firestore,
-    'librarySeries',
+  const ref = collection(firestore, tenantPath('librarySeries'),
     lesson.seriesId,
     'books',
     lesson.bookId,
@@ -64,9 +63,7 @@ export function getTranslationsForLocale(
   lesson: { seriesId: string; bookId: string; unitId: string; id: string },
   locale: string,
 ): Observable<LessonTranslation[]> {
-  const ref = collection(
-    firestore,
-    'librarySeries',
+  const ref = collection(firestore, tenantPath('librarySeries'),
     lesson.seriesId,
     'books',
     lesson.bookId,
@@ -90,7 +87,7 @@ export function getTranslationsForLocale(
  * filter is sufficient and needs no composite index.
  */
 export function getTitleTranslationsByNode(firestore: Firestore, nodeId: string): Observable<TitleTranslation[]> {
-  const ref = collection(firestore, 'titleTranslations');
+  const ref = collection(firestore, tenantPath('titleTranslations'));
   return collectionData(query(ref, where('nodeId', '==', nodeId)), {
     idField: 'id',
   }) as Observable<TitleTranslation[]>;
@@ -103,7 +100,7 @@ export function getTitleTranslationsByNode(firestore: Firestore, nodeId: string)
  * TitleTranslation doc comment for why nodeId alone is a safe map key.
  */
 export function getTitlesForLocale(firestore: Firestore, locale: string): Observable<Map<string, string>> {
-  const ref = collection(firestore, 'titleTranslations');
+  const ref = collection(firestore, tenantPath('titleTranslations'));
   return collectionData(query(ref, where('locale', '==', locale))).pipe(
     map((docs) => {
       const byNodeId = new Map<string, string>();

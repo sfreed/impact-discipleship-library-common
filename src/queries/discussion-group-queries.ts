@@ -1,3 +1,4 @@
+import { tenantPath } from '../shared/lists/tenancy';
 // Plain-function Firestore reads shared between impact-discipleship-library-new
 // (where groups are created/browsed/joined) and impact-discipleship-library-manager-new
 // (admin Impact Groups module - list/search/edit/delete any group) - see
@@ -42,7 +43,7 @@ import {
 const RECENT_ENTRY_LIMIT = 200;
 
 export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
-  const ref = collection(firestore, 'discussionGroups');
+  const ref = collection(firestore, tenantPath('discussionGroups'));
   return collectionData(query(ref, where('status', '==', 'open'), orderBy('startDate')), {
     idField: 'id',
   }) as Observable<DiscussionGroup[]>;
@@ -64,7 +65,7 @@ export function getOpenGroups(firestore: Firestore): Observable<DiscussionGroup[
 const ALL_GROUPS_SAFETY_LIMIT = 1000;
 
 export function getAllGroups(firestore: Firestore): Observable<DiscussionGroup[]> {
-  const ref = collection(firestore, 'discussionGroups');
+  const ref = collection(firestore, tenantPath('discussionGroups'));
   return collectionData(
     query(ref, orderBy('createdAt', 'desc'), limit(ALL_GROUPS_SAFETY_LIMIT)),
     { idField: 'id' },
@@ -72,12 +73,12 @@ export function getAllGroups(firestore: Firestore): Observable<DiscussionGroup[]
 }
 
 export function getGroup(firestore: Firestore, groupId: string): Observable<DiscussionGroup | undefined> {
-  const ref = doc(firestore, 'discussionGroups', groupId);
+  const ref = doc(firestore, tenantPath('discussionGroups'), groupId);
   return docData(ref, { idField: 'id' }) as Observable<DiscussionGroup | undefined>;
 }
 
 export function getGroupMembers(firestore: Firestore, groupId: string): Observable<GroupMembership[]> {
-  const ref = collection(firestore, 'discussionGroups', groupId, 'members');
+  const ref = collection(firestore, tenantPath('discussionGroups'), groupId, 'members');
   return collectionData(ref) as Observable<GroupMembership[]>;
 }
 
@@ -98,7 +99,7 @@ export function getMyMemberships(firestore: Firestore, email: string): Observabl
  *  list. Needs a composite index (creatorEmail + createdAt) - see
  *  firestore.indexes.json. */
 export function getMyCreatedGroups(firestore: Firestore, email: string): Observable<DiscussionGroup[]> {
-  const ref = collection(firestore, 'discussionGroups');
+  const ref = collection(firestore, tenantPath('discussionGroups'));
   return collectionData(
     query(ref, where('creatorEmail', '==', email.trim().toLowerCase()), orderBy('createdAt', 'desc')),
     { idField: 'id' },
@@ -106,7 +107,7 @@ export function getMyCreatedGroups(firestore: Firestore, email: string): Observa
 }
 
 export function getGroupChatMessages(firestore: Firestore, groupId: string): Observable<GroupChatMessage[]> {
-  const ref = collection(firestore, 'discussionGroups', groupId, 'chatMessages');
+  const ref = collection(firestore, tenantPath('discussionGroups'), groupId, 'chatMessages');
   // Query the RECENT_ENTRY_LIMIT most recent messages (descending), then
   // reverse back to the chronological (ascending) order the chat UI renders
   // in - orderBy('sentAt') ascending with a limit() would instead return the
@@ -121,7 +122,7 @@ export function getGroupChatMessages(firestore: Firestore, groupId: string): Obs
 /** Every prayer shared into this group, newest first (browsed as a list,
  *  unlike chat's chronological read). See GroupPrayerRequest. */
 export function getGroupPrayerRequests(firestore: Firestore, groupId: string): Observable<GroupPrayerRequest[]> {
-  const ref = collection(firestore, 'discussionGroups', groupId, 'prayerRequests');
+  const ref = collection(firestore, tenantPath('discussionGroups'), groupId, 'prayerRequests');
   return collectionData(query(ref, orderBy('createdAt', 'desc'), limit(RECENT_ENTRY_LIMIT)), {
     idField: 'id',
   }) as Observable<GroupPrayerRequest[]>;
@@ -132,7 +133,7 @@ export function getConversation(
   groupId: string,
   otherEmail: string,
 ): Observable<GroupConversation | undefined> {
-  const ref = doc(firestore, 'discussionGroups', groupId, 'conversations', otherEmail.trim().toLowerCase());
+  const ref = doc(firestore, tenantPath('discussionGroups'), groupId, 'conversations', otherEmail.trim().toLowerCase());
   return docData(ref, { idField: 'id' }) as Observable<GroupConversation | undefined>;
 }
 
@@ -141,9 +142,7 @@ export function getConversationMessages(
   groupId: string,
   otherEmail: string,
 ): Observable<ConversationMessage[]> {
-  const ref = collection(
-    firestore,
-    'discussionGroups',
+  const ref = collection(firestore, tenantPath('discussionGroups'),
     groupId,
     'conversations',
     otherEmail.trim().toLowerCase(),
@@ -162,7 +161,7 @@ export function getConversationMessages(
  *  (a normal subcollection read, not a collectionGroup query - already
  *  scoped to one group). */
 export function getGroupConversations(firestore: Firestore, groupId: string): Observable<GroupConversation[]> {
-  const ref = collection(firestore, 'discussionGroups', groupId, 'conversations');
+  const ref = collection(firestore, tenantPath('discussionGroups'), groupId, 'conversations');
   // Naturally bounded by this one group's membership size already (unlike
   // the whole-collection listeners elsewhere in this file), but capped for
   // consistency with its sibling per-group listeners rather than left with

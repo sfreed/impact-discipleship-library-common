@@ -1,3 +1,4 @@
+import { tenantPath } from '../shared/lists/tenancy';
 // Shared read side of lesson-image hydration - both apps resolve
 // `lessonimage:{id}` placeholders in a Form.io schema to real data URIs before
 // handing it to Formio.builder/Formio.createForm. Reconciled during
@@ -107,7 +108,7 @@ async function fetchImageDataUris(firestore: Firestore, ids: Set<string>): Promi
       // unreachable image must never abort resolving the rest of the
       // lesson's images.
       try {
-        const snap = await getDoc(doc(firestore, 'lessonImages', id));
+        const snap = await getDoc(doc(firestore, tenantPath('lessonImages'), id));
         if (snap.exists()) {
           dataUriById.set(id, (snap.data()['dataUri'] as string) ?? '');
         }
