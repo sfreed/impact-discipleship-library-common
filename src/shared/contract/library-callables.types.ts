@@ -272,3 +272,22 @@ export type DeleteMyAccountRequest = Record<string, never>;
 export interface DeleteMyAccountResult {
   deleted: boolean;
 }
+
+/**
+ * Emails the signed-in reader a PDF of one lesson, with their own saved
+ * answers filled in.
+ *
+ * Deliberately has no notion of the lesson being "finished": an unanswered
+ * question prints as a blank questionnaire with room to write, so the same
+ * call serves both a completed workbook and a paper copy to work through.
+ * The recipient is always the caller's own account address - never a
+ * parameter, so this can't be turned into a way to mail arbitrary people.
+ */
+export interface EmailLessonPdfRequest {
+  bookId: string;
+  lessonId: string;
+}
+export interface EmailLessonPdfResult {
+  /** The address it was queued to, so the app can say where it went. */
+  sentTo: string;
+}

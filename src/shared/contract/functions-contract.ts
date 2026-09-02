@@ -78,6 +78,7 @@ export const CALLABLE_FUNCTIONS = {
   acceptGroupInvite: 'acceptGroupInvite',
   // reader app - profile, store
   verifyAndGrantReaderStorePurchase: 'verifyAndGrantReaderStorePurchase',
+  emailLessonPdf: 'emailLessonPdf',
   deleteMyAccount: 'deleteMyAccount',
   recordMyLogin: 'recordMyLogin',
   createMyReaderProfile: 'createMyReaderProfile',
