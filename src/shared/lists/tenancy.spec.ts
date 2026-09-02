@@ -2,7 +2,8 @@ import {
   SITE_HOSTNAMES,
   TENANT_COLLECTIONS,
   TENANT_ID,
-  tenantPath
+  tenantPath,
+  triggerPath
 } from './tenancy';
 
 // THE SEAM EVERY TENANT READ AND WRITE GOES THROUGH. Both apps' FirebaseDAO
@@ -62,6 +63,29 @@ describe('tenantPath', () => {
     for (const name of TENANT_COLLECTIONS) {
       expect(tenantPath(name)).not.toContain('sites/');
     }
+  });
+});
+
+describe('triggerPath', () => {
+  it('follows a collection when it moves, which is the entire point', () => {
+    // A trigger pattern is the one path in the system whose mistakes are
+    // silent - nothing errors, nothing logs, the function simply never runs.
+    // Building it from the same list the DAO reads means a collection cannot
+    // move without its triggers moving in the same edit.
+    expect(triggerPath('page_content', '{id}'))
+      .toBe(`tenants/${TENANT_ID}/page_content/{id}`);
+  });
+
+  it('leaves an unmoved collection where it is', () => {
+    expect(triggerPath('purchases', '{id}')).toBe('purchases/{id}');
+  });
+
+  it('keeps deep wildcard remainders intact', () => {
+    // discussionGroups' notification triggers watch subcollections, and the
+    // remainder carries its own wildcards. Mangling it would break them in
+    // exactly the silent way this helper exists to prevent.
+    expect(triggerPath('discussionGroups', '{groupId}/members/{email}'))
+      .toBe('discussionGroups/{groupId}/members/{email}');
   });
 });
 

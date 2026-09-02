@@ -116,3 +116,33 @@ export function tenantPath(table: string): string {
     ? `tenants/${TENANT_ID}/${table}`
     : table;
 }
+
+/**
+ * The document pattern a Firestore TRIGGER watches.
+ *
+ * THE ONE PLACE IN THE SYSTEM WHERE A WRONG PATH IS SILENT. Every other
+ * consumer of the seam fails loudly - a read returns nothing and a screen is
+ * visibly empty within a minute. A trigger whose pattern stops matching
+ * simply never runs: Firestore raises nothing, the deploy succeeds, and the
+ * logs are empty because no code executed. A purchase then looks completely
+ * normal and is never fulfilled, never upserted onto a customer, and never
+ * grants the library licence somebody paid for.
+ *
+ * Before this existed the pattern was a hardcoded literal in each trigger,
+ * so moving a collection meant remembering to edit them by hand - fourteen
+ * of them, across eleven files, with no error if you missed one. Going
+ * through here means a collection joins TENANT_COLLECTIONS and its triggers
+ * follow, in the same edit, by construction.
+ *
+ * `integration/trigger-liveness.test.js` is the belt to this braces: it
+ * writes through the same seam and asserts the side effect actually
+ * happened, so a trigger that stops firing for any OTHER reason still goes
+ * red.
+ *
+ * @param table The collection the trigger watches.
+ * @param rest The wildcard remainder, e.g. `{id}` or `{groupId}/members/{email}`.
+ * @return The full document pattern.
+ */
+export function triggerPath(table: string, rest: string): string {
+  return `${tenantPath(table)}/${rest}`;
+}
