@@ -179,7 +179,14 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   'groupInvites',
   'libraryUsers',
   'discussionGroups',
-  'librarySeries'
+  'librarySeries',
+
+  // Wave 4 - production-only, and LIVE rather than leftovers: email_lists
+  // feeds the admin's contact report, form_submissions is written by the
+  // public form renderer and watched by a trigger. Dev has neither, which
+  // is the only reason they were not in an earlier wave.
+  'email_lists',
+  'form_submissions'
 ];
 
 /**

@@ -89,15 +89,23 @@ describe('triggerPath', () => {
   });
 
   it('leaves an unmoved collection where it is', () => {
-    expect(triggerPath('purchases', '{id}')).toBe('purchases/{id}');
+    // `mail` rather than a collection that merely has not moved YET. This
+    // named `purchases` until it moved, and then failed - a test that has to
+    // be rewritten every wave is asserting the migration's progress rather
+    // than the function's behaviour. `mail` belongs to the send-email
+    // extension and can never join the list, so this means the same thing
+    // forever.
+    expect(triggerPath('mail', '{id}')).toBe('mail/{id}');
   });
 
   it('keeps deep wildcard remainders intact', () => {
     // discussionGroups' notification triggers watch subcollections, and the
     // remainder carries its own wildcards. Mangling it would break them in
-    // exactly the silent way this helper exists to prevent.
+    // exactly the silent way this helper exists to prevent - so assert the
+    // REMAINDER survives, whatever the collection's own path resolves to.
     expect(triggerPath('discussionGroups', '{groupId}/members/{email}'))
-      .toBe('discussionGroups/{groupId}/members/{email}');
+      .toBe(`${tenantPath('discussionGroups')}/{groupId}/members/{email}`);
+    expect(triggerPath('mail', '{a}/deep/{b}')).toBe('mail/{a}/deep/{b}');
   });
 });
 
