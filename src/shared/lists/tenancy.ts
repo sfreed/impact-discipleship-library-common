@@ -181,11 +181,20 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   'discussionGroups',
   'librarySeries',
 
-  // Wave 4 - production-only, and LIVE rather than leftovers: email_lists
-  // feeds the admin's contact report, form_submissions is written by the
-  // public form renderer and watched by a trigger. Dev has neither, which
-  // is the only reason they were not in an earlier wave.
-  'email_lists',
+  // Wave 4 - the last one, and production-only. Dev has neither, which is
+  // the only reason it was not in an earlier wave.
+  //
+  // `form_submissions` is LIVE: the public site writes it through its own
+  // FormSubmissionService, the admin's Custom Form Submissions screen reads
+  // it, and onFormSubmissionCreated watches it. Its rule constrains the
+  // anonymous create field by field, so the deploy order in that rule's own
+  // comment applies - WEB HOSTING SHIPS BEFORE THE RULES NARROW, or a
+  // running old bundle writes a shape the new rules refuse.
+  //
+  // `email_lists` is deliberately NOT here. It has no rule at all - default
+  // deny - and no code in any of the three apps reads or writes it: a
+  // leftover of the saved-lists feature that was removed app-wide. Moving
+  // dead data into the clean tree is the opposite of the point.
   'form_submissions'
 ];
 
