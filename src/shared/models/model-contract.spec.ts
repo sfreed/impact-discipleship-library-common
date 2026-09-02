@@ -1,6 +1,5 @@
 import { BaseModel } from './base.model';
 import { CoachModel } from './domain/coach.model';
-import { CourseModel } from './domain/course.model';
 import { DMMModel } from './domain/dmm.model';
 import { DockBarModel } from './domain/dock-bar.model';
 import { EventRegistrationModel } from './domain/event-registration.model';
@@ -138,7 +137,6 @@ const CASES: ModelCase[] = [
 
   // --- no runtime state: declarations only ----------------------------
   { name: 'BaseModel', create: () => new BaseModel(), defaults: {}, extendsBase: false },
-  { name: 'CourseModel', create: () => new CourseModel(), defaults: {}, extendsBase: true },
   { name: 'FormDefinitionModel', create: () => new FormDefinitionModel(), defaults: {}, extendsBase: true },
   { name: 'FormSubmissionModel', create: () => new FormSubmissionModel(), defaults: {}, extendsBase: true },
   { name: 'LocationModel', create: () => new LocationModel(), defaults: {}, extendsBase: true },
