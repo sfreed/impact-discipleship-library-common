@@ -966,4 +966,79 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Invite them again, or ask them to request to join. Leaving returns any license you had assigned them to your reserve, so you can assign it again once they are back - nothing was consumed.', kind: 'html', area: 'Guide > For Group Leaders' },
   { text: 'I need to remove a member', kind: 'label', area: 'Guide > For Group Leaders' },
   { text: 'There is no remove action for an already-approved member - they leave from their own Overview tab. Use <strong>Message</strong> on the Members tab to talk to them directly.', kind: 'html', area: 'Guide > For Group Leaders' },
+  {
+    text: "Emailing a lesson to yourself",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "Every lesson in the list has a small <strong>envelope</strong> button beside it. Tap it and we email you that lesson as a PDF, at the address you sign in with. It usually arrives within a minute or two.",
+    kind: "html",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The contents of a book, with an envelope button beside each lesson",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The lessons in a book, grouped by unit. The envelope beside each one emails you that lesson as a PDF.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The PDF holds the whole lesson: the teaching, the questions, and any answers you have already written. You do not have to finish a lesson first. Anything still unanswered comes through as an empty box with lines to write on, so you can print it and work through it on paper, or take it with you to a group meeting.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "It goes to your own account address, and only to you. Your answers stay private in the PDF exactly as they are in the app.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "Moving between lessons",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The two arrows at the top right of a lesson move you to the <strong>previous</strong> and <strong>next</strong> lesson without going back to the book contents. They run straight through the whole book, so the end of one unit carries on into the start of the next. An arrow is greyed out only at the very first and the very last lesson of a book.",
+    kind: "html",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "If you have written anything into the lesson you are leaving, it is saved for you first. There is no need to press Save before moving on.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The top of a lesson, with previous and next arrows at the right",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "A lesson scrolled down on a phone, with the title and arrows still at the top",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "The arrows sit beside the lesson title. As you scroll, the title shrinks to a single line and stays put, so the arrows stay within reach.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "<strong>Emailing a lesson to yourself</strong> - the PDF is built and sent by our server, so the envelope button beside each lesson is greyed out until you are back online.",
+    kind: "html",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "<strong>Deleting</strong> a message, or your whole account - both are carried out by our server rather than on your device.",
+    kind: "html",
+    area: 'Guide > For Everyone',
+  },
+  {
+    text: "Wherever something needs a connection, the app says so plainly rather than asking you to try again, because trying again will not help until you are back online. Your lesson answers are the exception that keeps working: those are written to your device the moment you save them, and they upload by themselves later.",
+    kind: "label",
+    area: 'Guide > For Everyone',
+  },
 ];
