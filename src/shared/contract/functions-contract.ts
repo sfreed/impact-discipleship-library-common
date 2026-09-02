@@ -99,6 +99,7 @@ export const TRIGGER_FUNCTIONS = {
   onPurchaseCustomerUpsert: 'onPurchaseCustomerUpsert',
   onEventRegistrationCustomerUpsert: 'onEventRegistrationCustomerUpsert',
   campaignSendScheduler: 'campaignSendScheduler',
+  pruneSentMail: 'pruneSentMail',
   onCampaignMailDelivered: 'onCampaignMailDelivered',
   onTranslationLocaleRegistry: 'onTranslationLocaleRegistry',
   onPurchaseGrantLibraryLicenses: 'onPurchaseGrantLibraryLicenses',
