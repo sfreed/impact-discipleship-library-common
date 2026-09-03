@@ -151,6 +151,15 @@ export const CORS_ALLOWED_ORIGINS: readonly string[] = [
   // admin, dev
   'https://impactdisciplesdev-admin.web.app',
   'https://impactdisciplesdev-admin.firebaseapp.com',
+  // reader, production (custom domain + Firebase-assigned) and dev. The
+  // reader calls only callables today, which are not origin-gated, so
+  // nothing breaks without these - listed so the first onRequest call it
+  // ever makes does not repeat the admin custom-domain incident above.
+  'https://library.impactdisciples.com',
+  'https://impactdisciples-library.web.app',
+  'https://impactdisciples-library.firebaseapp.com',
+  'https://impactdisciplesdev-library.web.app',
+  'https://impactdisciplesdev-library.firebaseapp.com',
   // local development - see APP_URLS above for the port rule. Both
   // backends are listed: a browser calling a deployed function from a
   // local page is origin-checked the same either way.
