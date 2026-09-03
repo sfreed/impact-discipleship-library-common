@@ -325,6 +325,17 @@ export interface PageContentItem {
   icon?: string;
   ctaTitle?: string;
   ctaUrl?: string;
+  /**
+   * Open the destination in a NEW TAB, leaving this site open behind it.
+   *
+   * Off unless staff switch it on for that button (Shane, 2026-09-03, for
+   * the Give page's three donation buttons, which leave for a payment
+   * provider and were taking the visitor with them). Honoured wherever an
+   * entry's link is drawn - list entries and buttons pieces alike - because
+   * they share this one shape. Absent means off, so nothing stored before
+   * this field existed changes behaviour.
+   */
+  newTab?: boolean;
   isActive: boolean;
 }
 
