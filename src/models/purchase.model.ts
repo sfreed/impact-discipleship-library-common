@@ -29,7 +29,10 @@ export interface PurchaseCartItem {
   language?: string;
 }
 
-export type PurchaseReceipt = 'COUPON' | 'FREE ONLY' | (string & {});
+/** A PayPal order id, the coupon code that covered the order, or 'FREE ONLY'
+ *  (naturally $0, no coupon). 'COUPON' is the pre-2026-09-03 form - the
+ *  backfill replaced it with the code, but readers still honour it. */
+export type PurchaseReceipt = 'FREE ONLY' | 'COUPON' | (string & {});
 
 /** One admin's revoke action against a purchase - a bundled purchase can be
  *  partially refunded in more than one step (possibly by different admins),
@@ -66,8 +69,11 @@ export interface Purchase {
   discount: number;
   /** Amount actually due/charged - subtotal - discount. */
   total: number;
-  /** PayPal order id, or the sentinels 'COUPON' (100%-off coupon) / 'FREE
-   *  ONLY' (naturally zero, no coupon involved). */
+  /** PayPal order id on a paid order; the coupon CODE on a coupon-covered
+   *  one (owner's rule, 2026-09-03 - it used to be the literal 'COUPON');
+   *  'FREE ONLY' when naturally zero with no coupon involved. couponCode is
+   *  still written on every coupon order - on a paid order with a partial
+   *  coupon it is the only place the code appears. */
   receipt: PurchaseReceipt;
   /** 'REFUNDED' only once every cartItem's digitalBookId is covered by
    *  `revocations` - see revokePurchase. A partial revoke leaves this 'NEW'
