@@ -139,7 +139,13 @@ export const CORS_ALLOWED_ORIGINS: readonly string[] = [
   // web, dev
   'https://impactdisciplesdev-public.web.app',
   'https://impactdisciplesdev-public.firebaseapp.com',
-  // admin, production
+  // admin, production (custom domain + Firebase-assigned). The custom domain
+  // was MISSING until 2026-09-03: restrictedCors had failed open until
+  // 2026-08-27, so nobody noticed staff were served from a domain this list
+  // did not name - then the first Print Label from admin.impactdisciples.com
+  // after that fix was refused at the preflight, and the admin showed
+  // "Couldn't update this order". A connected domain is an origin too.
+  'https://admin.impactdisciples.com',
   'https://impactdisciples-admin.web.app',
   'https://impactdisciples-admin.firebaseapp.com',
   // admin, dev
