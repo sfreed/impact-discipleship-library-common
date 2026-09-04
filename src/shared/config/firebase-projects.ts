@@ -127,10 +127,51 @@ export const LOCAL_APP_URLS: Readonly<Record<ImpactAppKey, string>> = {
   reader: 'http://localhost:6200',
 };
 
+/**
+ * Every browser origin the ADMIN app is served from.
+ *
+ * A CONNECTED DOMAIN IS AN ORIGIN TOO, and this list exists because that has
+ * now been learned twice from the same domain:
+ *
+ *   2026-09-03  restrictedCors did not name admin.impactdisciples.com, so the
+ *               first Print Label from it after the fail-open fix was refused
+ *               at the preflight.
+ *   2026-09-04  the web app's page previewer assembled its own allow-list from
+ *               APP_URLS.admin.*, which names only the Firebase-assigned
+ *               hosts. Staff work from the custom domain, so every preview
+ *               message was dropped on arrival: hovering a section outlined
+ *               nothing and an unsaved edit never reached the frame. Both
+ *               looked like the previewer being "not very live"; neither had
+ *               anything to do with the previewer.
+ *
+ * APP_URLS.admin is where the app IS, for building a link. This is every
+ * origin it may ARRIVE FROM, for deciding whether to trust it - and the two
+ * are not the same list. Anything gating an incoming admin request or message
+ * must use THIS one.
+ */
+export const ADMIN_APP_ORIGINS: readonly string[] = [
+  // production: custom domain first, because it is the one staff actually use
+  'https://admin.impactdisciples.com',
+  APP_URLS.admin.prod,
+  'https://impactdisciples-admin.firebaseapp.com',
+  // dev
+  APP_URLS.admin.dev,
+  'https://impactdisciplesdev-admin.firebaseapp.com',
+  // local: emulator-backed (x201) and live-data (x200)
+  APP_URLS.admin.emulator,
+  LOCAL_APP_URLS.admin,
+];
+
 /** Every browser origin the web and admin apps are served from - the
  *  allow-list functions/src/utils/security.functions.ts's restrictedCors
- *  enforces (mirrored there by hand until functions consume this file). */
-export const CORS_ALLOWED_ORIGINS: readonly string[] = [
+ *  enforces (mirrored there by hand until functions consume this file).
+ *  The admin half is ADMIN_APP_ORIGINS, so a newly connected admin domain
+ *  is named once and both CORS and the page previewer learn it together. */
+// Deduped on the way out: ADMIN_APP_ORIGINS carries the local admin servers
+// (a previewer running on localhost has to be trusted too) and the local block
+// below lists every app's, so 5200/5201 are named in both. Naming an origin
+// twice is harmless to includes() but reads as a merge nobody checked.
+export const CORS_ALLOWED_ORIGINS: readonly string[] = [...new Set<string>([
   // web, production (custom domain + Firebase-assigned)
   'https://impactdisciples.com',
   'https://www.impactdisciples.com',
@@ -139,18 +180,10 @@ export const CORS_ALLOWED_ORIGINS: readonly string[] = [
   // web, dev
   'https://impactdisciplesdev-public.web.app',
   'https://impactdisciplesdev-public.firebaseapp.com',
-  // admin, production (custom domain + Firebase-assigned). The custom domain
-  // was MISSING until 2026-09-03: restrictedCors had failed open until
-  // 2026-08-27, so nobody noticed staff were served from a domain this list
-  // did not name - then the first Print Label from admin.impactdisciples.com
-  // after that fix was refused at the preflight, and the admin showed
-  // "Couldn't update this order". A connected domain is an origin too.
-  'https://admin.impactdisciples.com',
-  'https://impactdisciples-admin.web.app',
-  'https://impactdisciples-admin.firebaseapp.com',
-  // admin, dev
-  'https://impactdisciplesdev-admin.web.app',
-  'https://impactdisciplesdev-admin.firebaseapp.com',
+  // admin, every environment - see ADMIN_APP_ORIGINS above for why the
+  // custom domain leads that list. Spread rather than repeated: this list and
+  // the previewer's had already drifted apart once.
+  ...ADMIN_APP_ORIGINS,
   // reader, production (custom domain + Firebase-assigned) and dev. The
   // reader calls only callables today, which are not origin-gated, so
   // nothing breaks without these - listed so the first onRequest call it
@@ -169,4 +202,4 @@ export const CORS_ALLOWED_ORIGINS: readonly string[] = [
   'http://localhost:5201',
   'http://localhost:6200',
   'http://localhost:6201',
-];
+])];
