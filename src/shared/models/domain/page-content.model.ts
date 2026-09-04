@@ -144,8 +144,26 @@ export interface PageContentBlock {
   /** Which part of a background PHOTO stays in view when the band crops it -
    *  'top' keeps faces, 'bottom' keeps foregrounds. Photo surfaces only.
    *  Absent = center. (Shane's About Us verdict: the history banner cropped
-   *  everyone's heads off.) */
+   *  everyone's heads off.)
+   *
+   *  SUPERSEDED by photoFocusPoint, and kept because it is stored on live
+   *  pages: nothing rewrites it, so a section keeps its position until
+   *  somebody actually moves the picture. Readers must honour both. */
   photoFocus?: 'top' | 'center' | 'bottom';
+  /**
+   * The exact point of a background photo to keep in view, as percentages
+   * from the top-left.
+   *
+   * Three named positions could only move a photo vertically and only to
+   * three places, so a face slightly off-centre could not be kept. This is
+   * what the editor's drag-a-point control writes.
+   *
+   * PERCENTAGES, not pixels, because the band's height is whatever its
+   * content makes it and the same photo is cropped differently on a phone.
+   * A percentage names a point in the PICTURE, which is the thing that does
+   * not change. Takes precedence over photoFocus where both exist.
+   */
+  photoFocusPoint?: { x: number; y: number };
 
   /**
    * CARD GROUNDS - a box painted behind a card or a column, from the same
