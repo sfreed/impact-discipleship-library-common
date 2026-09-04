@@ -237,6 +237,7 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
     variants: [
       { key: 'tiles', label: 'Picture tiles', blurb: 'a picture, a title and a line of text per tile', fields: { heading: true, subheading: true, body: true, entries: true } },
       { key: 'pictureRows', label: 'Picture rows', blurb: 'wide cards, each a square picture beside its title and text', fields: { heading: true, entries: true } },
+      { key: 'quoteCards', label: 'Quote cards', blurb: 'a square photo beside a quote, with who said it underneath - the same card as Picture rows with its two boxes swapped. The words are TYPED HERE, unlike the quote carousel, whose words belong to the Testimonials screen', fields: { heading: true, subheading: true, entries: true } },
       { key: 'icon', label: 'Icon tiles', blurb: 'an icon, a title, text and a button per tile', fields: { heading: true, entries: true } },
       { key: 'price', label: 'Price tiles', blurb: 'a title, a figure from the site settings, what is included, a button', fields: { heading: true, entries: true } },
       { key: 'rows', label: 'Labelled rows', blurb: 'a button on the left, a line of explanation on the right', fields: { heading: true, entries: true } },
