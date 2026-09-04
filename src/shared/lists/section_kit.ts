@@ -251,6 +251,23 @@ export const SECTION_KIT: readonly ArchetypeDef[] = [
 ];
 
 
+/**
+ * The List looks drawn as a GRID of cards, and so the only ones a cards-per-row
+ * setting means anything to.
+ *
+ * It exists because the setting has to be OFFERED in the admin and OBEYED in
+ * the web app, and those are different codebases. Showing the control on a
+ * timeline or a carousel would be a control that silently does nothing - the
+ * exact complaint that retired the old copy-colour toggle, which changed
+ * nothing on half the sections it appeared on.
+ *
+ * The web renderer keeps its own look -> layout map (LIST_LOOKS); its spec
+ * asserts the two agree, so neither can drift without going red.
+ */
+export const GRID_LIST_LOOKS: readonly string[] = [
+  'tiles', 'pictureRows', 'quoteCards', 'icon', 'price'
+];
+
 // ------------------------------------------------------------------ lookups
 
 // BY_ARCHETYPE was the index behind archetypeDef()/variantDef()/kitFields(),
