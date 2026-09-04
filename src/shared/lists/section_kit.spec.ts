@@ -96,14 +96,28 @@ describe('the section kit', () => {
     // These ten keys are STORED on the migrated pages - the cutover wrote
     // them on 2026-08-31. Renaming one here does not rename it in Firestore;
     // it makes every section carrying the old name draw nothing, silently,
-    // because the renderer's @switch simply finds no case. That is why this
-    // is an exact list and not a count.
+    // because the renderer's @switch simply finds no case. That is why each
+    // one is named rather than counted.
+    //
+    // It was an exact toEqual until 2026-09-04, which also failed the first
+    // time a NEW look was added ('quoteCards'). Adding one threatens nothing
+    // this test protects - only renaming or removing one does - and a guard
+    // that cries about safe changes gets edited without being read. So the
+    // ten are asserted individually and the list may grow past them.
     const list = SECTION_KIT.find((def) => def.archetype === SECTION_ARCHETYPE.LIST);
+    const keys = list?.variants.map((v) => v.key) ?? [];
 
-    expect(list?.variants.map((v) => v.key)).toEqual([
+    for (const migrated of [
       'tiles', 'pictureRows', 'icon', 'price', 'rows',
       'articles', 'numbered', 'timeline', 'quotes', 'slides'
-    ]);
+    ]) {
+      expect(keys)
+        .withContext(
+          `"${migrated}" is stored on live pages - without it here, every ` +
+          'section carrying that name draws nothing and says nothing'
+        )
+        .toContain(migrated);
+    }
   });
 
   it('gives every List look somewhere to get its items from', () => {
