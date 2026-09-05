@@ -310,6 +310,16 @@ export interface PageContentBlock {
  */
 export interface PageContentItem {
   image?: ImageModel;
+  /**
+   * The point of THIS entry's picture to keep in view when the card crops it.
+   *
+   * Percentages from the top-left, the same shape a section's background uses.
+   * A card's picture is cropped to a fixed frame - square on a picture row, a
+   * tall panel on a quote card - so a portrait taken at arm's length loses the
+   * face to the middle of the frame unless the card is told where to look.
+   * Absent = the card's own default.
+   */
+  photoFocusPoint?: { x: number; y: number };
   /** The short name: a card's title, a strip label, a timeline year. */
   title: string;
   /** A second, larger heading where an entry has both - a feature row's
