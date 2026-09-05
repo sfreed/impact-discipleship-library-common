@@ -11,10 +11,10 @@
  * in a popup, which is correct behind a staff login and unpublishable
  * anywhere else.
  *
- * So the derived document holds coordinates and a total. No name, no email,
- * no id, no city or country, and no per-place count - a coordinate on its own
- * identifies nobody, and there is nothing here to join back to a person even
- * for someone reading the document directly. Anything richer than this
+ * So the derived document holds coordinates, the place names that go with
+ * them, and a total. No name, no email, no id, no phone, no licences, no
+ * last-login - nothing that says WHO, and nothing to join back to a person
+ * even for someone reading the document directly. Anything that identifies
  * belongs behind the admin's own auth, not in a collection whose read rule is
  * `if true`.
  *
@@ -26,6 +26,20 @@ export interface LibraryMapPoint {
   lat: number;
   /** Degrees east, already jittered. */
   lng: number;
+  /**
+   * Where this is, for the map's popup: "Atlanta", "Georgia",
+   * "United States". Any of them may be absent - IP geolocation often
+   * resolves a country and no more.
+   *
+   * ADDED 2026-09-05, and it is worth being clear that it discloses nothing
+   * the point did not already. A coordinate IS a place; publishing "Atlanta"
+   * beside 33.75,-84.39 tells a reader of this document what a thirty-second
+   * lookup would have told them anyway. What stays out is everything that
+   * says WHO - and that line has not moved.
+   */
+  city?: string;
+  region?: string;
+  country?: string;
 }
 
 export interface LibraryMapModel {
