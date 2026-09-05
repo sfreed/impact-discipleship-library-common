@@ -309,7 +309,8 @@ export function resolveSurface(
  *  the dependency runs one way and has to keep doing so. */
 export type ContentPieceKindKey =
   | 'heading' | 'eyebrow' | 'text' | 'picture' | 'video' | 'buttons'
-  | 'form' | 'signup' | 'countdown' | 'siteDetails' | 'price' | 'note';
+  | 'form' | 'signup' | 'countdown' | 'siteDetails' | 'price' | 'note'
+  | 'readerMap';
 
 export interface ContentPieceDef {
   kind: ContentPieceKindKey;
@@ -418,6 +419,27 @@ export const CONTENT_PIECES: readonly ContentPieceDef[] = [
     fields: {},
     caveat: 'These come from the site details and already feed the footer. '
       + 'Change them in Web Config, where they have one home.'
+  },
+  {
+    kind: 'readerMap',
+    label: 'Where the library is read',
+    blurb: 'a world map, a dot per reader, updating as people sign in',
+    icon: 'public',
+    fields: {},
+    // THE CAVEAT IS THE DESIGN, not a footnote to it. The map staff know from
+    // the Library tab plots libraryUsers directly and names each person in a
+    // popup; that collection is readable only by its owner or an admin, and
+    // carries emails, phone numbers, licences and last-login times. None of
+    // that can go near a public page.
+    //
+    // So this piece does not read libraryUsers at all. A Cloud Function keeps
+    // a separate document holding COORDINATES AND NOTHING ELSE - no name, no
+    // email, no city, no id, not even a count per place - and the map draws
+    // that. There is nothing in the published data to identify anyone with,
+    // which is what makes it safe to put on a page anybody can open.
+    caveat: 'A dot per reader, and nothing else - no names, no places, and '
+      + 'nothing to click. Who those readers are stays in the Library tab, '
+      + 'which is the only place it is readable.'
   },
   {
     kind: 'price',

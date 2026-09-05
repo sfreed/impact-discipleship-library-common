@@ -476,7 +476,17 @@ export type ContentPieceKind =
    *  homes drifts, and a page is not its home. */
   | 'price'
   /** A small line, quieter than body text. */
-  | 'note';
+  | 'note'
+  /**
+   * A world map with a dot per Discipleship Library reader.
+   *
+   * Fed by `library_map/points`, which a Cloud Function derives from
+   * `libraryUsers` and which holds COORDINATES AND NOTHING ELSE. The piece
+   * carries no settings of its own - what it draws is entirely that document
+   * - and it deliberately cannot read `libraryUsers`, which is owner-or-admin
+   * only and full of things a public page must never see.
+   */
+  | 'readerMap';
 
 /**
  * ONE piece of content inside a column.

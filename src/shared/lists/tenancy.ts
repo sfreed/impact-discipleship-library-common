@@ -195,7 +195,14 @@ export const TENANT_COLLECTIONS: readonly string[] = [
   // deny - and no code in any of the three apps reads or writes it: a
   // leftover of the saved-lists feature that was removed app-wide. Moving
   // dead data into the clean tree is the opposite of the point.
-  'form_submissions'
+  'form_submissions',
+
+  // Added 2026-09-05. One document, `library_map/points`, derived from
+  // `libraryUsers` by onLibraryUserWritten and read by the public site's
+  // reader-map piece. It belongs under the tenant because it describes the
+  // MINISTRY - who is reading its library - rather than the system, which is
+  // the line the exclusions at the top of this list draw.
+  'library_map'
 ];
 
 /**

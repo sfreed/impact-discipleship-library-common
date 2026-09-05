@@ -110,6 +110,9 @@ export const TRIGGER_FUNCTIONS = {
   notifyJoinRequestActivity: 'notifyJoinRequestActivity',
   notifyPrayerRequestShared: 'notifyPrayerRequestShared',
   onAdminUserRoleSync: 'onAdminUserRoleSync',
+  /** Rebuilds `library_map/points`, the coordinates-only document the public
+   *  site's reader map draws, whenever a libraryUser is written. */
+  onLibraryUserWritten: 'onLibraryUserWritten',
   onPurchaseTaxSummary: 'onPurchaseTaxSummary',
   onEventRegistrationSessionCounts: 'onEventRegistrationSessionCounts',
   lockedOutPatronAlert: 'lockedOutPatronAlert',
