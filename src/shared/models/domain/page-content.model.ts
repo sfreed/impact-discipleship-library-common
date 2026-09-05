@@ -182,14 +182,12 @@ export interface PageContentBlock {
    */
   cardGround?: 'none' | 'panel' | 'brand' | 'dark';
   cardInk?: 'dark' | 'light';
-  leftGround?: 'none' | 'panel' | 'brand' | 'dark';
-  leftInk?: 'dark' | 'light';
-  rightGround?: 'none' | 'panel' | 'brand' | 'dark';
-  rightInk?: 'dark' | 'light';
-  /** A column's passage HEADINGS in the brand blue - the original audience
-   *  pages run their right-side questions in #588AC7. Absent = ink. */
-  leftTitleTone?: 'ink' | 'brand';
-  rightTitleTone?: 'ink' | 'brand';
+  // leftGround/leftInk/leftTitleTone and their right- twins were here until
+  // 2026-09-05. SectionColumn.ground/ink/titleTone replaced them on
+  // 2026-09-01 - a ground PER COLUMN rather than two fixed sides - and both
+  // the reader (kit-section's leftColClasses/rightColClasses) and the writer
+  // went with them the same day. What was left was six live-sounding
+  // declarations that nothing wrote and nothing read.
   /** How many cards a tile section puts on a row before wrapping. Absent =
    *  as many as fit. Seminars' picture cards run 2-and-2. */
   cardsPerRow?: 2 | 3 | 4;
@@ -217,27 +215,12 @@ export interface PageContentBlock {
    */
   signupList?: 'newsletter' | 'prayer';
 
-  /**
-   * WHICH SIDE the picture or video sits on, where a section has both text
-   * and media.
-   *
-   * A SETTING, not a variant (owner, 2026-08-31). It used to be fixed by the
-   * variant - "text with a video" always put the video on the right - or
-   * alternated by position down a list. Both are still the DEFAULT when this
-   * is unset, so nothing that was never touched moves; but a section can now
-   * be told, and staff do not have to pick a different look to get a picture
-   * on the left.
-   */
-  mediaSide?: 'left' | 'right';
-
-  /**
-   * Whether the passage comes BEFORE the heading rather than after it.
-   *
-   * The stacked equivalent of mediaSide: "heading and text" is the usual
-   * order, and this is how a section says "text, then heading" without
-   * needing a variant of its own.
-   */
-  textFirst?: boolean;
+  // mediaSide and textFirst were here until 2026-09-05. mediaSide's last
+  // reader went on 2026-09-01 with kit-section's mediaLeft class, and its
+  // control (mediaSides/pickMediaSide) went the same day; textFirst never had
+  // a reader or a writer in any of the three apps at all. Which side the
+  // media sits on is the variant's own default, alternated by position down a
+  // list, which is what it was before the setting existed.
 
   /**
    * What a COUNTDOWN counts toward, as an ISO date string ('2027-02-05' or a

@@ -5,7 +5,6 @@ import { DockBarModel } from './domain/dock-bar.model';
 import { EventRegistrationModel } from './domain/event-registration.model';
 import { FormDefinitionModel } from './domain/form-definition.model';
 import { FormSubmissionModel } from './domain/form-submission.model';
-import { HomePageImageModel } from './domain/home-page-image.model';
 import { ImpactTeamMemberModel } from './domain/impact-team-member.model';
 import { LocationModel } from './domain/location.model';
 import { OrganizationModel } from './domain/organization.model';
@@ -101,12 +100,6 @@ const CASES: ModelCase[] = [
   {
     name: 'DockBarModel',
     create: () => new DockBarModel(),
-    defaults: { isActive: false },
-    extendsBase: true,
-  },
-  {
-    name: 'HomePageImageModel',
-    create: () => new HomePageImageModel(),
     defaults: { isActive: false },
     extendsBase: true,
   },
