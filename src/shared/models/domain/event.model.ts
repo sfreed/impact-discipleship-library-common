@@ -45,7 +45,9 @@ export class EventModel extends BaseModel {
   kajabiPurchaseURL?: string;
   kajabiSubscribeURL?: string;
   imageUrl?: ImageModel;
-  emailTemplate?: string;
+  // `null` is what the summit wizard's copy-from-last-summit writes when the
+  // source had none (Firestore rejects `undefined`).
+  emailTemplate?: string | null;
   videoId?: string;
   faqList: FAQModel[] = [];
   checkIn?: Timestamp;

@@ -5,12 +5,15 @@ import { TESTIMONIAL_TYPES } from "../lists/testimonial_types.enum";
 import { UNIT_OF_MEASURE } from "../lists/unit_of_measure.enum";
 
 export class EnumHelper {
+  // Both are STRING enums, so Object.values() is exactly the keys-then-
+  // lookup this used to do (a numeric enum would also carry its reverse
+  // mappings and need the old form).
   static getPhoneTypesAsArray(): PHONE_TYPES[] {
-    return Object.keys(PHONE_TYPES).map(key => PHONE_TYPES[key]);
+    return Object.values(PHONE_TYPES);
   }
 
   static getTestimonialTypesAsArray(): TESTIMONIAL_TYPES[] {
-    return Object.keys(TESTIMONIAL_TYPES).map(key => TESTIMONIAL_TYPES[key]);
+    return Object.values(TESTIMONIAL_TYPES);
   }
 
   static getStateTypesAsArray(): string[] {

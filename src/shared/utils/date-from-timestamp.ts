@@ -16,7 +16,7 @@
 // separate cleanup that touches ~20 call sites; prefer toMillis() for new
 // code that just needs something sortable.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dateFromTimestamp = (item): any => {
+export const dateFromTimestamp = (item: unknown): any => {
   if (!item) {
     return null;
   }
@@ -31,8 +31,12 @@ export const dateFromTimestamp = (item): any => {
 
   let normalizedDate: Date | undefined;
 
-  if (item?.seconds) {
-    normalizedDate = new Date(Number(item.seconds) * 1000);
+  // A real Timestamp and the malformed {seconds, nanoseconds} map both
+  // answer to `.seconds`; anything else (a number, a plain object) falls
+  // through to null exactly as before.
+  const seconds = typeof item === 'object' ? (item as { seconds?: unknown }).seconds : undefined;
+  if (seconds) {
+    normalizedDate = new Date(Number(seconds) * 1000);
   }
 
   return isValidDate(normalizedDate) ? normalizedDate : null;
