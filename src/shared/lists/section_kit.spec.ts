@@ -168,12 +168,17 @@ describe('the pieces a column can hold', () => {
     expect(problems).toEqual([]);
   });
 
-  it('declares at least one field per kind - except the two that read elsewhere', () => {
+  it('declares at least one field per kind - except the ones that read elsewhere', () => {
     // A piece with no fields is a palette entry that opens an empty editor.
-    // The exceptions are real: Site details draws entirely from Web Config,
-    // and a Note is drawn from the block's own note line. Both are content
-    // the staff member does not type HERE, which is the point of them.
-    const readsElsewhere: ContentPieceKindKey[] = ['siteDetails', 'note'];
+    // The exceptions are real: Site details draws entirely from Web Config, a
+    // Note is drawn from the block's own note line, and the reader map draws
+    // entirely from `library_map/points` - a document a Cloud Function
+    // derives from libraryUsers, which no staff member can type into and no
+    // public client may read. All three are content that exists elsewhere,
+    // which is the point of them.
+    const readsElsewhere: ContentPieceKindKey[] = [
+      'siteDetails', 'note', 'readerMap'
+    ];
     const empty = CONTENT_PIECES
       .filter((piece) => !readsElsewhere.includes(piece.kind))
       .filter((piece) => Object.values(piece.fields).every((on) => !on))
