@@ -240,6 +240,7 @@ export const CHROME_TEXT_CATALOG: ChromeTextCatalogEntry[] = [
   { text: 'Enter a coupon code.', kind: 'label', area: 'Store' },
   { text: 'That coupon code is not valid.', kind: 'label', area: 'Store' },
   { text: 'That coupon does not apply to the selected books.', kind: 'label', area: 'Store' },
+  { text: 'That coupon does not apply to a book that is already on sale.', kind: 'label', area: 'Store' },
   { text: 'Could not check that coupon right now. Please try again.', kind: 'label', area: 'Store' },
   { text: 'Continue purchase in browser', kind: 'label', area: 'Store' },
   {

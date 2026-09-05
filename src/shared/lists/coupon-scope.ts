@@ -5,6 +5,7 @@
 // the two used to carry hand-copied versions of this rule - and the 2026-08
 // coupon defects were each a case of one copy drifting from the other.
 // Lives in lists/ (SDK-free) so functions/scripts/sync-shared.js copies it.
+import { round2 } from './money';
 
 /**
  * Sentinel tag id: a coupon carrying this tag covers EVERY event, including
@@ -55,4 +56,32 @@ export function couponTagsCover(
  */
 export function couponOverridesSale(percentOff: unknown): boolean {
   return typeof percentOff === 'number' && percentOff >= 100;
+}
+
+/**
+ * Whether a coupon takes effect on a line, given whether that line is
+ * already at a sale price: always when it is not on sale, and only for a
+ * giveaway when it is. The one question every pricing path asks before
+ * discounting a line - the reader Store and both of its server paths used
+ * to skip it and stack the coupon on top of the sale (found 2026-09-05).
+ */
+export function couponBeatsSale(percentOff: unknown, onSale: boolean): boolean {
+  return !onSale || couponOverridesSale(percentOff);
+}
+
+/**
+ * The per-unit coupon discount on a line, to the cent - 0 when the sale
+ * price wins. `unitPrice` is the price actually charged before the coupon
+ * (the sale price when on sale), so a giveaway takes the line to $0.
+ */
+export function couponUnitDiscount(
+  percentOff: unknown,
+  unitPrice: number,
+  onSale: boolean
+): number {
+  if (!couponBeatsSale(percentOff, onSale)) {
+    return 0;
+  }
+  const percent = typeof percentOff === 'number' ? Math.min(100, Math.max(0, percentOff)) : 0;
+  return round2((unitPrice * percent) / 100);
 }

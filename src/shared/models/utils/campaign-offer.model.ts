@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 import { BaseModel } from '../base.model';
 import { toMillis } from '../../utils/date-from-timestamp';
+import { round2 } from '../../lists/money';
 
 // A campaign's OFFER (Campaign Manager v3, 2026-08-22). One shape for every
 // campaign type: the campaign's TYPE decides what its starter content looks
@@ -74,8 +75,6 @@ export interface OfferSubject {
   series?: string | null;
 }
 
-/** Money, to the cent. */
-const round2 = (value: number): number => Math.round(value * 100) / 100;
 
 /**
  * The price this discount produces from a base price.
