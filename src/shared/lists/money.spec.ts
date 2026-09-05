@@ -14,9 +14,10 @@ describe('round2', () => {
   });
 
   it('is the Math.round form, not toFixed', () => {
-    // toFixed(2) gives "1.00" here (binary 1.005 is just under); the
-    // reader and its server paths have always said 1.01 - so that is the
-    // suite's answer.
-    expect(round2(1.005)).toBe(1.01);
+    // The two disagree on ties that binary floats land just below: 0.015
+    // rounds to 0.02 here and to "0.01" through toFixed(2). The reader and
+    // its server paths have always used this form, so it is the suite's.
+    expect(round2(0.015)).toBe(0.02);
+    expect(Number((0.015).toFixed(2))).toBe(0.01);
   });
 });
