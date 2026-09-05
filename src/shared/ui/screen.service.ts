@@ -1,0 +1,33 @@
+import { Output, Injectable, EventEmitter } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+
+// Breakpoint classes for the responsive shells. Shared by the web site and
+// the admin app since 2026-09-05 (the two copies were identical).
+@Injectable({
+  providedIn: 'root'
+})
+export class ScreenService {
+  @Output() changed = new EventEmitter();
+
+  constructor(private breakpointObserver: BreakpointObserver) {
+    this.breakpointObserver
+      .observe([Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Medium, Breakpoints.Large])
+      .subscribe(() => this.changed.next(true));
+  }
+
+  private isLargeScreen() {
+    const isLarge = this.breakpointObserver.isMatched(Breakpoints.Large);
+    const isXLarge = this.breakpointObserver.isMatched(Breakpoints.XLarge);
+
+    return isLarge || isXLarge;
+  }
+
+  public get sizes(): Record<string, boolean> {
+    return {
+      'screen-x-small': this.breakpointObserver.isMatched(Breakpoints.XSmall),
+      'screen-small': this.breakpointObserver.isMatched(Breakpoints.Small),
+      'screen-medium': this.breakpointObserver.isMatched(Breakpoints.Medium),
+      'screen-large': this.isLargeScreen(),
+    };
+  }
+}
